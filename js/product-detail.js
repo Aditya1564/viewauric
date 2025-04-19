@@ -429,21 +429,6 @@ function sendOrderNotificationEmail(orderData) {
     console.log('sendOrderNotificationEmail called with orderData:', JSON.stringify(orderData));
     
     try {
-        // A simple function to verify EmailJS is working without sending a test email
-        const testEmailJSDirectly = function() {
-            console.log("Verifying EmailJS availability...");
-            
-            if (typeof emailjs === 'undefined') {
-                console.error("EmailJS not available for direct use");
-                return Promise.reject(new Error("EmailJS not available"));
-            }
-            
-            // Instead of sending a test email, just resolve the promise if EmailJS is available
-            return Promise.resolve({
-                status: 200,
-                text: "EmailJS is available"
-            });
-        };
         
         // If EmailJS isn't available at all, we can't proceed
         if (typeof emailjs === 'undefined' && typeof window.sendOrderNotificationEmail !== 'function') {
@@ -483,10 +468,10 @@ function sendOrderNotificationEmail(orderData) {
         else {
             console.log('Using direct EmailJS implementation in product-detail.js');
             
-            // Run a direct test first to verify EmailJS is working
-            return testEmailJSDirectly()
-                .then(function(response) {
-                    console.log('Direct EmailJS test successful!', response.status, response.text);
+            // Skip testing and directly send the real emails
+            return Promise.resolve()
+                .then(function() {
+                    console.log('Proceeding to send actual order emails');
                     
                     // Format order date
                     const orderDate = orderData.orderDate || new Date().toLocaleDateString('en-IN');
