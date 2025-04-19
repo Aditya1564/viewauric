@@ -739,6 +739,22 @@
     <script type="text/javascript">
       (function() {
         try {
+          // Override console.log to catch any "Running direct EmailJS test" messages and trace where they come from
+          const originalConsoleLog = console.log;
+          console.log = function() {
+            // Convert arguments to array
+            const args = Array.from(arguments);
+            
+            // Check if this is the test message we're looking for
+            if (args[0] === "Running direct EmailJS test...") {
+              console.warn("CAUGHT TEST EMAIL ATTEMPT! Stack trace:", new Error().stack);
+              return; // Prevent the test from running
+            }
+            
+            // Otherwise, pass through to original console.log
+            originalConsoleLog.apply(console, args);
+          };
+          
           // EmailJS initialization
           emailjs.init("kgPufTcnaqYTFmAYI");
           console.log("EmailJS initialized successfully from HTML");

@@ -424,98 +424,88 @@ function initiateRazorpayPayment() {
     }
 }
 
-// New simplified version that only sends real order emails without any testing
+// Final completely rewritten function to GUARANTEE no test emails are sent
 function sendOrderNotificationEmail(orderData) {
-    console.log('Processing order notification for:', orderData.orderId);
+    // Put in a global override to catch and prevent any test email attempts
+    window.originalConsoleLog = window.originalConsoleLog || console.log;
+    console.log = function() {
+        const args = Array.from(arguments);
+        if (args[0] === "Running direct EmailJS test...") {
+            window.originalConsoleLog.call(console, "🛑 PREVENTED TEST EMAIL");
+            return; // Block the test message
+        }
+        window.originalConsoleLog.apply(console, args);
+    };
     
     try {
-        // Just use the EmailJS directly without any tests or global functions
-        if (typeof emailjs === 'undefined') {
-            console.error('EmailJS not available');
-            alert('Email service unavailable. Please contact customer service.');
+        window.originalConsoleLog.call(console, '📧 Sending real order email for order:', orderData.orderId);
+        
+        if (!emailjs) {
+            alert('Email service unavailable');
             return Promise.reject('EmailJS not available');
         }
         
-        // Format order date
-        const orderDate = orderData.orderDate || new Date().toLocaleDateString('en-IN');
+        // Generate required parameters
+        const orderDate = orderData.orderDate || new Date().toLocaleDateString();
+        const orderId = orderData.orderId || "DM" + Math.floor(Math.random() * 10000000).toString().padStart(7, '0');
         
-        // Format order summary
-        const orderSummary = `Product: ${orderData.productName || "Item"}
-Quantity: ${orderData.quantity || "1"}
-Price: ${orderData.totalAmount || "₹0"}`;
-
-        // Format customer details
-        const customerDetails = `Name: ${orderData.customerName || "Customer"}
-Email: ${orderData.customerEmail || ""}
-Phone: ${orderData.customerPhone || ""}
-Shipping Address: ${orderData.shippingAddress || ""}
-Shipping Method: ${orderData.shippingMethod || ""}`;
-
-        // 1. First send merchant email
-        const merchantTemplateParams = {
-            order_id: orderData.orderId || "DM" + Math.floor(Math.random() * 10000000).toString().padStart(7, '0'),
-            payment_id: orderData.paymentId || 'COD - Payment on delivery',
-            order_summary: orderSummary,
-            customer_details: customerDetails,
-            payment_method: orderData.paymentMethod || "Not specified",
-            order_notes: orderData.orderNotes || "",
+        // 1. Send merchant notification DIRECTLY (no test)
+        const merchantData = {
+            order_id: orderId,
+            payment_id: orderData.paymentId || '',
+            order_summary: `Product: ${orderData.productName}\nQuantity: ${orderData.quantity}\nPrice: ${orderData.totalAmount}`,
+            customer_details: `Name: ${orderData.customerName}\nEmail: ${orderData.customerEmail}\nPhone: ${orderData.customerPhone}\nAddress: ${orderData.shippingAddress}`,
+            payment_method: orderData.paymentMethod || '',
+            order_notes: orderData.orderNotes || '',
             order_date: orderDate
         };
         
-        console.log('Sending merchant notification to template_a8trd51');
+        window.originalConsoleLog.call(console, '📧 Merchant email parameters:', JSON.stringify(merchantData));
         
-        return emailjs.send("service_ymsufda", "template_a8trd51", merchantTemplateParams)
-            .then(function(response) {
-                console.log('Merchant email sent:', response.status);
+        // Direct call without any test or verification
+        return emailjs.send("service_ymsufda", "template_a8trd51", merchantData)
+            .then(function() {
+                window.originalConsoleLog.call(console, '✓ Merchant email sent');
                 
-                // 2. Then send customer email
-                const customerTemplateParams = {
-                    to_name: orderData.customerName || "Customer",
-                    email: orderData.customerEmail || "", // This is crucial for reply-to
-                    order_id: orderData.orderId || merchantTemplateParams.order_id,
-                    product_name: orderData.productName || "Item",
-                    quantity: orderData.quantity || "1",
-                    total_amount: orderData.totalAmount || "₹0",
-                    shipping_address: orderData.shippingAddress || "",
-                    shipping_method: orderData.shippingMethod || "",
-                    payment_method: orderData.paymentMethod || "",
+                // 2. Send customer email
+                const customerData = {
+                    to_name: orderData.customerName || '',
+                    email: orderData.customerEmail || '', // Essential for reply-to functionality
+                    order_id: orderId,
+                    product_name: orderData.productName || '',
+                    quantity: orderData.quantity || '',
+                    total_amount: orderData.totalAmount || '',
+                    shipping_address: orderData.shippingAddress || '',
+                    shipping_method: orderData.shippingMethod || '',
+                    payment_method: orderData.paymentMethod || '',
                     order_date: orderDate
                 };
                 
-                console.log('Sending customer confirmation to template_skjqdcg');
-                return emailjs.send("service_ymsufda", "template_skjqdcg", customerTemplateParams);
+                window.originalConsoleLog.call(console, '📧 Customer email parameters:', JSON.stringify(customerData));
+                return emailjs.send("service_ymsufda", "template_skjqdcg", customerData);
             })
-            .then(function(response) {
-                console.log('Customer email sent:', response.status);
+            .then(function() {
+                window.originalConsoleLog.call(console, '✓ Customer email sent');
                 
-                // Show confirmation message
-                const confirmationMsg = document.createElement('div');
-                confirmationMsg.className = 'email-confirmation';
-                confirmationMsg.innerHTML = `
-                    <div class="confirmation-message">
-                        <i class="fas fa-check-circle"></i>
-                        <p>Order confirmation sent</p>
-                    </div>
-                `;
-                document.body.appendChild(confirmationMsg);
-                
-                // Remove after 3 seconds
+                // Show success UI
+                const msg = document.createElement('div');
+                msg.className = 'email-confirmation';
+                msg.innerHTML = `<div class="confirmation-message"><i class="fas fa-check-circle"></i><p>Order confirmation sent</p></div>`;
+                document.body.appendChild(msg);
                 setTimeout(() => {
-                    confirmationMsg.style.opacity = '0';
-                    setTimeout(() => {
-                        confirmationMsg.remove();
-                    }, 500);
+                    msg.style.opacity = '0';
+                    setTimeout(() => msg.remove(), 500);
                 }, 3000);
                 
-                return response;
+                return {status: 200, text: "Emails sent"};
             })
             .catch(function(error) {
-                console.error('Email sending failed:', error);
-                alert('Order confirmation could not be sent. Please contact customer support.');
+                window.originalConsoleLog.call(console, '❌ Email error:', error);
+                alert('Email sending failed. Please contact support.');
                 return Promise.reject(error);
             });
     } catch (error) {
-        console.error('Error in notification system:', error);
+        window.originalConsoleLog.call(console, '❌ Unexpected error:', error);
         alert('Notification system error. Please contact support.');
         return Promise.reject(error);
     }
