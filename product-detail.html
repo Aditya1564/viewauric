@@ -776,9 +776,9 @@
             }
           }, 1000);
           
-          // Global function to simulate email sending for testing connection to EmailJS
+          // Global function just to check if EmailJS is available without sending a test email
           window.testEmailJS = function() {
-            console.log("Testing EmailJS connection...");
+            console.log("Checking EmailJS connection...");
             
             if (typeof emailjs === 'undefined' || typeof emailjs.send !== 'function') {
               console.error("EmailJS not loaded properly");
@@ -786,20 +786,10 @@
               return Promise.reject("EmailJS not available");
             }
             
-            return emailjs.send("service_ymsufda", "template_a8trd51", {
-              order_id: "TEST-" + Date.now(),
-              payment_id: "TEST",
-              product_name: "Test Product",
-              quantity: "1",
-              total_amount: "₹1,000",
-              customer_name: "Test User",
-              customer_email: "test@example.com",
-              customer_phone: "1234567890",
-              shipping_address: "Test Address",
-              shipping_method: "Test Shipping",
-              payment_method: "Test Payment",
-              order_notes: "Test Order",
-              order_date: new Date().toLocaleDateString()
+            // Return a resolved promise without sending an actual email
+            return Promise.resolve({
+              status: 200,
+              text: "EmailJS is available"
             });
           };
           

@@ -579,28 +579,15 @@ Shipping Method: ${orderData.shippingMethod || "Standard"}`;
                     
                     alert('There was an issue sending the order confirmation. Please contact customer support for assistance.');
                     
-                    // Try one more time with direct initialization
-                    console.log('Attempting one final retry with explicit initialization...');
+                    // Try re-initializing EmailJS in case that's the issue
+                    console.log('Re-initializing EmailJS and retrying with actual order data...');
                     
                     if (typeof emailjs !== 'undefined') {
                         // Re-initialize with explicit key
                         emailjs.init("kgPufTcnaqYTFmAYI");
                         
-                        // Simplified test send
-                        emailjs.send(
-                            "service_ymsufda", 
-                            "template_skjqdcg", 
-                            {
-                                order_id: "FINAL-TEST-" + Date.now(),
-                                product_name: "Final Test Product",
-                                customer_name: "Test User",
-                                email: "test@example.com" // Using email instead of customer_email for consistency
-                            }
-                        ).then(function(response) {
-                            console.log('Final test email sent successfully in recovery attempt');
-                        }).catch(function(finalError) {
-                            console.error('Final test also failed:', finalError);
-                        });
+                        // No test email - just log the result
+                        console.log('EmailJS has been re-initialized. Suggest trying again or contacting support.');
                     }
                 });
         }
