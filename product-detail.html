@@ -739,25 +739,46 @@
     <script type="text/javascript">
       (function() {
         try {
-          // Override console.log to catch any "Running direct EmailJS test" messages and trace where they come from
-          const originalConsoleLog = console.log;
+          // Global hack: Replace the EmailJS send function to prevent any test emails
+          // Store the original functions
+          window.originalConsoleLog = console.log;
+          window.originalEmailJSInit = emailjs.init;
+          window.originalEmailJSSend = emailjs.send;
+          
+          // Override console.log to catch and trace test messages
           console.log = function() {
-            // Convert arguments to array
             const args = Array.from(arguments);
             
-            // Check if this is the test message we're looking for
+            // Block test email messages
             if (args[0] === "Running direct EmailJS test...") {
-              console.warn("CAUGHT TEST EMAIL ATTEMPT! Stack trace:", new Error().stack);
-              return; // Prevent the test from running
+              window.originalConsoleLog.call(console, "🛑 BLOCKED TEST EMAIL! Trace:", new Error().stack);
+              return; // Prevent logging
             }
             
-            // Otherwise, pass through to original console.log
-            originalConsoleLog.apply(console, args);
+            // Normal logging
+            window.originalConsoleLog.apply(console, args);
           };
           
-          // EmailJS initialization
-          emailjs.init("kgPufTcnaqYTFmAYI");
-          console.log("EmailJS initialized successfully from HTML");
+          // Override emailjs.send to block test emails
+          emailjs.send = function(serviceID, templateID, params) {
+            // Stringify all parameters for inspection
+            const paramsString = JSON.stringify(params);
+            
+            // Check if this is a test email
+            if (paramsString.includes("TEST-") || 
+                (params.order_id && params.order_id.toString().includes("TEST-"))) {
+              window.originalConsoleLog.call(console, "🚫 INTERCEPTED TEST EMAIL:", params.order_id);
+              return Promise.resolve({status: 200, text: "TEST EMAIL BLOCKED"}); // Return success but don't send
+            }
+            
+            // Let real emails through
+            window.originalConsoleLog.call(console, "✅ Allowing real email:", params.order_id);
+            return window.originalEmailJSSend.call(emailjs, serviceID, templateID, params);
+          };
+          
+          // EmailJS initialization - use original function
+          window.originalEmailJSInit.call(emailjs, "kgPufTcnaqYTFmAYI");
+          window.originalConsoleLog.call(console, "EmailJS initialized with test prevention");
           
           // Helper function to pre-fill all form fields
           window.fillFormFields = function() {

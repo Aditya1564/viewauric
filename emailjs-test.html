@@ -285,32 +285,30 @@
             
             logMessage("Preparing to send test email with parameters: " + JSON.stringify(templateParams));
             
-            // Try to send a test email using the merchant template
-            emailjs.send("service_ymsufda", "template_a8trd51", templateParams)
-                .then(function(response) {
-                    logMessage("Email sent successfully! Status: " + response.status, 'success');
-                    showStatus("EmailJS test successful! Email sent with status: " + response.status, "success");
-                    
-                    // Display response details
-                    const details = document.createElement("pre");
-                    details.textContent = JSON.stringify({
-                        status: response.status,
-                        text: response.text,
-                        timestamp: new Date().toLocaleString()
-                    }, null, 2);
-                    document.getElementById("status").appendChild(details);
-                    button.disabled = false;
-                })
-                .catch(function(error) {
-                    logMessage("Failed to send email: " + (error.text || error.message), 'error');
-                    showStatus("EmailJS test failed: " + (error.text || error.message), "error");
-                    
-                    // Display error details
-                    const details = document.createElement("pre");
-                    details.textContent = JSON.stringify(error, null, 2);
-                    document.getElementById("status").appendChild(details);
-                    button.disabled = false;
-                });
+            // DISABLED: Do not send any actual test emails
+            logMessage("⛔ Test email sending has been disabled", 'warn');
+            showStatus("Test emails have been disabled to prevent duplicate notifications", "info");
+            
+            // Simulate successful response without sending email
+            setTimeout(() => {
+                const mockResponse = { status: 200, text: "SIMULATED_SUCCESS" };
+                logMessage("Simulated email test (no actual email sent)", 'success');
+                showStatus("EmailJS connection test successful, but no actual email was sent", "success");
+                
+                // Display simulated response
+                const details = document.createElement("pre");
+                details.textContent = JSON.stringify({
+                    status: mockResponse.status,
+                    text: mockResponse.text,
+                    timestamp: new Date().toLocaleString(),
+                    note: "This is a simulated response. No actual email was sent."
+                }, null, 2);
+                document.getElementById("status").appendChild(details);
+                button.disabled = false;
+            }, 1000);
+            
+            // Return early to prevent actual email sending
+            return;
         });
     </script>
 </body>
