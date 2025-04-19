@@ -482,7 +482,7 @@ function sendOrderNotificationEmail(orderData) {
                 };
                 
                 window.originalConsoleLog.call(console, '📧 Customer email parameters:', JSON.stringify(customerData));
-                return emailjs.send("service_ymsufda", "template_skjqdcg", customerData);
+                return emailjs.send("service_ymsufda", "template_2m2rpzr", customerData);
             })
             .then(function() {
                 window.originalConsoleLog.call(console, '✓ Customer email sent');
