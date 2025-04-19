@@ -785,74 +785,65 @@
             });
           };
           
-          // Define the global sendOrderNotificationEmail function
+          // New completely rewritten function to prevent test emails
           window.sendOrderNotificationEmail = function(orderData) {
-            console.log("sendOrderNotificationEmail called with data:", JSON.stringify(orderData));
+            // Directly delegate to the JS file implementation without any testing
+            if (typeof sendOrderNotificationEmail === 'function') {
+              console.log("Delegating to implementation in product-detail.js");
+              return sendOrderNotificationEmail(orderData);
+            }
+            
+            console.log("Processing order in HTML implementation");
             
             // Validate EmailJS is loaded
             if (typeof emailjs === 'undefined' || typeof emailjs.send !== 'function') {
-              console.error("EmailJS is not available. Cannot send emails.");
-              alert("Email service is unavailable. Please contact customer support.");
+              console.error("EmailJS not available");
+              alert("Email service unavailable. Please contact support.");
               return Promise.reject("EmailJS not available");
             }
             
-            // Format the order date
+            // Format order date
             const orderDate = orderData.orderDate || new Date().toLocaleDateString('en-IN');
             
-            // Format order summary for merchant email
-            const orderSummary = `Product: ${orderData.productName || "Jewelry Item"}
-Quantity: ${orderData.quantity || "1"}
-Price: ${orderData.totalAmount || "₹0"}`;
-
-            // Format customer details for merchant email
-            const customerDetails = `Name: ${orderData.customerName || "Customer"}
-Email: ${orderData.customerEmail || "customer@example.com"}
-Phone: ${orderData.customerPhone || "Not provided"}
-Shipping Address: ${orderData.shippingAddress || "Not provided"}
-Shipping Method: ${orderData.shippingMethod || "Standard"}`;
-
-            // Create merchant template params with properly formatted fields for the owner template
+            // 1. Send merchant email only
             const merchantTemplateParams = {
               order_id: orderData.orderId || "DM" + Math.floor(Math.random() * 10000000).toString().padStart(7, '0'),
-              payment_id: orderData.paymentId || 'COD - Payment on delivery',
-              order_summary: orderSummary,
-              customer_details: customerDetails,
+              payment_id: orderData.paymentId || 'COD',
+              order_summary: `Product: ${orderData.productName}\nQuantity: ${orderData.quantity}\nPrice: ${orderData.totalAmount}`,
+              customer_details: `Name: ${orderData.customerName}\nEmail: ${orderData.customerEmail}\nPhone: ${orderData.customerPhone}\nShipping Address: ${orderData.shippingAddress}`,
               payment_method: orderData.paymentMethod || "Not specified",
-              order_notes: orderData.orderNotes || "None",
+              order_notes: orderData.orderNotes || "",
               order_date: orderDate
             };
             
-            console.log("Sending merchant email with template_a8trd51");
+            console.log("Sending merchant notification");
             
-            // First send email to merchant
+            // Send emails without any testing
             return emailjs.send("service_ymsufda", "template_a8trd51", merchantTemplateParams)
               .then(function(response) {
-                console.log("Merchant email sent successfully!", response.status, response.text);
+                console.log("Merchant email sent");
                 
-                // Create customer template params
+                // 2. Send customer email
                 const customerTemplateParams = {
                   to_name: orderData.customerName || "Customer",
-                  email: orderData.customerEmail || "", // Add this for the reply-to field
+                  email: orderData.customerEmail || "", // Required for reply-to
                   order_id: orderData.orderId || merchantTemplateParams.order_id,
-                  product_name: orderData.productName || "Jewelry Item",
-                  quantity: orderData.quantity || "1",
-                  total_amount: orderData.totalAmount || "₹0",
-                  shipping_address: orderData.shippingAddress || "Not provided",
-                  shipping_method: orderData.shippingMethod || "Standard",
-                  payment_method: orderData.paymentMethod || "Not specified",
+                  product_name: orderData.productName || "",
+                  quantity: orderData.quantity || "",
+                  total_amount: orderData.totalAmount || "",
+                  shipping_address: orderData.shippingAddress || "",
+                  shipping_method: orderData.shippingMethod || "",
+                  payment_method: orderData.paymentMethod || "",
                   order_date: orderDate
                 };
                 
-                console.log("Sending customer email with template_skjqdcg");
-                
-                // Then send email to customer
-                // Use the correct customer template ID
+                console.log("Sending customer confirmation");
                 return emailjs.send("service_ymsufda", "template_skjqdcg", customerTemplateParams);
               })
               .then(function(response) {
-                console.log("Customer email sent successfully!", response.status, response.text);
+                console.log("Customer email sent");
                 
-                // Show success message
+                // Show confirmation UI
                 const confirmationMsg = document.createElement('div');
                 confirmationMsg.className = 'email-confirmation';
                 confirmationMsg.innerHTML = `
@@ -863,19 +854,17 @@ Shipping Method: ${orderData.shippingMethod || "Standard"}`;
                 `;
                 document.body.appendChild(confirmationMsg);
                 
-                // Remove message after 3 seconds
+                // Remove after 3 seconds
                 setTimeout(() => {
                   confirmationMsg.style.opacity = '0';
-                  setTimeout(() => {
-                    confirmationMsg.remove();
-                  }, 500);
+                  setTimeout(() => confirmationMsg.remove(), 500);
                 }, 3000);
                 
                 return response;
               })
               .catch(function(error) {
-                console.error("Failed to send email:", error);
-                alert("There was an issue sending the order confirmation. Please contact support for assistance.");
+                console.error("Email failed:", error);
+                alert("Order confirmation could not be sent. Please contact support.");
                 throw error;
               });
           };
