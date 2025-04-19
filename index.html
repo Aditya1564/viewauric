@@ -1,11 +1,604 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello Page</title>
-</head>
-<body>
-    <h1>hello</h1>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>Divas Mantra - Timeless & Classic Jewellery</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lato:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/mobile-menu.css">
+    <link rel="stylesheet" href="css/desktop-menu.css">
+    <link rel="stylesheet" href="css/responsive.css">
+  </head>
+  <body>
+    <!-- Header -->
+    <header class="header">
+        <!-- Promo Banner -->
+        <div class="promo-banner">
+            <button class="banner-arrow banner-prev">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <p>Save 21% on exclusive selections - <a href="#">Shop Now</a></p>
+            <button class="banner-arrow banner-next">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        
+        <!-- Main Navigation -->
+        <nav class="nav-container">
+            <div class="nav-left">
+                <div class="nav-icon menu-icon" id="menuButton">
+                    <i class="fas fa-bars"></i>
+                </div>
+                <div class="nav-icon location-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+            </div>
+            
+            <div class="logo">Divas Mantra</div>
+            
+            <div class="nav-right">
+                <div class="nav-icon search-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="nav-icon cart-icon">
+                    <i class="fas fa-shopping-bag"></i>
+                </div>
+            </div>
+        </nav>
+        
+        <!-- Desktop Navigation - Horizontal Menu -->
+        <nav class="desktop-nav">
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li class="dropdown">
+                    <a href="#">Necklace</a>
+                    <div class="dropdown-content">
+                        <a href="#">All Necklaces</a>
+                        <a href="#">Choker</a>
+                        <a href="#">Layered</a>
+                        <a href="#">Classic</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#">Earrings</a>
+                    <div class="dropdown-content">
+                        <a href="#">All Earrings</a>
+                        <a href="#">Chandbali</a>
+                        <a href="#">Jhumka</a>
+                        <a href="#">Studs</a>
+                        <a href="#">Drop</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#">Bangles</a>
+                    <div class="dropdown-content">
+                        <a href="#">All Bangles</a>
+                        <a href="#">Gold Bangles</a>
+                        <a href="#">Silver Bangles</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#">Chains & Pendants</a>
+                    <div class="dropdown-content">
+                        <a href="#">All Chains</a>
+                        <a href="#">Pendants</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#">Accessories</a>
+                    <div class="dropdown-content">
+                        <a href="#">All Accessories</a>
+                        <a href="#">Hair Pins</a>
+                        <a href="#">Maang Tikka</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#">Collections</a>
+                    <div class="dropdown-content">
+                        <a href="#">Leelah</a>
+                        <a href="#">Chettinad</a>
+                        <a href="#">Nabah</a>
+                        <a href="#">Mathuram</a>
+                    </div>
+                </li>
+                <li><a href="#">Sale</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <!-- Overlay for menu background -->
+    <div class="menu-overlay" id="menuOverlay"></div>
+    
+    <!-- Mobile Navigation Menu - Matching Screenshot Exactly -->
+    <div class="mobile-menu" id="mobileMenu">
+        <!-- Main Menu View -->
+        <div id="mainMenuView" style="display: flex; flex-direction: column; height: 100%;">
+            <div class="menu-header">
+                <button class="menu-close" id="closeButton">
+                    ×
+                </button>
+            </div>
+
+            <!-- Scrollable menu content -->
+            <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; justify-content: space-between;">
+                <ul class="menu-list">
+                    <li class="menu-item">
+                        <a href="#" class="menu-link" data-submenu="necklace-submenu">
+                            Necklace
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    
+                    <li class="menu-item">
+                        <a href="#" class="menu-link" data-submenu="earrings-submenu">
+                            Earrings
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+
+                    <li class="menu-item">
+                        <a href="#" class="menu-link" data-submenu="bangles-submenu">
+                            Bangles
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    
+                    <li class="menu-item">
+                        <a href="#" class="menu-link" data-submenu="chains-pendants-submenu">
+                            Chains & Pendants
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    
+                    <li class="menu-item">
+                        <a href="#" class="menu-link" data-submenu="accessories-submenu">
+                            Accessories
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    
+                    <li class="menu-item">
+                        <a href="#" class="menu-link" data-submenu="collections-submenu">
+                            Collections
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            Sale
+                        </a>
+                    </li>
+                </ul>
+            
+            
+            </div>
+            
+            <!-- Footer elements as individual items at the bottom -->
+            <div style="margin-top: auto; width: 100%;">
+                <a href="#" style="display: flex; align-items: center; padding: 20px; border-top: 1px solid #f1f1f1; text-decoration: none; color: #333; font-weight: 400;">
+                    <i class="fas fa-user" style="margin-right: 10px;"></i> LOGIN
+                </a>
+                
+                <div style="display: flex; align-items: center; padding: 20px; border-top: 1px solid #f1f1f1; color: #333;">
+                    INR ₹ <i class="fas fa-chevron-down" style="margin-left: 10px; font-size: 12px; color: #999;"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Earrings Submenu View (Example of second level) -->
+        <div id="earringsSubmenuView" class="submenu-view" style="display: none; flex: 1; display: flex; flex-direction: column;">
+            <div class="menu-header">
+                <button class="menu-close" id="closeEarringsButton">
+                    ×
+                </button>
+            </div>
+            
+            <a href="#" class="back-link" id="backFromEarrings">
+                <i class="fas fa-chevron-left"></i> Earrings
+            </a>
+            
+            <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; justify-content: space-between;">
+                <div class="category-view">
+                    <h3 class="category-header">
+                        Jewellery Type <i class="fas fa-chevron-right"></i>
+                    </h3>
+                    
+                    <ul class="submenu" id="jewellery-type-submenu">
+                        <li class="submenu-item">
+                            <a href="#" class="submenu-link">All Earring</a>
+                        </li>
+                        <li class="submenu-item">
+                            <a href="#" class="submenu-link">Chandbali</a>
+                        </li>
+                        <li class="submenu-item">
+                            <a href="#" class="submenu-link">Jhumka</a>
+                        </li>
+                        <li class="submenu-item">
+                            <a href="#" class="submenu-link">Studs</a>
+                        </li>
+                        <li class="submenu-item">
+                            <a href="#" class="submenu-link">Drop</a>
+                        </li>
+                        <li class="submenu-item">
+                            <a href="#" class="submenu-link">Dangler</a>
+                        </li>
+                    </ul>
+                    
+                    <h3 class="category-header">
+                        Collections <i class="fas fa-chevron-right"></i>
+                    </h3>
+                </div>
+            
+            
+            </div>
+            
+            <!-- Footer elements as individual items at the bottom -->
+            <div style="margin-top: auto; width: 100%;">
+                <a href="#" style="display: flex; align-items: center; padding: 20px; border-top: 1px solid #f1f1f1; text-decoration: none; color: #333; font-weight: 400;">
+                    <i class="fas fa-user" style="margin-right: 10px;"></i> LOGIN
+                </a>
+                
+                <div style="display: flex; align-items: center; padding: 20px; border-top: 1px solid #f1f1f1; color: #333;">
+                    INR ₹ <i class="fas fa-chevron-down" style="margin-left: 10px; font-size: 12px; color: #999;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section with Slider -->
+    <section class="hero-slider">
+        <!-- Remove active class to let JavaScript handle the initial state -->
+        <div class="slide">
+            <img src="images/slider-image1.jpg" alt="Elegant jewelry collection" class="slide-image">
+        </div>
+        <div class="slide">
+            <img src="images/slider-image2.jpg" alt="The Bangle Collection" class="slide-image">
+        </div>
+
+        <div class="slider-dots">
+            <div class="slider-dot"></div>
+            <div class="slider-dot"></div>
+        </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section class="categories container">
+        <div class="categories-wrapper">
+            <div class="category-container">
+                <div class="category-item">
+                    <div class="category-image">
+                        <img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" alt="Leelah Collection">
+                    </div>
+                    <h3 class="category-name">Leelah</h3>
+                    <p class="collection-label">Collection</p>
+                </div>
+                <div class="category-item">
+                    <div class="category-image">
+                        <img src="https://images.unsplash.com/photo-1602173574767-37ac01994b2a?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" alt="Chettinad Collection">
+                    </div>
+                    <h3 class="category-name">Chettinad</h3>
+                    <p class="collection-label">Collection</p>
+                </div>
+                <div class="category-item">
+                    <div class="category-image">
+                        <img src="https://images.unsplash.com/photo-1589207212797-cfd578c5ad89?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" alt="Nabah Collection">
+                    </div>
+                    <h3 class="category-name">Nabah</h3>
+                    <p class="collection-label">Collection</p>
+                </div>
+                <div class="category-item">
+                    <div class="category-image">
+                        <img src="https://images.unsplash.com/photo-1603561596112-0a132b757442?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" alt="Mathuram Collection">
+                    </div>
+                    <h3 class="category-name">Mathuram</h3>
+                    <p class="collection-label">Collection</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- New Arrivals Section -->
+    <section class="new-arrivals container">
+        <div class="new-arrivals-header">
+            <h2 class="section-title">New Arrivals</h2>
+            <p class="section-subtitle">Discover our latest exquisite creations</p>
+        </div>
+        
+        <div class="arrivals-gallery">
+            <div class="arrivals-featured">
+                <div class="featured-product">
+                    <img src="https://images.unsplash.com/photo-1608042314453-ae338d80c427?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Exquisite Diamond Pendant">
+                    <div class="featured-overlay">
+                        <h3>Exquisite Diamond Pendant</h3>
+                        <p class="featured-price">₹58,000</p>
+                        <a href="product-detail.html?id=diamond-pendant" class="view-details">View Details</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="arrivals-grid">
+                <div class="arrival-item">
+                    <a href="product-detail.html?id=emerald-studs" style="text-decoration: none; color: inherit;">
+                        <div class="arrival-image">
+                            <img src="https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" alt="Emerald Studs">
+                        </div>
+                        <div class="arrival-details">
+                            <h3 class="arrival-title">Emerald Studs</h3>
+                            <p class="arrival-price">₹32,500</p>
+                            <span class="arrival-new">New</span>
+                        </div>
+                    </a>
+                </div>
+                
+                <div class="arrival-item">
+                    <a href="product-detail.html?id=rose-gold-bracelet" style="text-decoration: none; color: inherit;">
+                        <div class="arrival-image">
+                            <img src="https://images.unsplash.com/photo-1611591437281-460bfbe1220a?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" alt="Rose Gold Bracelet">
+                        </div>
+                        <div class="arrival-details">
+                            <h3 class="arrival-title">Rose Gold Bracelet</h3>
+                            <p class="arrival-price">₹41,200</p>
+                            <span class="arrival-new">New</span>
+                        </div>
+                    </a>
+                </div>
+                
+                <div class="arrival-item">
+                    <div class="arrival-image">
+                        <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" alt="Royal Bangle Set">
+                    </div>
+                    <div class="arrival-details">
+                        <h3 class="arrival-title">Royal Bangle Set</h3>
+                        <p class="arrival-price">₹36,800</p>
+                        <span class="arrival-new">New</span>
+                    </div>
+                </div>
+                
+                <div class="arrival-item">
+                    <div class="arrival-image">
+                        <img src="https://images.unsplash.com/photo-1611085583191-a3b181a88401?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" alt="Pearl & Diamond Necklace">
+                    </div>
+                    <div class="arrival-details">
+                        <h3 class="arrival-title">Pearl & Diamond Necklace</h3>
+                        <p class="arrival-price">₹52,900</p>
+                        <span class="arrival-new">New</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="arrivals-cta">
+                <a href="#" class="view-all-button">View All New Arrivals</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Product Categories Section -->
+    <section class="product-categories">
+        <div class="container">
+            <h2 class="category-heading">Golden Brass</h2>
+            
+            <div class="product-scroll-container">
+                <div class="product-item">
+                    <div class="product-image">
+                        <img src="https://images.unsplash.com/photo-1599459182681-c938b7f14d3e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Daisy Combo Set">
+                        <div class="product-badge">SAVE 33%</div>
+                        <button class="add-to-wishlist">+</button>
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-name">Daisy Combo Set</h3>
+                        <div class="product-pricing">
+                            <span class="current-price">Rs. 500.00</span>
+                            <span class="original-price">Rs. 749.00</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="product-item">
+                    <div class="product-image">
+                        <img src="https://images.unsplash.com/photo-1611085583191-a3b181a88401?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Baroque-Leaf Statement Earrings">
+                        <div class="product-badge">SAVE 34%</div>
+                        <button class="add-to-wishlist">+</button>
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-name">Baroque-Leaf Statement Earrings</h3>
+                        <div class="product-pricing">
+                            <span class="current-price">Rs. 190.00</span>
+                            <span class="original-price">Rs. 290.00</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="product-item">
+                    <div class="product-image">
+                        <img src="https://images.unsplash.com/photo-1610694955371-d4a3e0ce4b52?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Golden Flower Set">
+                        <div class="product-badge">SAVE 30%</div>
+                        <button class="add-to-wishlist">+</button>
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-name">Golden Flower Set</h3>
+                        <div class="product-pricing">
+                            <span class="current-price">Rs. 680.00</span>
+                            <span class="original-price">Rs. 980.00</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="product-item">
+                    <div class="product-image">
+                        <img src="https://images.unsplash.com/photo-1599643477877-530eb83abc8e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Antique Bangles">
+                        <div class="product-badge">SAVE 25%</div>
+                        <button class="add-to-wishlist">+</button>
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-name">Antique Bangles</h3>
+                        <div class="product-pricing">
+                            <span class="current-price">Rs. 450.00</span>
+                            <span class="original-price">Rs. 600.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="view-all-container">
+                <a href="#" class="view-all-btn">VIEW ALL</a>
+            </div>
+            
+            <h2 class="category-heading">Silver Jewelry</h2>
+            
+            <div class="product-scroll-container">
+                <div class="product-item">
+                    <div class="product-image">
+                        <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Green Mayuri Jhumkas">
+                        <div class="product-badge">SAVE 33%</div>
+                        <button class="add-to-wishlist">+</button>
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-name">Green Mayuri Jhumkas</h3>
+                        <div class="product-pricing">
+                            <span class="current-price">Rs. 340.00</span>
+                            <span class="original-price">Rs. 509.00</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="product-item">
+                    <div class="product-image">
+                        <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Peach Round Silver Pendant">
+                        <div class="product-badge">SAVE 33%</div>
+                        <button class="add-to-wishlist">+</button>
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-name">Peach Round Silver Pendant</h3>
+                        <div class="product-pricing">
+                            <span class="current-price">Rs. 600.00</span>
+                            <span class="original-price">Rs. 899.00</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="product-item">
+                    <div class="product-image">
+                        <img src="https://images.unsplash.com/photo-1598560917807-1bae44bd2be8?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Silver Charm Bracelet">
+                        <div class="product-badge">SAVE 35%</div>
+                        <button class="add-to-wishlist">+</button>
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-name">Silver Charm Bracelet</h3>
+                        <div class="product-pricing">
+                            <span class="current-price">Rs. 550.00</span>
+                            <span class="original-price">Rs. 850.00</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="product-item">
+                    <div class="product-image">
+                        <img src="https://images.unsplash.com/photo-1611107683227-e9060eccd846?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Silver Lotus Pendant">
+                        <div class="product-badge">SAVE 28%</div>
+                        <button class="add-to-wishlist">+</button>
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-name">Silver Lotus Pendant</h3>
+                        <div class="product-pricing">
+                            <span class="current-price">Rs. 480.00</span>
+                            <span class="original-price">Rs. 670.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="view-all-container">
+                <a href="#" class="view-all-btn">VIEW ALL</a>
+            </div>
+            
+            <h2 class="category-heading">Earrings</h2>
+            
+            <div class="product-scroll-container">
+                <div class="product-item sold-out">
+                    <div class="product-image">
+                        <img src="https://images.unsplash.com/photo-1629224316810-9d8805b95e76?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Navy Blue Meenakshi Fusion Golden Earrings">
+                        <div class="product-badge">SAVE 33%</div>
+                        <div class="sold-out-badge">SOLD OUT</div>
+                        <button class="add-to-wishlist">+</button>
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-name">Navy Blue Meenakshi Fusion Golden Earrings</h3>
+                        <div class="product-pricing">
+                            <span class="current-price">Rs. 1,300.00</span>
+                            <span class="original-price">Rs. 1,949.00</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="product-item">
+                    <div class="product-image">
+                        <img src="https://images.unsplash.com/photo-1603974372039-adc49044b6bd?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Blue Meenakshi Fusion Earrings">
+                        <div class="product-badge">SAVE 33%</div>
+                        <button class="add-to-wishlist">+</button>
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-name">Blue Meenakshi Fusion Earrings</h3>
+                        <div class="product-pricing">
+                            <span class="current-price">Rs. 1,300.00</span>
+                            <span class="original-price">Rs. 1,949.00</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="product-item">
+                    <div class="product-image">
+                        <img src="https://images.unsplash.com/photo-1561172292-43e57ba52d07?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Pearl Drop Earrings">
+                        <div class="product-badge">SAVE 30%</div>
+                        <button class="add-to-wishlist">+</button>
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-name">Pearl Drop Earrings</h3>
+                        <div class="product-pricing">
+                            <span class="current-price">Rs. 980.00</span>
+                            <span class="original-price">Rs. 1,400.00</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="product-item">
+                    <div class="product-image">
+                        <img src="https://images.unsplash.com/photo-1573408301185-9146fe634ad0?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Gemstone Stud Earrings">
+                        <div class="product-badge">SAVE 25%</div>
+                        <button class="add-to-wishlist">+</button>
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-name">Gemstone Stud Earrings</h3>
+                        <div class="product-pricing">
+                            <span class="current-price">Rs. 750.00</span>
+                            <span class="original-price">Rs. 999.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="view-all-container">
+                <a href="#" class="view-all-btn">VIEW ALL</a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Made to Order Section -->
+    <section class="made-to-order">
+        <div class="made-to-order-content">
+            <h2>Made To Order</h2>
+        </div>
+    </section>
+
+    <!-- WhatsApp Button -->
+    <a href="#" class="whatsapp-btn">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <script src="js/navigation.js"></script>
+    <script src="js/auto-slider.js"></script>
+    <script src="js/banner-rotator.js"></script>
+  </body>
 </html>

@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>Product Details - Divas Mantra</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lato:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/mobile-menu.css">
+    <link rel="stylesheet" href="css/desktop-menu.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/product-detail.css">
+    <link rel="stylesheet" href="css/price-summary.css">
+    <link rel="stylesheet" href="css/email-confirmation.css">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  </head>
+  <body>
+    <!-- Header -->
+    <header class="header">
+        <!-- Promo Banner -->
+        <div class="promo-banner">
+            <button class="banner-arrow banner-prev">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <p>Save 21% on exclusive selections - <a href="#">Shop Now</a></p>
+            <button class="banner-arrow banner-next">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        
+        <!-- Main Navigation -->
+        <nav class="nav-container">
+            <div class="nav-left">
+                <div class="nav-icon menu-icon" id="menuButton">
+                    <i class="fas fa-bars"></i>
+                </div>
+                <div class="nav-icon location-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+            </div>
+            
+            <div class="logo"><a href="index.html">Divas Mantra</a></div>
+            
+            <div class="nav-right">
+                <div class="nav-icon search-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="nav-icon cart-icon">
+                    <i class="fas fa-shopping-bag"></i>
+                </div>
+            </div>
+        </nav>
+        
+        <!-- Desktop Navigation - Horizontal Menu -->
+        <nav class="desktop-nav">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li class="dropdown">
+                    <a href="#">Necklace</a>
+                    <div class="dropdown-content">
+                        <a href="#">All Necklaces</a>
+                        <a href="#">Choker</a>
+                        <a href="#">Layered</a>
+                        <a href="#">Classic</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#">Earrings</a>
+                    <div class="dropdown-content">
+                        <a href="#">All Earrings</a>
+                        <a href="#">Chandbali</a>
+                        <a href="#">Jhumka</a>
+                        <a href="#">Studs</a>
+                        <a href="#">Drop</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#">Bangles</a>
+                    <div class="dropdown-content">
+                        <a href="#">All Bangles</a>
+                        <a href="#">Gold Bangles</a>
+                        <a href="#">Silver Bangles</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#">Chains & Pendants</a>
+                    <div class="dropdown-content">
+                        <a href="#">All Chains</a>
+                        <a href="#">Pendants</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#">Accessories</a>
+                    <div class="dropdown-content">
+                        <a href="#">All Accessories</a>
+                        <a href="#">Hair Pins</a>
+                        <a href="#">Maang Tikka</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#">Collections</a>
+                    <div class="dropdown-content">
+                        <a href="#">Leelah</a>
+                        <a href="#">Chettinad</a>
+                        <a href="#">Nabah</a>
+                        <a href="#">Mathuram</a>
+                    </div>
+                </li>
+                <li><a href="#">Sale</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <!-- Overlay for menu background -->
+    <div class="menu-overlay" id="menuOverlay"></div>
+    
+    <!-- Mobile Navigation Menu - Matching Screenshot Exactly -->
+    <div class="mobile-menu" id="mobileMenu">
+        <!-- Main Menu View -->
+        <div id="mainMenuView" style="display: flex; flex-direction: column; height: 100%;">
+            <div class="menu-header">
+                <button class="menu-close" id="closeButton">
+                    ×
+                </button>
+            </div>
+
+            <!-- Scrollable menu content -->
+            <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; justify-content: space-between;">
+                <ul class="menu-list">
+                    <li class="menu-item">
+                        <a href="#" class="menu-link" data-submenu="necklace-submenu">
+                            Necklace
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    
+                    <li class="menu-item">
+                        <a href="#" class="menu-link" data-submenu="earrings-submenu">
+                            Earrings
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+
+                    <li class="menu-item">
+                        <a href="#" class="menu-link" data-submenu="bangles-submenu">
+                            Bangles
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    
+                    <li class="menu-item">
+                        <a href="#" class="menu-link" data-submenu="chains-pendants-submenu">
+                            Chains & Pendants
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    
+                    <li class="menu-item">
+                        <a href="#" class="menu-link" data-submenu="accessories-submenu">
+                            Accessories
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    
+                    <li class="menu-item">
+                        <a href="#" class="menu-link" data-submenu="collections-submenu">
+                            Collections
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            Sale
+                        </a>
+                    </li>
+                </ul>
+            
+            
+            </div>
+        </div>
+    </div>
+
+    <!-- Breadcrumb Navigation -->
+    <div class="breadcrumb container">
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="#">Jewelry</a></li>
+            <li><span id="product-breadcrumb-name">Exquisite Diamond Pendant</span></li>
+        </ul>
+    </div>
+
+    <!-- Product Detail Section -->
+    <section class="product-detail container">
+        <div class="product-gallery">
+            <div class="product-main-image">
+                <img id="main-product-image" src="https://images.unsplash.com/photo-1608042314453-ae338d80c427?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Exquisite Diamond Pendant">
+            </div>
+            <div class="product-thumbnail-gallery">
+                <div class="thumbnail active">
+                    <img src="https://images.unsplash.com/photo-1608042314453-ae338d80c427?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80" alt="Exquisite Diamond Pendant - Front View">
+                </div>
+                <div class="thumbnail">
+                    <img src="https://images.unsplash.com/photo-1599643477877-530eb83abc8e?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80" alt="Exquisite Diamond Pendant - Side View">
+                </div>
+                <div class="thumbnail">
+                    <img src="https://images.unsplash.com/photo-1588444837495-c6cfeb53f32d?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80" alt="Exquisite Diamond Pendant - Detail View">
+                </div>
+                <div class="thumbnail">
+                    <img src="https://images.unsplash.com/photo-1611591437281-460bfbe1220a?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80" alt="Exquisite Diamond Pendant - Worn">
+                </div>
+            </div>
+        </div>
+        <div class="product-info">
+            <h1 id="product-title">Exquisite Diamond Pendant</h1>
+            <div class="product-collection" id="product-collection">Leelah Collection</div>
+            <div class="product-price">
+                <span class="current-price" id="product-price">₹58,000</span>
+                <span class="original-price" id="product-original-price">₹72,500</span>
+                <span class="discount-badge">Save 20%</span>
+            </div>
+            <div class="product-description">
+                <p id="product-description">Handcrafted with precision and care, this stunning diamond pendant features a 1.2 carat brilliant-cut diamond surrounded by smaller diamonds in an elegant setting. The pendant hangs from an 18K gold chain with a secure lobster clasp. Perfect for special occasions or as an everyday statement piece.</p>
+            </div>
+            
+            <div class="product-details-list">
+                <div class="detail-item">
+                    <span class="detail-label">Material</span>
+                    <span class="detail-value" id="product-material">18K Gold</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Stone</span>
+                    <span class="detail-value" id="product-stone">Diamond</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Carat</span>
+                    <span class="detail-value" id="product-carat">1.2 ct</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Chain Length</span>
+                    <span class="detail-value" id="product-chain-length">18 inches</span>
+                </div>
+            </div>
+            
+            <div class="product-variants">
+                <div class="variant-group">
+                    <label for="product-quantity">Quantity:</label>
+                    <div class="quantity-selector">
+                        <button class="quantity-btn decrease" id="decrease-quantity">-</button>
+                        <input type="number" id="product-quantity" value="1" min="1" max="10">
+                        <button class="quantity-btn increase" id="increase-quantity">+</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="product-price-summary">
+                <div class="price-calculation">
+                    <div class="price-row">
+                        <span>Price (₹58,000 × <span id="price-quantity">1</span>):</span>
+                        <span id="subtotal-display">₹58,000</span>
+                    </div>
+                    <div class="price-row total-price">
+                        <span>Total Amount:</span>
+                        <span id="total-amount-display">₹58,000</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="buy-options">
+                <button class="buy-now-button" id="buy-now-button">Buy Now</button>
+            </div>
+            
+            <div class="delivery-info">
+                <div class="delivery-item">
+                    <i class="fas fa-truck"></i>
+                    <span>Free shipping on all orders</span>
+                </div>
+                <div class="delivery-item">
+                    <i class="fas fa-undo"></i>
+                    <span>Easy 15-day returns</span>
+                </div>
+                <div class="delivery-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Secure checkout</span>
+                </div>
+                <div class="delivery-item">
+                    <i class="fas fa-certificate"></i>
+                    <span>Certified authentic jewelry</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="product-additional-info container">
+        <div class="tab-container">
+            <div class="tabs">
+                <div class="tab active" data-tab="details">Details</div>
+                <div class="tab" data-tab="care">Care Instructions</div>
+                <div class="tab" data-tab="shipping">Shipping & Returns</div>
+            </div>
+            <div class="tab-content">
+                <div class="tab-pane active" id="details">
+                    <p>This exquisite diamond pendant is part of our exclusive Leelah Collection, inspired by traditional designs with a modern twist. Each piece is meticulously crafted by our master jewelers using ethically sourced materials.</p>
+                    <ul>
+                        <li>18K gold pendant featuring a 1.2 carat center diamond</li>
+                        <li>Surrounded by 0.5 carats of smaller diamonds</li>
+                        <li>Certified by the Gemological Institute</li>
+                        <li>Includes a matching 18K gold chain</li>
+                        <li>Pendant dimensions: 15mm x 10mm</li>
+                        <li>Comes in a luxury jewelry box</li>
+                    </ul>
+                </div>
+                <div class="tab-pane" id="care">
+                    <h3>Jewelry Care Instructions</h3>
+                    <p>To maintain the beauty and longevity of your diamond pendant, please follow these care instructions:</p>
+                    <ul>
+                        <li>Store in the provided jewelry box when not in use</li>
+                        <li>Avoid contact with perfumes, lotions, and cosmetics</li>
+                        <li>Remove before swimming, bathing, or engaging in physical activities</li>
+                        <li>Clean gently with a soft cloth and mild soap solution</li>
+                        <li>Have your jewelry professionally cleaned once a year</li>
+                    </ul>
+                </div>
+                <div class="tab-pane" id="shipping">
+                    <h3>Shipping Information</h3>
+                    <p>We offer free insured shipping on all orders.</p>
+                    <ul>
+                        <li>Standard delivery: 3-5 business days</li>
+                        <li>Express delivery: 1-2 business days (additional charges apply)</li>
+                        <li>International shipping available</li>
+                    </ul>
+                    
+                    <h3>Return Policy</h3>
+                    <p>We want you to be completely satisfied with your purchase. If for any reason you're not, you may return it within 15 days of receipt.</p>
+                    <ul>
+                        <li>Item must be unworn and in original condition</li>
+                        <li>Include all original packaging and documentation</li>
+                        <li>Custom orders are non-returnable</li>
+                        <li>Return shipping costs are the responsibility of the customer</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="related-products container">
+        <h2 class="section-title">You May Also Like</h2>
+        <div class="product-scroll-container">
+            <div class="product-item">
+                <div class="product-image">
+                    <img src="https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" alt="Emerald Studs">
+                    <button class="add-to-wishlist">
+                        <i class="far fa-heart"></i>
+                    </button>
+                </div>
+                <div class="product-details">
+                    <h3 class="product-name">Emerald Studs</h3>
+                    <div class="product-pricing">
+                        <span class="current-price">₹32,500</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="product-item">
+                <div class="product-image">
+                    <img src="https://images.unsplash.com/photo-1611591437281-460bfbe1220a?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" alt="Rose Gold Bracelet">
+                    <button class="add-to-wishlist">
+                        <i class="far fa-heart"></i>
+                    </button>
+                </div>
+                <div class="product-details">
+                    <h3 class="product-name">Rose Gold Bracelet</h3>
+                    <div class="product-pricing">
+                        <span class="current-price">₹41,200</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="product-item">
+                <div class="product-image">
+                    <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" alt="Royal Bangle Set">
+                    <button class="add-to-wishlist">
+                        <i class="far fa-heart"></i>
+                    </button>
+                </div>
+                <div class="product-details">
+                    <h3 class="product-name">Royal Bangle Set</h3>
+                    <div class="product-pricing">
+                        <span class="current-price">₹36,900</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="product-item">
+                <div class="product-image">
+                    <img src="https://images.unsplash.com/photo-1599459183200-59c7687a0275?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" alt="Pearl Drop Earrings">
+                    <div class="product-badge">New</div>
+                    <button class="add-to-wishlist">
+                        <i class="far fa-heart"></i>
+                    </button>
+                </div>
+                <div class="product-details">
+                    <h3 class="product-name">Pearl Drop Earrings</h3>
+                    <div class="product-pricing">
+                        <span class="current-price">₹27,800</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- WhatsApp Button -->
+    <a href="#" class="whatsapp-btn">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-top">
+                <div class="footer-column">
+                    <h3 class="footer-title">About Us</h3>
+                    <p>Divas Mantra offers exquisite handcrafted jewelry that combines traditional craftsmanship with modern design sensibilities.</p>
+                </div>
+                <div class="footer-column">
+                    <h3 class="footer-title">Customer Service</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Shipping & Returns</a></li>
+                        <li><a href="#">Jewelry Care</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3 class="footer-title">Shop</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">New Arrivals</a></li>
+                        <li><a href="#">Best Sellers</a></li>
+                        <li><a href="#">Sale</a></li>
+                        <li><a href="#">Collections</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3 class="footer-title">Stay Connected</h3>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-pinterest-p"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                    </div>
+                    <div class="newsletter">
+                        <h4>Subscribe to our newsletter</h4>
+                        <form class="newsletter-form">
+                            <input type="email" placeholder="Your email address">
+                            <button type="submit">Subscribe</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p class="copyright">© 2023 Divas Mantra. All rights reserved.</p>
+                <div class="footer-bottom-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Checkout Form Overlay -->
+    <div id="checkout-overlay" class="checkout-overlay">
+        <div class="checkout-container">
+            <div class="checkout-header">
+                <h2>Complete Your Purchase</h2>
+                <button id="close-checkout" class="close-checkout">&times;</button>
+            </div>
+            
+            <div class="checkout-progress">
+                <div class="progress-step active" data-step="shipping">
+                    <span class="step-number">1</span>
+                    <span class="step-name">Shipping</span>
+                </div>
+                <div class="progress-connector"></div>
+                <div class="progress-step" data-step="payment">
+                    <span class="step-number">2</span>
+                    <span class="step-name">Payment</span>
+                </div>
+                <div class="progress-connector"></div>
+                <div class="progress-step" data-step="confirmation">
+                    <span class="step-number">3</span>
+                    <span class="step-name">Confirmation</span>
+                </div>
+            </div>
+            
+            <div class="checkout-body">
+                <!-- Step 1: Shipping Information -->
+                <div class="checkout-step active" id="shipping-step">
+                    <h3>Shipping Information</h3>
+                    <form id="shipping-form" class="checkout-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="full-name">Full Name*</label>
+                                <input type="text" id="full-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Phone Number*</label>
+                                <input type="tel" id="phone" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email Address*</label>
+                            <input type="email" id="email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="address1">Address Line 1*</label>
+                            <input type="text" id="address1" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="address2">Address Line 2</label>
+                            <input type="text" id="address2">
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="city">City*</label>
+                                <input type="text" id="city" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="state">State*</label>
+                                <select id="state" required>
+                                    <option value="">Select State</option>
+                                    <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                    <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                                    <option value="Assam">Assam</option>
+                                    <option value="Bihar">Bihar</option>
+                                    <option value="Chhattisgarh">Chhattisgarh</option>
+                                    <option value="Goa">Goa</option>
+                                    <option value="Gujarat">Gujarat</option>
+                                    <option value="Haryana">Haryana</option>
+                                    <option value="Himachal Pradesh">Himachal Pradesh</option>
+                                    <option value="Jharkhand">Jharkhand</option>
+                                    <option value="Karnataka">Karnataka</option>
+                                    <option value="Kerala">Kerala</option>
+                                    <option value="Madhya Pradesh">Madhya Pradesh</option>
+                                    <option value="Maharashtra">Maharashtra</option>
+                                    <option value="Manipur">Manipur</option>
+                                    <option value="Meghalaya">Meghalaya</option>
+                                    <option value="Mizoram">Mizoram</option>
+                                    <option value="Nagaland">Nagaland</option>
+                                    <option value="Odisha">Odisha</option>
+                                    <option value="Punjab">Punjab</option>
+                                    <option value="Rajasthan">Rajasthan</option>
+                                    <option value="Sikkim">Sikkim</option>
+                                    <option value="Tamil Nadu">Tamil Nadu</option>
+                                    <option value="Telangana">Telangana</option>
+                                    <option value="Tripura">Tripura</option>
+                                    <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                    <option value="Uttarakhand">Uttarakhand</option>
+                                    <option value="West Bengal">West Bengal</option>
+                                    <option value="Delhi">Delhi</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="pincode">Pincode*</label>
+                                <input type="text" id="pincode" pattern="[0-9]{6}" maxlength="6" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="country">Country*</label>
+                                <select id="country" required>
+                                    <option value="India" selected>India</option>
+                                    <option value="UAE">UAE</option>
+                                    <option value="USA">USA</option>
+                                    <option value="UK">UK</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="shipping-method">Shipping Method*</label>
+                            <div class="shipping-methods">
+                                <div class="shipping-method">
+                                    <input type="radio" name="shipping" id="standard-shipping" value="standard" checked>
+                                    <label for="standard-shipping">
+                                        <div class="method-name">Standard Shipping</div>
+                                        <div class="method-details">
+                                            <span class="method-price">Free</span>
+                                            <span class="method-time">3-5 business days</span>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="shipping-method">
+                                    <input type="radio" name="shipping" id="express-shipping" value="express">
+                                    <label for="express-shipping">
+                                        <div class="method-name">Express Shipping</div>
+                                        <div class="method-details">
+                                            <span class="method-price">₹250</span>
+                                            <span class="method-time">1-2 business days</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="order-notes">Order Notes (Optional)</label>
+                            <textarea id="order-notes" rows="2" placeholder="Special instructions for delivery"></textarea>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn-secondary" id="cancel-shipping">Cancel</button>
+                            <button type="button" class="btn-primary" id="next-to-payment">Continue to Payment</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Step 2: Payment Information -->
+                <div class="checkout-step" id="payment-step">
+                    <h3>Order Summary</h3>
+                    <div class="order-summary">
+                        <div class="order-product">
+                            <div class="product-img">
+                                <img id="summary-product-image" src="" alt="">
+                            </div>
+                            <div class="product-info">
+                                <h4 id="summary-product-name"></h4>
+                                <div class="product-meta">
+                                    <span class="product-quantity">Quantity: <span id="summary-quantity">1</span></span>
+                                </div>
+                            </div>
+                            <div class="product-price" id="summary-product-price"></div>
+                        </div>
+                        
+                        <div class="order-totals">
+                            <div class="total-row">
+                                <span>Subtotal</span>
+                                <span id="summary-subtotal"></span>
+                            </div>
+                            <div class="total-row">
+                                <span>Shipping</span>
+                                <span id="summary-shipping">Free</span>
+                            </div>
+                            <div class="total-row">
+                                <span>Tax (5%)</span>
+                                <span id="summary-tax"></span>
+                            </div>
+                            <div class="total-row grand-total">
+                                <span>Grand Total</span>
+                                <span id="summary-total"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3>Payment Method</h3>
+                    <div class="payment-methods">
+                        <div class="payment-method active">
+                            <input type="radio" name="payment" id="razorpay" value="razorpay" checked>
+                            <label for="razorpay">
+                                <div class="method-name">Razorpay (Credit Card, Debit Card, UPI, Netbanking)</div>
+                                <div class="method-cards">
+                                    <i class="fab fa-cc-visa"></i>
+                                    <i class="fab fa-cc-mastercard"></i>
+                                    <i class="fab fa-cc-amex"></i>
+                                    <i class="fab fa-cc-diners-club"></i>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="payment-method">
+                            <input type="radio" name="payment" id="cod" value="cod">
+                            <label for="cod">
+                                <div class="method-name">Cash on Delivery</div>
+                                <div class="method-details">
+                                    <span class="method-info">Additional ₹99 charge applies</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" id="back-to-shipping">Back to Shipping</button>
+                        <button type="button" class="btn-primary" id="place-order">Place Order</button>
+                    </div>
+                </div>
+                
+                <!-- Step 3: Order Confirmation -->
+                <div class="checkout-step" id="confirmation-step">
+                    <div class="order-confirmation">
+                        <div class="success-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h2>Order Confirmed!</h2>
+                        <p>Thank you for your order! We've received your details and will process your order shortly.</p>
+                        <div class="order-details">
+                            <div class="detail-row">
+                                <span class="detail-label">Order Number:</span>
+                                <span class="detail-value" id="confirmation-order-number"></span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Order Date:</span>
+                                <span class="detail-value" id="confirmation-order-date"></span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Total Amount:</span>
+                                <span class="detail-value" id="confirmation-order-total"></span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Shipping Address:</span>
+                                <span class="detail-value" id="confirmation-shipping-address"></span>
+                            </div>
+                        </div>
+                        
+                        <p>A notification has been sent to our merchant team. You will receive updates about your order soon.</p>
+                        
+                        <div class="form-actions">
+                            <a href="index.html" class="continue-shopping-btn">Continue Shopping</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load the LATEST EmailJS with the most recent CDN URL -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    
+    <!-- Load Razorpay -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    
+    <!-- Custom scripts -->
+    <script src="js/navigation.js"></script>
+    
+    <!-- Initialize EmailJS using the latest approach -->
+    <script type="text/javascript">
+      (function() {
+        try {
+          // EmailJS initialization
+          emailjs.init("kgPufTcnaqYTFmAYI");
+          console.log("EmailJS initialized successfully from HTML");
+          
+          // Helper function to pre-fill all form fields
+          window.fillFormFields = function() {
+            console.log("Pre-filling form fields for testing...");
+            
+            // Customer information
+            document.getElementById('full-name').value = 'Test Customer';
+            document.getElementById('phone').value = '9876543210';
+            document.getElementById('email').value = 'test@example.com';
+            
+            // Address information
+            document.getElementById('address1').value = 'Test Address Line 1';
+            document.getElementById('address2').value = 'Test Address Line 2';
+            document.getElementById('city').value = 'Mumbai';
+            document.getElementById('state').value = 'Maharashtra';
+            document.getElementById('pincode').value = '400001';
+            
+            // Select standard shipping
+            document.getElementById('standard-shipping').checked = true;
+            
+            // Add order notes
+            document.getElementById('order-notes').value = 'This is a test order. Please ignore.';
+            
+            console.log("Form fields pre-filled successfully");
+          };
+          
+          // Auto-fill form fields on page load after 1 second
+          setTimeout(function() {
+            if (document.getElementById('full-name')) {
+              fillFormFields();
+              console.log("Form fields auto-filled for testing");
+            }
+          }, 1000);
+          
+          // Global function to simulate email sending for testing connection to EmailJS
+          window.testEmailJS = function() {
+            console.log("Testing EmailJS connection...");
+            
+            if (typeof emailjs === 'undefined' || typeof emailjs.send !== 'function') {
+              console.error("EmailJS not loaded properly");
+              alert("Email service not available");
+              return Promise.reject("EmailJS not available");
+            }
+            
+            return emailjs.send("service_ymsufda", "template_a8trd51", {
+              order_id: "TEST-" + Date.now(),
+              payment_id: "TEST",
+              product_name: "Test Product",
+              quantity: "1",
+              total_amount: "₹1,000",
+              customer_name: "Test User",
+              customer_email: "test@example.com",
+              customer_phone: "1234567890",
+              shipping_address: "Test Address",
+              shipping_method: "Test Shipping",
+              payment_method: "Test Payment",
+              order_notes: "Test Order",
+              order_date: new Date().toLocaleDateString()
+            });
+          };
+          
+          // Define the global sendOrderNotificationEmail function
+          window.sendOrderNotificationEmail = function(orderData) {
+            console.log("sendOrderNotificationEmail called with data:", JSON.stringify(orderData));
+            
+            // Validate EmailJS is loaded
+            if (typeof emailjs === 'undefined' || typeof emailjs.send !== 'function') {
+              console.error("EmailJS is not available. Cannot send emails.");
+              alert("Email service is unavailable. Please contact customer support.");
+              return Promise.reject("EmailJS not available");
+            }
+            
+            // Format the order date
+            const orderDate = orderData.orderDate || new Date().toLocaleDateString('en-IN');
+            
+            // Format order summary for merchant email
+            const orderSummary = `Product: ${orderData.productName || "Jewelry Item"}
+Quantity: ${orderData.quantity || "1"}
+Price: ${orderData.totalAmount || "₹0"}`;
+
+            // Format customer details for merchant email
+            const customerDetails = `Name: ${orderData.customerName || "Customer"}
+Email: ${orderData.customerEmail || "customer@example.com"}
+Phone: ${orderData.customerPhone || "Not provided"}
+Shipping Address: ${orderData.shippingAddress || "Not provided"}
+Shipping Method: ${orderData.shippingMethod || "Standard"}`;
+
+            // Create merchant template params with properly formatted fields for the owner template
+            const merchantTemplateParams = {
+              order_id: orderData.orderId || "DM" + Math.floor(Math.random() * 10000000).toString().padStart(7, '0'),
+              payment_id: orderData.paymentId || 'COD - Payment on delivery',
+              order_summary: orderSummary,
+              customer_details: customerDetails,
+              payment_method: orderData.paymentMethod || "Not specified",
+              order_notes: orderData.orderNotes || "None",
+              order_date: orderDate
+            };
+            
+            console.log("Sending merchant email with template_a8trd51");
+            
+            // First send email to merchant
+            return emailjs.send("service_ymsufda", "template_a8trd51", merchantTemplateParams)
+              .then(function(response) {
+                console.log("Merchant email sent successfully!", response.status, response.text);
+                
+                // Create customer template params
+                const customerTemplateParams = {
+                  to_name: orderData.customerName || "Customer",
+                  order_id: orderData.orderId || merchantTemplateParams.order_id,
+                  product_name: orderData.productName || "Jewelry Item",
+                  quantity: orderData.quantity || "1",
+                  total_amount: orderData.totalAmount || "₹0",
+                  shipping_address: orderData.shippingAddress || "Not provided",
+                  shipping_method: orderData.shippingMethod || "Standard",
+                  payment_method: orderData.paymentMethod || "Not specified",
+                  order_date: orderDate
+                };
+                
+                console.log("Sending customer email with template_skjqdcg");
+                
+                // Then send email to customer
+                // Use the correct customer template ID
+                return emailjs.send("service_ymsufda", "template_skjqdcg", customerTemplateParams);
+              })
+              .then(function(response) {
+                console.log("Customer email sent successfully!", response.status, response.text);
+                
+                // Show success message
+                const confirmationMsg = document.createElement('div');
+                confirmationMsg.className = 'email-confirmation';
+                confirmationMsg.innerHTML = `
+                  <div class="confirmation-message">
+                    <i class="fas fa-check-circle"></i>
+                    <p>Order confirmation sent</p>
+                  </div>
+                `;
+                document.body.appendChild(confirmationMsg);
+                
+                // Remove message after 3 seconds
+                setTimeout(() => {
+                  confirmationMsg.style.opacity = '0';
+                  setTimeout(() => {
+                    confirmationMsg.remove();
+                  }, 500);
+                }, 3000);
+                
+                return response;
+              })
+              .catch(function(error) {
+                console.error("Failed to send email:", error);
+                alert("There was an issue sending the order confirmation. Please contact support for assistance.");
+                throw error;
+              });
+          };
+        } catch (error) {
+          console.error("Exception in EmailJS setup:", error);
+        }
+      })();
+    </script>
+    
+    <script src="js/product-detail.js"></script>
+  </body>
+</html>

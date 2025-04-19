@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EmailJS Test</title>
+    <!-- Loading the LATEST EmailJS SDK from the official CDN -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .container {
+            margin-top: 20px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #e2f3f7;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .diagnostics {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 5px;
+            background-color: #f8f9fa;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <h1>EmailJS Test Tool</h1>
+    <p>This page tests whether EmailJS is properly configured and working correctly.</p>
+    
+    <div class="container">
+        <h2>Configuration</h2>
+        <p><strong>Public Key:</strong> kgPufTcnaqYTFmAYI</p>
+        <p><strong>Service ID:</strong> service_ymsufda</p>
+        <p><strong>Template IDs:</strong></p>
+        <ul>
+            <li>Owner Notification: template_a8trd51</li>
+            <li>Customer Confirmation: template_2m2rpzr</li>
+        </ul>
+    </div>
+    
+    <div class="container">
+        <h2>Test EmailJS Integration</h2>
+        <p>Click the button below to test if EmailJS is working properly:</p>
+        <button id="testBtn">Send Test Email</button>
+        <div id="status"></div>
+    </div>
+    
+    <div class="diagnostics">
+        <h2>Diagnostics</h2>
+        <table>
+            <tr>
+                <th>Component</th>
+                <th>Status</th>
+            </tr>
+            <tr>
+                <td>EmailJS Library</td>
+                <td id="library-status">Checking...</td>
+            </tr>
+            <tr>
+                <td>EmailJS Send Function</td>
+                <td id="send-function-status">Checking...</td>
+            </tr>
+            <tr>
+                <td>Network Connectivity</td>
+                <td id="network-status">Checking...</td>
+            </tr>
+        </table>
+        
+        <h3>Console Log</h3>
+        <div id="console-log"></div>
+    </div>
+
+    <script>
+        // Custom logging function that displays in the UI
+        function logMessage(message, type = 'log') {
+            const consoleLog = document.getElementById('console-log');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            
+            const timestamp = new Date().toLocaleTimeString();
+            let color = 'black';
+            
+            switch(type) {
+                case 'error':
+                    color = 'red';
+                    console.error(message);
+                    break;
+                case 'warn':
+                    color = 'orange';
+                    console.warn(message);
+                    break;
+                case 'success':
+                    color = 'green';
+                    console.log(message);
+                    break;
+                default:
+                    console.log(message);
+            }
+            
+            logEntry.innerHTML = `<span style="color:${color}">[${timestamp}] ${message}</span>`;
+            consoleLog.appendChild(logEntry);
+            consoleLog.scrollTop = consoleLog.scrollHeight;
+        }
+        
+        // Function to show status messages
+        function showStatus(message, type) {
+            const statusElement = document.getElementById("status");
+            statusElement.textContent = message;
+            statusElement.className = type;
+            statusElement.style.display = "block";
+        }
+        
+        // Function to update diagnostic status
+        function updateDiagnostic(id, status, isSuccess) {
+            const element = document.getElementById(id);
+            element.textContent = status;
+            element.style.color = isSuccess ? 'green' : 'red';
+        }
+        
+        // Check network connectivity
+        function checkNetworkStatus() {
+            fetch('https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js', { method: 'HEAD' })
+                .then(() => {
+                    updateDiagnostic('network-status', 'Connected ✓', true);
+                    logMessage('Network connectivity verified', 'success');
+                })
+                .catch(error => {
+                    updateDiagnostic('network-status', 'Error: ' + error.message, false);
+                    logMessage('Network connectivity issue: ' + error.message, 'error');
+                });
+        }
+        
+        // Initialize EmailJS with the latest approach
+        (function() {
+            try {
+                // Initialize library
+                if (typeof emailjs !== 'undefined') {
+                    // Simple initialization
+                    emailjs.init("kgPufTcnaqYTFmAYI");
+                    
+                    updateDiagnostic('library-status', 'Loaded ✓', true);
+                    logMessage('EmailJS library loaded successfully', 'success');
+                    
+                    // Verify send function exists
+                    if (typeof emailjs.send === 'function') {
+                        updateDiagnostic('send-function-status', 'Available ✓', true);
+                        logMessage('EmailJS send function is available', 'success');
+                        showStatus("EmailJS is properly initialized and ready to use", "info");
+                    } else {
+                        updateDiagnostic('send-function-status', 'Not available ✗', false);
+                        logMessage('EmailJS send function is not available', 'error');
+                        showStatus("EmailJS send function not found", "error");
+                    }
+                } else {
+                    updateDiagnostic('library-status', 'Not loaded ✗', false);
+                    updateDiagnostic('send-function-status', 'Not available ✗', false);
+                    logMessage('EmailJS library failed to load', 'error');
+                    showStatus("Error: EmailJS library not loaded properly", "error");
+                }
+                
+                // Check network connectivity
+                checkNetworkStatus();
+                
+            } catch (error) {
+                updateDiagnostic('library-status', 'Error ✗', false);
+                updateDiagnostic('send-function-status', 'Not available ✗', false);
+                logMessage('Error initializing EmailJS: ' + error.message, 'error');
+                showStatus("Error initializing EmailJS: " + error.message, "error");
+            }
+        })();
+
+        // Add event listener to test button
+        document.getElementById('testBtn').addEventListener('click', function() {
+            const button = this;
+            button.disabled = true;
+            
+            if (typeof emailjs === 'undefined' || typeof emailjs.send !== 'function') {
+                showStatus("EmailJS library is not loaded properly. Cannot send test email.", "error");
+                logMessage('Test canceled: EmailJS not available', 'error');
+                button.disabled = false;
+                return;
+            }
+            
+            showStatus("Testing EmailJS... Please wait", "info");
+            logMessage("Starting EmailJS test...");
+            
+            // Clear previous test results
+            const statusElement = document.getElementById("status");
+            while (statusElement.childElementCount > 0) {
+                statusElement.removeChild(statusElement.lastChild);
+            }
+            
+            // Generate a random order ID for testing
+            const testOrderId = "TEST-" + Math.floor(Math.random() * 10000);
+            logMessage(`Generated test order ID: ${testOrderId}`);
+            
+            // Simple test params for the merchant template
+            const templateParams = {
+                order_id: testOrderId,
+                payment_id: "TEST-PAYMENT",
+                product_name: "Test Product",
+                quantity: "1",
+                total_amount: "₹1,000",
+                customer_name: "Test Customer",
+                customer_email: "test@example.com",
+                customer_phone: "1234567890",
+                shipping_address: "123 Test Street, Test City, 12345",
+                shipping_method: "Standard",
+                payment_method: "Test Payment",
+                order_notes: "This is a test order",
+                order_date: new Date().toLocaleDateString()
+            };
+            
+            logMessage("Preparing to send test email with parameters: " + JSON.stringify(templateParams));
+            
+            // Try to send a test email using the merchant template
+            emailjs.send("service_ymsufda", "template_a8trd51", templateParams)
+                .then(function(response) {
+                    logMessage("Email sent successfully! Status: " + response.status, 'success');
+                    showStatus("EmailJS test successful! Email sent with status: " + response.status, "success");
+                    
+                    // Display response details
+                    const details = document.createElement("pre");
+                    details.textContent = JSON.stringify({
+                        status: response.status,
+                        text: response.text,
+                        timestamp: new Date().toLocaleString()
+                    }, null, 2);
+                    document.getElementById("status").appendChild(details);
+                    button.disabled = false;
+                })
+                .catch(function(error) {
+                    logMessage("Failed to send email: " + (error.text || error.message), 'error');
+                    showStatus("EmailJS test failed: " + (error.text || error.message), "error");
+                    
+                    // Display error details
+                    const details = document.createElement("pre");
+                    details.textContent = JSON.stringify(error, null, 2);
+                    document.getElementById("status").appendChild(details);
+                    button.disabled = false;
+                });
+        });
+    </script>
+</body>
+</html>
