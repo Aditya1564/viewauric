@@ -776,20 +776,12 @@
             }
           }, 1000);
           
-          // Global function just to check if EmailJS is available without sending a test email
+          // Disabled test function to prevent any test emails
           window.testEmailJS = function() {
-            console.log("Checking EmailJS connection...");
-            
-            if (typeof emailjs === 'undefined' || typeof emailjs.send !== 'function') {
-              console.error("EmailJS not loaded properly");
-              alert("Email service not available");
-              return Promise.reject("EmailJS not available");
-            }
-            
-            // Return a resolved promise without sending an actual email
+            console.log("EmailJS test function disabled to prevent test emails");
             return Promise.resolve({
               status: 200,
-              text: "EmailJS is available"
+              text: "EmailJS test disabled"
             });
           };
           
