@@ -429,39 +429,20 @@ function sendOrderNotificationEmail(orderData) {
     console.log('sendOrderNotificationEmail called with orderData:', JSON.stringify(orderData));
     
     try {
-        // A simple test function to directly verify EmailJS is working
+        // A simple function to verify EmailJS is working without sending a test email
         const testEmailJSDirectly = function() {
-            console.log("Running direct EmailJS test...");
+            console.log("Verifying EmailJS availability...");
             
             if (typeof emailjs === 'undefined') {
-                console.error("EmailJS not available for direct test");
+                console.error("EmailJS not available for direct use");
                 return Promise.reject(new Error("EmailJS not available"));
             }
             
-            // Format test order summary and customer details
-            const testOrderSummary = `Product: Test Product Direct
-Quantity: 1
-Price: ₹1,000`;
-
-            const testCustomerDetails = `Name: Test User Direct
-Email: test@example.com
-Phone: 1234567890
-Shipping Address: Test Address Direct
-Shipping Method: Test Shipping`;
-
-            return emailjs.send(
-                "service_ymsufda", 
-                "template_a8trd51", 
-                {
-                    order_id: "TEST-" + Date.now(),
-                    payment_id: "TEST-DIRECT-" + Date.now(),
-                    order_summary: testOrderSummary,
-                    customer_details: testCustomerDetails,
-                    payment_method: "Test Payment",
-                    order_notes: "Direct test from product-detail.js",
-                    order_date: new Date().toLocaleDateString()
-                }
-            );
+            // Instead of sending a test email, just resolve the promise if EmailJS is available
+            return Promise.resolve({
+                status: 200,
+                text: "EmailJS is available"
+            });
         };
         
         // If EmailJS isn't available at all, we can't proceed

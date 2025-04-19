@@ -850,6 +850,7 @@ Shipping Method: ${orderData.shippingMethod || "Standard"}`;
                 // Create customer template params
                 const customerTemplateParams = {
                   to_name: orderData.customerName || "Customer",
+                  email: orderData.customerEmail || "", // Add this for the reply-to field
                   order_id: orderData.orderId || merchantTemplateParams.order_id,
                   product_name: orderData.productName || "Jewelry Item",
                   quantity: orderData.quantity || "1",
