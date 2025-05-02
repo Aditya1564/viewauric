@@ -233,7 +233,7 @@
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-    border-color: #8B4513;
+    border-color: #6B3400;
     outline: none;
 }
 
