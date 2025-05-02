@@ -514,7 +514,7 @@ a {
 
 .view-details {
     display: inline-block;
-    background: #6B3400;
+    background: #724114;
     color: white;
     font-weight: 500;
     padding: 10px 20px;
@@ -888,7 +888,7 @@ a {
 }
 
 .view-all-btn {
-    background: #6B3400;
+    background: #724114;
     color: white;
     font-family: 'Lato', sans-serif;
     font-size: 14px;
@@ -901,7 +901,7 @@ a {
 }
 
 .view-all-btn:hover {
-    background: #5E2900;
+    background: #663300;
 }
 
 /* Made to Order Section */
