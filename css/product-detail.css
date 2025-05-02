@@ -387,7 +387,7 @@
 }
 
 .grand-total span:last-child {
-    color: #C6A567 !important;
+    color: #9A7A3E !important;
 }
 
 /* Payment Methods */
@@ -630,7 +630,7 @@
 .current-price {
     font-size: 28px;
     font-weight: 500;
-    color: #C6A567 !important;
+    color: #9A7A3E !important;
     font-family: 'Lato', sans-serif;
 }
 
@@ -771,7 +771,7 @@ input[type=number]::-webkit-outer-spin-button {
 
 .add-to-cart-button {
     width: 100%;
-    background: #C6A567;
+    background: #9A7A3E;
     color: white;
     font-family: 'Lato', sans-serif;
     font-size: 14px;
@@ -788,7 +788,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .add-to-cart-button:hover {
-    background: #D6B577;
+    background: #856725;
 }
 
 .buy-now-button {
