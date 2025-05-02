@@ -421,7 +421,7 @@
 
 .payment-method input:checked + label {
     background-color: #f9f9f9;
-    border-color: #B08F4C;
+    border-color: #8B4513;
 }
 
 .method-cards {
@@ -523,7 +523,7 @@
 }
 
 .breadcrumb a {
-    color: #B08F4C;
+    color: #8B4513;
     text-decoration: none;
 }
 
@@ -583,12 +583,12 @@
 }
 
 .thumbnail:hover {
-    border-color: #B08F4C;
+    border-color: #8B4513;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .thumbnail.active {
-    border: 2px solid #B08F4C;
+    border: 2px solid #8B4513;
     padding: 1px;
 }
 
@@ -771,7 +771,7 @@ input[type=number]::-webkit-outer-spin-button {
 
 .add-to-cart-button {
     width: 100%;
-    background: #B08F4C;
+    background: #8B4513;
     color: white;
     font-family: 'Lato', sans-serif;
     font-size: 14px;
@@ -788,7 +788,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .add-to-cart-button:hover {
-    background: #C6A567;
+    background: #6B3400;
 }
 
 .buy-now-button {
@@ -849,7 +849,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .delivery-item i {
-    color: #B08F4C;
+    color: #8B4513;
 }
 
 /* Additional Information Tabs */
@@ -876,12 +876,12 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .tab:hover {
-    color: #B08F4C;
+    color: #8B4513;
 }
 
 .tab.active {
-    color: #B08F4C;
-    border-bottom: 2px solid #B08F4C;
+    color: #8B4513;
+    border-bottom: 2px solid #8B4513;
 }
 
 .tab-content {
@@ -974,7 +974,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .footer-links a:hover {
-    color: #B08F4C;
+    color: #8B4513;
 }
 
 .social-links {
@@ -996,7 +996,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .social-link:hover {
-    background-color: #B08F4C;
+    background-color: #8B4513;
     color: white;
 }
 
@@ -1018,7 +1018,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .newsletter-form button {
-    background: #B08F4C;
+    background: #8B4513;
     color: white;
     border: none;
     padding: 10px 15px;
@@ -1028,7 +1028,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .newsletter-form button:hover {
-    background: #C6A567;
+    background: #6B3400;
 }
 
 .footer-bottom {
@@ -1057,7 +1057,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .footer-bottom-links a:hover {
-    color: #B08F4C;
+    color: #8B4513;
 }
 
 /* Responsive Styles */
