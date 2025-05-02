@@ -478,39 +478,18 @@ function fetchProductDetails(productId) {
     // Get product data or use default if not found
     const product = products[productId] || products['diamond-pendant'];
 
-    // Update page content with product data
-    document.getElementById('product-title').textContent = product.name;
-    try {
-        document.getElementById('product-breadcrumb-name').textContent = product.name;
-    } catch (e) {
-        console.log('Breadcrumb element not found, skipping update');
+    // Helper function to safely update element text content
+    function safeUpdateElement(id, value) {
+        const element = document.getElementById(id);
+        if (element && value) {
+            element.textContent = value;
+        }
     }
-    try {
-        document.getElementById('product-collection').textContent = product.collection;
-    } catch (e) {
-        console.log('Collection element not found, skipping update');
-    }
-    document.getElementById('product-price').textContent = product.price;
-    try {
-        document.getElementById('product-original-price').textContent = product.originalPrice;
-    } catch (e) {
-        console.log('Original price element not found, skipping update');
-    }
-    try {
-        document.getElementById('product-description').textContent = product.description;
-    } catch (e) {
-        console.log('Description element not found, skipping update');
-    }
-    
-    // Update product details
-    try {
-        if (product.material) document.getElementById('product-material').textContent = product.material;
-        if (product.stone) document.getElementById('product-stone').textContent = product.stone;
-        if (product.carat) document.getElementById('product-carat').textContent = product.carat;
-        if (product.chainLength) document.getElementById('product-chain-length').textContent = product.chainLength;
-    } catch (e) {
-        console.log('Some product detail elements not found, skipping updates');
-    }
+
+    // Update basic product information
+    safeUpdateElement('product-title', product.name);
+    safeUpdateElement('product-price', product.price);
+    safeUpdateElement('product-brand', 'Jewellery Hubb Jaipur');
     
     // Update tab content
     try {
@@ -533,36 +512,43 @@ function fetchProductDetails(productId) {
     }
     
     // Update main image
-    document.getElementById('main-product-image').src = product.mainImage;
-    document.getElementById('main-product-image').alt = product.name;
+    const mainImage = document.getElementById('main-product-image');
+    if (mainImage) {
+        mainImage.src = product.mainImage;
+        mainImage.alt = product.name;
+    }
     
     // Update thumbnails if available
     if (product.images && product.images.length > 0) {
         const thumbnailsContainer = document.querySelector('.product-thumbnail-gallery');
-        thumbnailsContainer.innerHTML = '';
-        
-        product.images.forEach((image, index) => {
-            const thumbnail = document.createElement('div');
-            thumbnail.className = 'thumbnail' + (index === 0 ? ' active' : '');
+        if (thumbnailsContainer) {
+            thumbnailsContainer.innerHTML = '';
             
-            const img = document.createElement('img');
-            img.src = image;
-            img.alt = `${product.name} - View ${index + 1}`;
-            
-            thumbnail.appendChild(img);
-            thumbnailsContainer.appendChild(thumbnail);
-            
-            thumbnail.addEventListener('click', function() {
-                // Update active class
-                document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
+            product.images.forEach((image, index) => {
+                const thumbnail = document.createElement('div');
+                thumbnail.className = 'thumbnail' + (index === 0 ? ' active' : '');
                 
-                // Update main image
-                const mainImage = document.getElementById('main-product-image');
-                mainImage.src = img.src.replace('w=200', 'w=800');
-                mainImage.alt = img.alt;
+                const img = document.createElement('img');
+                img.src = image;
+                img.alt = `${product.name} - View ${index + 1}`;
+                
+                thumbnail.appendChild(img);
+                thumbnailsContainer.appendChild(thumbnail);
+                
+                thumbnail.addEventListener('click', function() {
+                    // Update active class
+                    document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Update main image
+                    const mainImage = document.getElementById('main-product-image');
+                    if (mainImage) {
+                        mainImage.src = img.src.replace('w=200', 'w=800');
+                        mainImage.alt = img.alt;
+                    }
+                });
             });
-        });
+        }
     }
 }
 
