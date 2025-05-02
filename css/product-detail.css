@@ -387,7 +387,7 @@
 }
 
 .grand-total span:last-child {
-    color: #9A7A3E !important;
+    color: #B08F4C !important;
 }
 
 /* Payment Methods */
@@ -523,7 +523,7 @@
 }
 
 .breadcrumb a {
-    color: #C6A567;
+    color: #9A7A3E;
     text-decoration: none;
 }
 
@@ -583,12 +583,12 @@
 }
 
 .thumbnail:hover {
-    border-color: #8B4513;
+    border-color: #9A7A3E;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .thumbnail.active {
-    border: 2px solid #8B4513;
+    border: 2px solid #9A7A3E;
     padding: 1px;
 }
 
@@ -630,7 +630,7 @@
 .current-price {
     font-size: 28px;
     font-weight: 500;
-    color: #9A7A3E !important;
+    color: #B08F4C !important;
     font-family: 'Lato', sans-serif;
 }
 
@@ -771,7 +771,7 @@ input[type=number]::-webkit-outer-spin-button {
 
 .add-to-cart-button {
     width: 100%;
-    background: #9A7A3E;
+    background: #B08F4C;
     color: white;
     font-family: 'Lato', sans-serif;
     font-size: 14px;
@@ -788,7 +788,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .add-to-cart-button:hover {
-    background: #856725;
+    background: #C6A567;
 }
 
 .buy-now-button {
@@ -876,12 +876,12 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .tab:hover {
-    color: #5E2900;
+    color: #9A7A3E;
 }
 
 .tab.active {
-    color: #5E2900;
-    border-bottom: 2px solid #5E2900;
+    color: #9A7A3E;
+    border-bottom: 2px solid #9A7A3E;
 }
 
 .tab-content {
@@ -974,7 +974,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .footer-links a:hover {
-    color: #5E2900;
+    color: #9A7A3E;
 }
 
 .social-links {
@@ -996,7 +996,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .social-link:hover {
-    background-color: #8B4513;
+    background-color: #9A7A3E;
     color: white;
 }
 
@@ -1018,7 +1018,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .newsletter-form button {
-    background: #5E2900;
+    background: #9A7A3E;
     color: white;
     border: none;
     padding: 10px 15px;
@@ -1028,7 +1028,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .newsletter-form button:hover {
-    background: #6B3400;
+    background: #856725;
 }
 
 .footer-bottom {
@@ -1057,7 +1057,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .footer-bottom-links a:hover {
-    color: #5E2900;
+    color: #9A7A3E;
 }
 
 /* Responsive Styles */
