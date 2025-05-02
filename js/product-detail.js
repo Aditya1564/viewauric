@@ -65,6 +65,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const quantityInput = document.getElementById('product-quantity');
 
     function updateQuantityDisplay() {
+        if (!quantityInput) {
+            console.error('Quantity input element not found');
+            return;
+        }
+        
         let currentValue = parseInt(quantityInput.value);
         
         // Update the price summary
@@ -75,156 +80,245 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Update subtotal
         const subtotalDisplay = document.getElementById('subtotal-display');
-        const priceText = document.getElementById('product-price').textContent;
-        const price = parseInt(priceText.replace(/[₹,]/g, ''));
-        const subtotal = price * currentValue;
+        const productPriceElement = document.getElementById('product-price');
         
-        if (subtotalDisplay) {
+        if (productPriceElement && subtotalDisplay) {
+            const priceText = productPriceElement.textContent;
+            const price = parseInt(priceText.replace(/[₹,]/g, ''));
+            const subtotal = price * currentValue;
             subtotalDisplay.textContent = '₹' + subtotal.toLocaleString('en-IN');
         }
         
         // Update total amount
         const totalAmountDisplay = document.getElementById('total-amount-display');
-        if (totalAmountDisplay) {
+        if (totalAmountDisplay && productPriceElement) {
+            const priceText = productPriceElement.textContent;
+            const price = parseInt(priceText.replace(/[₹,]/g, ''));
+            const subtotal = price * currentValue;
             totalAmountDisplay.textContent = '₹' + subtotal.toLocaleString('en-IN');
         }
         
         // Update checkout summary quantity if available
-        updateSummaryQuantity();
+        try {
+            updateSummaryQuantity();
+        } catch (e) {
+            console.log('Summary quantity update skipped:', e.message);
+        }
     }
 
-    decreaseBtn.addEventListener('click', function() {
-        let currentValue = parseInt(quantityInput.value);
-        if (currentValue > 1) {
-            quantityInput.value = currentValue - 1;
-            updateQuantityDisplay();
-        }
-    });
+    // Add event listeners only if the elements exist
+    if (decreaseBtn && quantityInput) {
+        decreaseBtn.addEventListener('click', function() {
+            let currentValue = parseInt(quantityInput.value);
+            if (currentValue > 1) {
+                quantityInput.value = currentValue - 1;
+                updateQuantityDisplay();
+            }
+        });
+    }
 
-    increaseBtn.addEventListener('click', function() {
-        let currentValue = parseInt(quantityInput.value);
-        if (currentValue < 10) { // Setting max quantity to 10
-            quantityInput.value = currentValue + 1;
-            updateQuantityDisplay();
-        }
-    });
+    if (increaseBtn && quantityInput) {
+        increaseBtn.addEventListener('click', function() {
+            let currentValue = parseInt(quantityInput.value);
+            if (currentValue < 10) { // Setting max quantity to 10
+                quantityInput.value = currentValue + 1;
+                updateQuantityDisplay();
+            }
+        });
+    }
 
-    quantityInput.addEventListener('change', function() {
-        let value = parseInt(this.value);
-        
-        if (isNaN(value) || value < 1) {
-            this.value = 1;
-        } else if (value > 10) {
-            this.value = 10;
-        }
-        
-        updateQuantityDisplay();
-    });
+    if (quantityInput) {
+        quantityInput.addEventListener('change', function() {
+            let value = parseInt(this.value);
+            
+            if (isNaN(value) || value < 1) {
+                this.value = 1;
+            } else if (value > 10) {
+                this.value = 10;
+            }
+            
+            updateQuantityDisplay();
+        });
+    }
 
     // Buy Now Button - Opens checkout overlay
     const buyNowButton = document.getElementById('buy-now-button');
     const checkoutOverlay = document.getElementById('checkout-overlay');
     const closeCheckoutBtn = document.getElementById('close-checkout');
     
-    buyNowButton.addEventListener('click', function() {
-        // Update order summary with current product details
-        updateOrderSummary();
-        // Show checkout overlay
-        checkoutOverlay.classList.add('active');
-        document.body.style.overflow = 'hidden'; // Prevent scrolling behind overlay
-    });
+    // Add event listeners if elements exist
+    if (buyNowButton && checkoutOverlay) {
+        buyNowButton.addEventListener('click', function() {
+            try {
+                // Update order summary with current product details
+                updateOrderSummary();
+                // Show checkout overlay
+                checkoutOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden'; // Prevent scrolling behind overlay
+            } catch (e) {
+                console.error('Error showing checkout:', e);
+            }
+        });
+    }
     
-    closeCheckoutBtn.addEventListener('click', function() {
-        checkoutOverlay.classList.remove('active');
-        document.body.style.overflow = '';
-    });
+    if (closeCheckoutBtn && checkoutOverlay) {
+        closeCheckoutBtn.addEventListener('click', function() {
+            checkoutOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    }
     
     // Cancel shipping button
-    document.getElementById('cancel-shipping').addEventListener('click', function() {
-        checkoutOverlay.classList.remove('active');
-        document.body.style.overflow = '';
-    });
+    const cancelShippingBtn = document.getElementById('cancel-shipping');
+    if (cancelShippingBtn && checkoutOverlay) {
+        cancelShippingBtn.addEventListener('click', function() {
+            checkoutOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    }
     
     // Checkout Flow Navigation
     const progressSteps = document.querySelectorAll('.progress-step');
     const checkoutSteps = document.querySelectorAll('.checkout-step');
     
     // Next to payment button
-    document.getElementById('next-to-payment').addEventListener('click', function() {
-        // Validate shipping form
-        const shippingForm = document.getElementById('shipping-form');
-        const requiredFields = shippingForm.querySelectorAll('[required]');
-        let isValid = true;
-        
-        requiredFields.forEach(field => {
-            if (!field.value.trim()) {
-                field.style.borderColor = 'red';
-                isValid = false;
-            } else {
-                field.style.borderColor = '';
+    const nextToPaymentBtn = document.getElementById('next-to-payment');
+    if (nextToPaymentBtn) {
+        nextToPaymentBtn.addEventListener('click', function() {
+            try {
+                // Validate shipping form
+                const shippingForm = document.getElementById('shipping-form');
+                if (!shippingForm) {
+                    console.error('Shipping form not found');
+                    return;
+                }
+                
+                const requiredFields = shippingForm.querySelectorAll('[required]');
+                let isValid = true;
+                
+                requiredFields.forEach(field => {
+                    if (!field.value.trim()) {
+                        field.style.borderColor = 'red';
+                        isValid = false;
+                    } else {
+                        field.style.borderColor = '';
+                    }
+                });
+                
+                if (!isValid) {
+                    alert('Please fill in all required fields');
+                    return;
+                }
+                
+                // Update progress steps
+                if (progressSteps.length >= 2) {
+                    progressSteps.forEach(step => step.classList.remove('active'));
+                    progressSteps[1].classList.add('active');
+                    progressSteps[0].classList.add('completed');
+                }
+                
+                // Update checkout steps
+                if (checkoutSteps.length >= 2) {
+                    checkoutSteps.forEach(step => step.classList.remove('active'));
+                    checkoutSteps[1].classList.add('active');
+                }
+                
+                // Update summary address
+                updateOrderSummary();
+            } catch (e) {
+                console.error('Error proceeding to payment:', e);
             }
         });
-        
-        if (!isValid) {
-            alert('Please fill in all required fields');
-            return;
-        }
-        
-        // Update progress steps
-        progressSteps.forEach(step => step.classList.remove('active'));
-        progressSteps[1].classList.add('active');
-        progressSteps[0].classList.add('completed');
-        
-        // Update checkout steps
-        checkoutSteps.forEach(step => step.classList.remove('active'));
-        checkoutSteps[1].classList.add('active');
-        
-        // Update summary address
-        updateOrderSummary();
-    });
+    }
     
     // Back to shipping button
-    document.getElementById('back-to-shipping').addEventListener('click', function() {
-        // Update progress steps
-        progressSteps.forEach(step => step.classList.remove('active', 'completed'));
-        progressSteps[0].classList.add('active');
-        
-        // Update checkout steps
-        checkoutSteps.forEach(step => step.classList.remove('active'));
-        checkoutSteps[0].classList.add('active');
-    });
+    const backToShippingBtn = document.getElementById('back-to-shipping');
+    if (backToShippingBtn) {
+        backToShippingBtn.addEventListener('click', function() {
+            try {
+                // Update progress steps
+                if (progressSteps.length > 0) {
+                    progressSteps.forEach(step => step.classList.remove('active', 'completed'));
+                    progressSteps[0].classList.add('active');
+                }
+                
+                // Update checkout steps
+                if (checkoutSteps.length >= 2) {
+                    checkoutSteps.forEach(step => step.classList.remove('active'));
+                    checkoutSteps[0].classList.add('active');
+                }
+            } catch (e) {
+                console.error('Error returning to shipping:', e);
+            }
+        });
+    }
     
     // Place order button
-    document.getElementById('place-order').addEventListener('click', function() {
-        const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
-        
-        if (paymentMethod === 'razorpay') {
-            initiateRazorpayPayment();
-        } else {
-            // For COD payment method
-            processCashOnDeliveryOrder();
-        }
-    });
+    const placeOrderBtn = document.getElementById('place-order');
+    if (placeOrderBtn) {
+        placeOrderBtn.addEventListener('click', function() {
+            try {
+                const paymentMethodEl = document.querySelector('input[name="payment"]:checked');
+                if (!paymentMethodEl) {
+                    alert('Please select a payment method');
+                    return;
+                }
+                
+                const paymentMethod = paymentMethodEl.value;
+                
+                if (paymentMethod === 'razorpay') {
+                    initiateRazorpayPayment();
+                } else {
+                    // For COD payment method
+                    processCashOnDeliveryOrder();
+                }
+            } catch (e) {
+                console.error('Error placing order:', e);
+            }
+        });
+    }
     
     // Shipping method change
-    document.querySelectorAll('input[name="shipping"]').forEach(radio => {
-        radio.addEventListener('change', function() {
-            updateShippingCost();
-            updateOrderTotals();
+    const shippingRadios = document.querySelectorAll('input[name="shipping"]');
+    if (shippingRadios.length > 0) {
+        shippingRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                try {
+                    updateShippingCost();
+                    updateOrderTotals();
+                } catch (e) {
+                    console.error('Error updating shipping cost:', e);
+                }
+            });
         });
-    });
+    }
     
     // Payment method change
-    document.querySelectorAll('input[name="payment"]').forEach(radio => {
-        radio.addEventListener('change', function() {
-            const codFee = this.value === 'cod' ? 99 : 0;
-            document.getElementById('summary-shipping').textContent = this.value === 'cod' ? 
-                'Free + ₹99 COD Fee' : 
-                document.querySelector('input[name="shipping"]:checked').value === 'express' ? 
-                    '₹250' : 'Free';
-            updateOrderTotals();
+    const paymentRadios = document.querySelectorAll('input[name="payment"]');
+    if (paymentRadios.length > 0) {
+        paymentRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                try {
+                    const shippingEl = document.getElementById('summary-shipping');
+                    if (shippingEl) {
+                        const codFee = this.value === 'cod' ? 99 : 0;
+                        const shippingRadioChecked = document.querySelector('input[name="shipping"]:checked');
+                        let shippingMethod = 'standard';
+                        if (shippingRadioChecked) {
+                            shippingMethod = shippingRadioChecked.value;
+                        }
+                        
+                        shippingEl.textContent = this.value === 'cod' ? 
+                            'Free + ₹99 COD Fee' : 
+                            shippingMethod === 'express' ? '₹250' : 'Free';
+                    }
+                    updateOrderTotals();
+                } catch (e) {
+                    console.error('Error updating payment method:', e);
+                }
+            });
         });
-    });
+    }
 });
 
 // Function to load product details from product ID
