@@ -421,7 +421,7 @@
 
 .payment-method input:checked + label {
     background-color: #f9f9f9;
-    border-color: #8B4513;
+    border-color: #B08F4C;
 }
 
 .method-cards {
@@ -523,7 +523,7 @@
 }
 
 .breadcrumb a {
-    color: #9A7A3E;
+    color: #B08F4C;
     text-decoration: none;
 }
 
@@ -583,12 +583,12 @@
 }
 
 .thumbnail:hover {
-    border-color: #9A7A3E;
+    border-color: #B08F4C;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .thumbnail.active {
-    border: 2px solid #9A7A3E;
+    border: 2px solid #B08F4C;
     padding: 1px;
 }
 
@@ -849,7 +849,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .delivery-item i {
-    color: #8B4513;
+    color: #B08F4C;
 }
 
 /* Additional Information Tabs */
@@ -876,12 +876,12 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .tab:hover {
-    color: #9A7A3E;
+    color: #B08F4C;
 }
 
 .tab.active {
-    color: #9A7A3E;
-    border-bottom: 2px solid #9A7A3E;
+    color: #B08F4C;
+    border-bottom: 2px solid #B08F4C;
 }
 
 .tab-content {
@@ -974,7 +974,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .footer-links a:hover {
-    color: #9A7A3E;
+    color: #B08F4C;
 }
 
 .social-links {
@@ -996,7 +996,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .social-link:hover {
-    background-color: #9A7A3E;
+    background-color: #B08F4C;
     color: white;
 }
 
@@ -1018,7 +1018,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .newsletter-form button {
-    background: #9A7A3E;
+    background: #B08F4C;
     color: white;
     border: none;
     padding: 10px 15px;
@@ -1028,7 +1028,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .newsletter-form button:hover {
-    background: #856725;
+    background: #C6A567;
 }
 
 .footer-bottom {
@@ -1057,7 +1057,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .footer-bottom-links a:hover {
-    color: #9A7A3E;
+    color: #B08F4C;
 }
 
 /* Responsive Styles */
