@@ -582,9 +582,30 @@ function fetchProductDetails(productId) {
 
     // Helper function to safely update element text content
     function safeUpdateElement(id, value) {
+        console.log(`Attempting to update element '${id}' with:`, value);
+        
+        if (!id) {
+            console.error('Empty ID provided to safeUpdateElement');
+            return;
+        }
+        
+        if (value === undefined || value === null) {
+            console.warn(`Value for element '${id}' is ${value}`);
+            // Don't return, still try to find the element for debugging
+        }
+        
         const element = document.getElementById(id);
-        if (element && value) {
-            element.textContent = value;
+        console.log(`Element '${id}' found:`, element ? 'Yes' : 'No');
+        
+        if (element && value !== undefined && value !== null) {
+            try {
+                element.textContent = value;
+                console.log(`Successfully updated element '${id}'`);
+            } catch (error) {
+                console.error(`Error updating '${id}':`, error);
+            }
+        } else if (!element) {
+            console.warn(`Element with ID '${id}' not found`);
         }
     }
 
@@ -594,42 +615,50 @@ function fetchProductDetails(productId) {
     safeUpdateElement('product-brand', 'Jewellery Hubb Jaipur');
     
     // Update tab content
-    console.log('Attempting to update tab content for', product.name);
-    console.log('Available tabs:', document.querySelectorAll('.tab-pane').length);
-    console.log('Tab IDs:', Array.from(document.querySelectorAll('.tab-pane')).map(el => el.id));
+    console.log('Determining whether to use static or dynamic tab content for', product.name);
     
-    if (product.detailsContent) {
-        console.log('Details content available:', product.detailsContent.substring(0, 50) + '...');
-        const detailsTab = document.getElementById('details');
-        console.log('Details tab found:', detailsTab ? 'Yes' : 'No');
-        if (detailsTab) {
-            console.log('Found details tab, updating content');
-            detailsTab.innerHTML = product.detailsContent;
-        } else {
-            console.error('Details tab element not found');
+    // Check if we're using a defined product
+    const hasDefinedProduct = productId === 'emerald-studs' || productId === 'diamond-pendant' || productId === 'rose-gold-bracelet';
+    const useStaticContent = !hasDefinedProduct || window.location.search === '' || productId === 'default';
+    
+    console.log('Using', useStaticContent ? 'STATIC' : 'DYNAMIC', 'content for tabs');
+    
+    if (!useStaticContent) {
+        // DYNAMIC CONTENT: Replace tab content with product-specific data
+        if (product.detailsContent) {
+            console.log('Details content available from product data');
+            const detailsTab = document.querySelector('.tab-pane#details');
+            if (detailsTab) {
+                console.log('Found details tab, updating with dynamic content');
+                detailsTab.innerHTML = product.detailsContent;
+            } else {
+                console.error('Details tab element not found');
+            }
+        }
+        
+        if (product.careContent) {
+            console.log('Care content available from product data');
+            const careTab = document.querySelector('.tab-pane#care');
+            if (careTab) {
+                console.log('Found care tab, updating with dynamic content');
+                careTab.innerHTML = product.careContent;
+            } else {
+                console.error('Care tab element not found');
+            }
+        }
+        
+        if (product.shippingContent) {
+            console.log('Shipping content available from product data');
+            const shippingTab = document.querySelector('.tab-pane#shipping');
+            if (shippingTab) {
+                console.log('Found shipping tab, updating with dynamic content');
+                shippingTab.innerHTML = product.shippingContent;
+            } else {
+                console.error('Shipping tab element not found');
+            }
         }
     } else {
-        console.error('No details content available for', product.name);
-    }
-    
-    if (product.careContent) {
-        const careTab = document.getElementById('care');
-        if (careTab) {
-            console.log('Found care tab, updating content');
-            careTab.innerHTML = product.careContent;
-        } else {
-            console.error('Care tab element not found');
-        }
-    }
-    
-    if (product.shippingContent) {
-        const shippingTab = document.getElementById('shipping');
-        if (shippingTab) {
-            console.log('Found shipping tab, updating content');
-            shippingTab.innerHTML = product.shippingContent;
-        } else {
-            console.error('Shipping tab element not found');
-        }
+        console.log('Using static HTML content for tabs (no changes)');
     }
     
     // Update main image
