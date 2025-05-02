@@ -318,7 +318,7 @@
 
 .method-price {
     font-weight: 600;
-    color: #B08F4C;
+    color: #B08F4c;
 }
 
 .method-time {
@@ -636,6 +636,12 @@
     align-items: center;
     gap: 15px;
     margin-bottom: 20px;
+}
+.current-price2{
+    font-size: 28px;
+    font-weight: 500;
+    color: #5E2900 !important;
+    font-family: 'Lato', sans-serif;
 }
 
 .current-price {
