@@ -918,60 +918,118 @@ function updateShippingCost() {
 
 // Update order totals based on product price, quantity, shipping and payment method
 function updateOrderTotals() {
-    // Get product price without currency and commas
-    const priceElement = document.getElementById('product-price');
-    const priceText = priceElement ? priceElement.textContent : '₹58,000';
-    const price = parseInt(priceText.replace(/[₹,]/g, ''));
-    
-    // Get quantity
-    const quantity = parseInt(document.getElementById('product-quantity').value);
-    
-    // Calculate subtotal
-    const subtotal = price * quantity;
-    
-    // Get shipping cost
-    const shippingMethod = document.querySelector('input[name="shipping"]:checked').value;
-    const shippingCost = shippingMethod === 'express' ? 250 : 0;
-    
-    // Get payment method - COD fee if applicable
-    const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
-    const codFee = paymentMethod === 'cod' ? 99 : 0;
-    
-    // Calculate tax (5%)
-    const tax = Math.round(subtotal * 0.05);
-    
-    // Calculate grand total
-    const grandTotal = subtotal + shippingCost + codFee + tax;
-    
-    // Update summary elements
-    if (document.getElementById('summary-subtotal')) {
-        document.getElementById('summary-subtotal').textContent = '₹' + subtotal.toLocaleString('en-IN');
-        document.getElementById('summary-tax').textContent = '₹' + tax.toLocaleString('en-IN');
-        document.getElementById('summary-total').textContent = '₹' + grandTotal.toLocaleString('en-IN');
+    try {
+        // Get product price without currency and commas
+        const priceElement = document.getElementById('product-price');
+        const priceText = priceElement ? priceElement.textContent : '₹58,000';
+        const price = parseInt(priceText.replace(/[₹,]/g, ''));
+        
+        // Get quantity safely
+        const quantityInput = document.getElementById('product-quantity');
+        if (!quantityInput) {
+            console.log('Quantity input not found, using default quantity of 1');
+            return; // Exit early if we can't find the quantity element
+        }
+        const quantity = parseInt(quantityInput.value) || 1;
+        
+        // Calculate subtotal
+        const subtotal = price * quantity;
+        
+        // Get shipping cost safely
+        const shippingMethodEl = document.querySelector('input[name="shipping"]:checked');
+        if (!shippingMethodEl) {
+            console.log('Shipping method not found');
+            return; // Exit early if we can't find the shipping method
+        }
+        const shippingMethod = shippingMethodEl.value;
+        const shippingCost = shippingMethod === 'express' ? 250 : 0;
+        
+        // Get payment method safely
+        const paymentMethodEl = document.querySelector('input[name="payment"]:checked');
+        if (!paymentMethodEl) {
+            console.log('Payment method not found');
+            return; // Exit early if we can't find the payment method
+        }
+        const paymentMethod = paymentMethodEl.value;
+        const codFee = paymentMethod === 'cod' ? 99 : 0;
+        
+        // Calculate tax (5%)
+        const tax = Math.round(subtotal * 0.05);
+        
+        // Calculate grand total
+        const grandTotal = subtotal + shippingCost + codFee + tax;
+        
+        // Update summary elements safely
+        const summarySubtotal = document.getElementById('summary-subtotal');
+        const summaryTax = document.getElementById('summary-tax');
+        const summaryTotal = document.getElementById('summary-total');
+        
+        if (summarySubtotal && summaryTax && summaryTotal) {
+            summarySubtotal.textContent = '₹' + subtotal.toLocaleString('en-IN');
+            summaryTax.textContent = '₹' + tax.toLocaleString('en-IN');
+            summaryTotal.textContent = '₹' + grandTotal.toLocaleString('en-IN');
+        }
+    } catch (error) {
+        console.error('Error updating order totals:', error);
     }
     
-    return grandTotal;
+    // For backward compatibility, return a default value
+    return 0;
 }
 
 // Update order summary with product details
 function updateOrderSummary() {
-    // Get product details
-    const productName = document.getElementById('product-title').textContent;
-    const productImage = document.getElementById('main-product-image').src;
-    const productPrice = document.getElementById('product-price').textContent;
-    
-    // Get quantity
-    const quantity = document.getElementById('product-quantity').value;
-    
-    // Update summary elements
-    document.getElementById('summary-product-name').textContent = productName;
-    document.getElementById('summary-product-image').src = productImage;
-    document.getElementById('summary-product-price').textContent = productPrice;
-    document.getElementById('summary-quantity').textContent = quantity;
-    
-    // Update totals
-    updateShippingCost();
-    updateOrderTotals();
+    try {
+        // Get product details safely
+        const titleEl = document.getElementById('product-title');
+        const imageEl = document.getElementById('main-product-image');
+        const priceEl = document.getElementById('product-price');
+        const quantityEl = document.getElementById('product-quantity');
+        
+        // Check if all required elements exist
+        if (!titleEl || !imageEl || !priceEl || !quantityEl) {
+            console.error('Missing required product elements for summary');
+            return;
+        }
+        
+        const productName = titleEl.textContent;
+        const productImage = imageEl.src;
+        const productPrice = priceEl.textContent;
+        const quantity = quantityEl.value;
+        
+        // Get summary elements
+        const summaryNameEl = document.getElementById('summary-product-name');
+        const summaryImageEl = document.getElementById('summary-product-image');
+        const summaryPriceEl = document.getElementById('summary-product-price');
+        const summaryQuantityEl = document.getElementById('summary-quantity');
+        
+        // Check if summary elements exist
+        if (!summaryNameEl || !summaryImageEl || !summaryPriceEl || !summaryQuantityEl) {
+            console.error('Missing required summary elements');
+            return;
+        }
+        
+        // Update summary elements
+        summaryNameEl.textContent = productName;
+        summaryImageEl.src = productImage;
+        summaryPriceEl.textContent = productPrice;
+        summaryQuantityEl.textContent = quantity;
+        
+        // Update totals
+        try {
+            updateShippingCost();
+        } catch (e) {
+            console.error('Error updating shipping cost:', e);
+        }
+        
+        try {
+            updateOrderTotals();
+        } catch (e) {
+            console.error('Error updating order totals:', e);
+        }
+    } catch (error) {
+        console.error('Error updating order summary:', error);
+    }
 }
 
 // Process Cash on Delivery order
