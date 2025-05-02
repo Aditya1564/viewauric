@@ -669,10 +669,21 @@ function fetchProductDetails(productId) {
 
 // Function to initialize Razorpay payment
 function initiateRazorpayPayment() {
-    // Get product details
-    const productName = document.getElementById('product-title').textContent;
-    const productImage = document.getElementById('main-product-image').src;
-    const quantity = document.getElementById('product-quantity').value;
+    try {
+        // Get product details safely
+        const productTitleEl = document.getElementById('product-title');
+        const productImageEl = document.getElementById('main-product-image');
+        const quantityEl = document.getElementById('product-quantity');
+        
+        if (!productTitleEl || !productImageEl || !quantityEl) {
+            console.error('Missing required elements for payment');
+            alert('Unable to process payment at this time. Some product details are missing.');
+            return;
+        }
+        
+        const productName = productTitleEl.textContent;
+        const productImage = productImageEl.src;
+        const quantity = quantityEl.value;
     
     // Get customer details from form
     const name = document.getElementById('full-name').value;
