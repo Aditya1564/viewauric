@@ -595,15 +595,21 @@ function fetchProductDetails(productId) {
     
     // Update tab content
     console.log('Attempting to update tab content for', product.name);
+    console.log('Available tabs:', document.querySelectorAll('.tab-pane').length);
+    console.log('Tab IDs:', Array.from(document.querySelectorAll('.tab-pane')).map(el => el.id));
     
     if (product.detailsContent) {
+        console.log('Details content available:', product.detailsContent.substring(0, 50) + '...');
         const detailsTab = document.getElementById('details');
+        console.log('Details tab found:', detailsTab ? 'Yes' : 'No');
         if (detailsTab) {
             console.log('Found details tab, updating content');
             detailsTab.innerHTML = product.detailsContent;
         } else {
             console.error('Details tab element not found');
         }
+    } else {
+        console.error('No details content available for', product.name);
     }
     
     if (product.careContent) {
@@ -769,6 +775,10 @@ function initiateRazorpayPayment() {
         console.error("Razorpay initialization failed:", error);
         alert("Payment initialization failed. Please try again later.");
     }
+  } catch (error) {
+    console.error("Payment setup error:", error);
+    alert("Payment processing error. Please try again later.");
+  }
 }
 
 // Final completely rewritten function to GUARANTEE no test emails are sent
