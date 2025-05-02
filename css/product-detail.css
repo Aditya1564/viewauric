@@ -561,13 +561,16 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0;
+    margin-left: calc(-50vw + 50%);
 }
 
 .product-main-image img {
-    width: 100%;
+    width: 100vw;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
     background-color: #fff;
+    max-width: none;
 }
 
 .product-thumbnail-gallery {
