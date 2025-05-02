@@ -929,30 +929,71 @@ function showPaymentSuccessMessage(paymentId, productName) {
 
 // Update summary quantity in checkout
 function updateSummaryQuantity() {
-    const quantity = document.getElementById('product-quantity').value;
-    if (document.getElementById('summary-quantity')) {
-        document.getElementById('summary-quantity').textContent = quantity;
+    try {
+        // Safely get the quantity
+        const quantityEl = document.getElementById('product-quantity');
+        if (!quantityEl) {
+            console.warn('product-quantity element not found');
+            return;
+        }
+        const quantity = quantityEl.value;
+        
+        // Safely update summary quantity
+        const summaryQuantityEl = document.getElementById('summary-quantity');
+        if (summaryQuantityEl) {
+            summaryQuantityEl.textContent = quantity;
+            console.log('Updated summary quantity to', quantity);
+        } else {
+            console.warn('summary-quantity element not found');
+        }
+        
+        // Update order totals
+        updateOrderTotals();
+    } catch (error) {
+        console.error('Error in updateSummaryQuantity:', error);
     }
-    updateOrderTotals();
 }
 
 // Update shipping cost based on selected shipping method
 function updateShippingCost() {
-    const shippingMethod = document.querySelector('input[name="shipping"]:checked').value;
-    const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
-    
-    let shippingText = 'Free';
-    
-    if (shippingMethod === 'express') {
-        shippingText = '₹250';
+    try {
+        // Safely get shipping method
+        const shippingMethodEl = document.querySelector('input[name="shipping"]:checked');
+        if (!shippingMethodEl) {
+            console.warn('No shipping method found, using default');
+            return;
+        }
+        const shippingMethod = shippingMethodEl.value;
+        
+        // Safely get payment method
+        const paymentMethodEl = document.querySelector('input[name="payment"]:checked');
+        if (!paymentMethodEl) {
+            console.warn('No payment method found, using default');
+            return;
+        }
+        const paymentMethod = paymentMethodEl.value;
+        
+        let shippingText = 'Free';
+        
+        if (shippingMethod === 'express') {
+            shippingText = '₹250';
+        }
+        
+        if (paymentMethod === 'cod') {
+            shippingText = shippingMethod === 'express' ? 
+                '₹250 + ₹99 COD Fee' : 'Free + ₹99 COD Fee';
+        }
+        
+        // Safely update shipping text
+        const summaryShippingEl = document.getElementById('summary-shipping');
+        if (summaryShippingEl) {
+            summaryShippingEl.textContent = shippingText;
+        } else {
+            console.warn('summary-shipping element not found');
+        }
+    } catch (error) {
+        console.error('Error in updateShippingCost:', error);
     }
-    
-    if (paymentMethod === 'cod') {
-        shippingText = shippingMethod === 'express' ? 
-            '₹250 + ₹99 COD Fee' : 'Free + ₹99 COD Fee';
-    }
-    
-    document.getElementById('summary-shipping').textContent = shippingText;
 }
 
 // Update order totals based on product price, quantity, shipping and payment method
@@ -1073,101 +1114,167 @@ function updateOrderSummary() {
 
 // Process Cash on Delivery order
 function processCashOnDeliveryOrder() {
-    // Get product details
-    const productName = document.getElementById('product-title').textContent;
-    const productImage = document.getElementById('main-product-image').src;
-    const quantity = document.getElementById('product-quantity').value;
-    
-    // Generate random order number
-    const orderNumber = 'DM' + Math.floor(Math.random() * 10000000).toString().padStart(7, '0');
-    
-    // Get current date in dd/mm/yyyy format
-    const today = new Date();
-    const orderDate = today.getDate() + '/' + (today.getMonth() + 1) + '/' + today.getFullYear();
-    
-    // Get customer details from form
-    const name = document.getElementById('full-name').value;
-    const email = document.getElementById('email').value;
-    const phone = document.getElementById('phone').value;
-    const address1 = document.getElementById('address1').value;
-    const address2 = document.getElementById('address2').value || '';
-    const city = document.getElementById('city').value;
-    const state = document.getElementById('state').value;
-    const pincode = document.getElementById('pincode').value;
-    const country = document.getElementById('country').value;
-    const orderNotes = document.getElementById('order-notes').value || '';
-    
-    // Get shipping method
-    const shippingMethod = document.querySelector('input[name="shipping"]:checked').value;
-    
-    // Format full shipping address
-    const shippingAddress = `${address1}, ${address2 ? address2 + ', ' : ''}${city}, ${state}, ${pincode}, ${country}`;
-    
-    // Get total amount
-    const totalAmount = document.getElementById('summary-total').textContent;
-    
-    // Send order notification email
-    sendOrderNotificationEmail({
-        orderId: orderNumber,
-        paymentId: 'COD - Payment on delivery',
-        productName: productName,
-        quantity: quantity,
-        totalAmount: totalAmount,
-        customerName: name,
-        customerEmail: email,
-        customerPhone: phone,
-        shippingAddress: shippingAddress,
-        shippingMethod: shippingMethod === 'express' ? 'Express (1-2 days)' : 'Standard (3-5 days)',
-        orderNotes: orderNotes,
-        paymentMethod: 'Cash on Delivery'
-    });
-    
-    // Complete the order
-    completeOrder(orderNumber, orderDate);
+    try {
+        // Get product details safely
+        const titleEl = document.getElementById('product-title');
+        const imageEl = document.getElementById('main-product-image');
+        const quantityEl = document.getElementById('product-quantity');
+        
+        if (!titleEl || !imageEl || !quantityEl) {
+            console.error('Missing required product elements for COD order');
+            return;
+        }
+        
+        const productName = titleEl.textContent;
+        const productImage = imageEl.src;
+        const quantity = quantityEl.value;
+        
+        // Generate random order number
+        const orderNumber = 'DM' + Math.floor(Math.random() * 10000000).toString().padStart(7, '0');
+        
+        // Get current date in dd/mm/yyyy format
+        const today = new Date();
+        const orderDate = today.getDate() + '/' + (today.getMonth() + 1) + '/' + today.getFullYear();
+        
+        // Get customer details from form safely
+        const nameEl = document.getElementById('full-name');
+        const emailEl = document.getElementById('email');
+        const phoneEl = document.getElementById('phone');
+        const address1El = document.getElementById('address1');
+        const address2El = document.getElementById('address2');
+        const cityEl = document.getElementById('city');
+        const stateEl = document.getElementById('state');
+        const pincodeEl = document.getElementById('pincode');
+        const countryEl = document.getElementById('country');
+        const orderNotesEl = document.getElementById('order-notes');
+        
+        if (!nameEl || !emailEl || !phoneEl || !address1El || !cityEl || !stateEl || !pincodeEl || !countryEl) {
+            console.error('Missing required customer details for COD order');
+            return;
+        }
+        
+        const name = nameEl.value;
+        const email = emailEl.value;
+        const phone = phoneEl.value;
+        const address1 = address1El.value;
+        const address2 = address2El ? address2El.value || '' : '';
+        const city = cityEl.value;
+        const state = stateEl.value;
+        const pincode = pincodeEl.value;
+        const country = countryEl.value;
+        const orderNotes = orderNotesEl ? orderNotesEl.value || '' : '';
+        
+        // Get shipping method safely
+        const shippingMethodEl = document.querySelector('input[name="shipping"]:checked');
+        if (!shippingMethodEl) {
+            console.error('No shipping method selected for COD order');
+            return;
+        }
+        const shippingMethod = shippingMethodEl.value;
+        
+        // Format full shipping address
+        const shippingAddress = `${address1}, ${address2 ? address2 + ', ' : ''}${city}, ${state}, ${pincode}, ${country}`;
+        
+        // Get total amount safely
+        const totalAmountEl = document.getElementById('summary-total');
+        if (!totalAmountEl) {
+            console.error('Total amount element not found for COD order');
+            return;
+        }
+        const totalAmount = totalAmountEl.textContent;
+        
+        // Send order notification email
+        sendOrderNotificationEmail({
+            orderId: orderNumber,
+            paymentId: 'COD - Payment on delivery',
+            productName: productName,
+            quantity: quantity,
+            totalAmount: totalAmount,
+            customerName: name,
+            customerEmail: email,
+            customerPhone: phone,
+            shippingAddress: shippingAddress,
+            shippingMethod: shippingMethod === 'express' ? 'Express (1-2 days)' : 'Standard (3-5 days)',
+            orderNotes: orderNotes,
+            paymentMethod: 'Cash on Delivery'
+        });
+        
+        // Complete the order
+        completeOrder(orderNumber, orderDate);
+    } catch (error) {
+        console.error('Error in processCashOnDeliveryOrder:', error);
+    }
 }
 
 // Complete order and show confirmation
 function completeOrder(orderNumber, orderDate) {
-    // If order number and date weren't provided, generate them
-    if (!orderNumber) {
-        orderNumber = 'DM' + Math.floor(Math.random() * 10000000).toString().padStart(7, '0');
+    try {
+        // If order number and date weren't provided, generate them
+        if (!orderNumber) {
+            orderNumber = 'DM' + Math.floor(Math.random() * 10000000).toString().padStart(7, '0');
+        }
+        
+        if (!orderDate) {
+            const today = new Date();
+            orderDate = today.getDate() + '/' + (today.getMonth() + 1) + '/' + today.getFullYear();
+        }
+        
+        // Get total amount safely
+        const totalAmountEl = document.getElementById('summary-total');
+        const totalAmount = totalAmountEl ? totalAmountEl.textContent : '₹0';
+        
+        // Get shipping address components safely
+        const nameEl = document.getElementById('full-name');
+        const address1El = document.getElementById('address1');
+        const address2El = document.getElementById('address2');
+        const cityEl = document.getElementById('city');
+        const stateEl = document.getElementById('state');
+        const pincodeEl = document.getElementById('pincode');
+        const countryEl = document.getElementById('country');
+        
+        if (!nameEl || !address1El || !cityEl || !stateEl || !pincodeEl || !countryEl) {
+            console.error('Missing required address elements');
+            return;
+        }
+        
+        const name = nameEl.value;
+        const address1 = address1El.value;
+        const address2 = address2El ? address2El.value : '';
+        const city = cityEl.value;
+        const state = stateEl.value;
+        const pincode = pincodeEl.value;
+        const country = countryEl.value;
+        
+        // Format shipping address
+        const shippingAddress = `${name}, ${address1}, ${address2 ? address2 + ', ' : ''}${city}, ${state}, ${pincode}, ${country}`;
+        
+        // Update confirmation page elements safely
+        const confirmOrderNumEl = document.getElementById('confirmation-order-number');
+        const confirmOrderDateEl = document.getElementById('confirmation-order-date');
+        const confirmOrderTotalEl = document.getElementById('confirmation-order-total');
+        const confirmShippingAddressEl = document.getElementById('confirmation-shipping-address');
+        
+        if (confirmOrderNumEl) confirmOrderNumEl.textContent = orderNumber;
+        if (confirmOrderDateEl) confirmOrderDateEl.textContent = orderDate;
+        if (confirmOrderTotalEl) confirmOrderTotalEl.textContent = totalAmount;
+        if (confirmShippingAddressEl) confirmShippingAddressEl.textContent = shippingAddress;
+        
+        // Update progress steps safely
+        const progressSteps = document.querySelectorAll('.progress-step');
+        if (progressSteps && progressSteps.length >= 3) {
+            progressSteps.forEach(step => step.classList.remove('active'));
+            progressSteps[2].classList.add('active');
+            progressSteps[0].classList.add('completed');
+            progressSteps[1].classList.add('completed');
+        }
+        
+        // Show confirmation step safely
+        const checkoutSteps = document.querySelectorAll('.checkout-step');
+        if (checkoutSteps && checkoutSteps.length >= 3) {
+            checkoutSteps.forEach(step => step.classList.remove('active'));
+            checkoutSteps[2].classList.add('active');
+        }
+    } catch (error) {
+        console.error('Error in completeOrder:', error);
     }
-    
-    if (!orderDate) {
-        const today = new Date();
-        orderDate = today.getDate() + '/' + (today.getMonth() + 1) + '/' + today.getFullYear();
-    }
-    
-    // Get total amount
-    const totalAmount = document.getElementById('summary-total').textContent;
-    
-    // Get shipping address components
-    const name = document.getElementById('full-name').value;
-    const address1 = document.getElementById('address1').value;
-    const address2 = document.getElementById('address2').value;
-    const city = document.getElementById('city').value;
-    const state = document.getElementById('state').value;
-    const pincode = document.getElementById('pincode').value;
-    const country = document.getElementById('country').value;
-    
-    // Format shipping address
-    const shippingAddress = `${name}, ${address1}, ${address2 ? address2 + ', ' : ''}${city}, ${state}, ${pincode}, ${country}`;
-    
-    // Update confirmation page elements
-    document.getElementById('confirmation-order-number').textContent = orderNumber;
-    document.getElementById('confirmation-order-date').textContent = orderDate;
-    document.getElementById('confirmation-order-total').textContent = totalAmount;
-    document.getElementById('confirmation-shipping-address').textContent = shippingAddress;
-    
-    // Update progress steps
-    const progressSteps = document.querySelectorAll('.progress-step');
-    progressSteps.forEach(step => step.classList.remove('active'));
-    progressSteps[2].classList.add('active');
-    progressSteps[0].classList.add('completed');
-    progressSteps[1].classList.add('completed');
-    
-    // Show confirmation step
-    const checkoutSteps = document.querySelectorAll('.checkout-step');
-    checkoutSteps.forEach(step => step.classList.remove('active'));
-    checkoutSteps[2].classList.add('active');
 }
