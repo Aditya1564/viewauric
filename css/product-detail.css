@@ -253,14 +253,14 @@
 }
 
 .btn-primary {
-    background-color: #8B4513;
+    background-color: #6B3400;
     color: white;
     border: none;
 }
 
 .btn-primary:hover {
-    background-color: #A0522D;
-    box-shadow: 0 4px 10px rgba(139, 69, 19, 0.3);
+    background-color: #5E2900;
+    box-shadow: 0 4px 10px rgba(107, 52, 0, 0.3);
 }
 
 .btn-secondary {
@@ -303,7 +303,7 @@
 
 .shipping-method input:checked + label {
     background-color: #f9f9f9;
-    border-color: #8B4513;
+    border-color: #6B3400;
 }
 
 .method-name {
@@ -318,7 +318,7 @@
 
 .method-price {
     font-weight: 600;
-    color: #8B4513;
+    color: #B08F4C;
 }
 
 .method-time {
@@ -421,7 +421,7 @@
 
 .payment-method input:checked + label {
     background-color: #f9f9f9;
-    border-color: #8B4513;
+    border-color: #6B3400;
 }
 
 .method-cards {
@@ -771,7 +771,7 @@ input[type=number]::-webkit-outer-spin-button {
 
 .add-to-cart-button {
     width: 100%;
-    background: #8B4513;
+    background: #6B3400;
     color: white;
     font-family: 'Lato', sans-serif;
     font-size: 14px;
@@ -849,7 +849,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .delivery-item i {
-    color: #8B4513;
+    color: #6B3400;
 }
 
 /* Additional Information Tabs */
@@ -876,12 +876,12 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .tab:hover {
-    color: #8B4513;
+    color: #6B3400;
 }
 
 .tab.active {
-    color: #8B4513;
-    border-bottom: 2px solid #8B4513;
+    color: #6B3400;
+    border-bottom: 2px solid #6B3400;
 }
 
 .tab-content {
@@ -974,7 +974,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .footer-links a:hover {
-    color: #8B4513;
+    color: #6B3400;
 }
 
 .social-links {
@@ -1018,7 +1018,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .newsletter-form button {
-    background: #8B4513;
+    background: #6B3400;
     color: white;
     border: none;
     padding: 10px 15px;
@@ -1057,7 +1057,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .footer-bottom-links a:hover {
-    color: #8B4513;
+    color: #6B3400;
 }
 
 /* Responsive Styles */
