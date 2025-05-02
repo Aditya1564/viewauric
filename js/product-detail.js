@@ -240,7 +240,47 @@ function fetchProductDetails(productId) {
                 'https://images.unsplash.com/photo-1599643477877-530eb83abc8e?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80',
                 'https://images.unsplash.com/photo-1588444837495-c6cfeb53f32d?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80',
                 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80'
-            ]
+            ],
+            detailsContent: `
+                <p>This exquisite diamond pendant is part of our exclusive Leelah Collection, inspired by traditional designs with a modern twist. Each piece is meticulously crafted by our master jewelers using ethically sourced materials.</p>
+                <ul>
+                    <li>18K gold pendant featuring a 1.2 carat center diamond</li>
+                    <li>Surrounded by 0.5 carats of smaller diamonds</li>
+                    <li>Certified by the Gemological Institute</li>
+                    <li>Includes a matching 18K gold chain</li>
+                    <li>Pendant dimensions: 15mm x 10mm</li>
+                    <li>Comes in a luxury jewelry box</li>
+                </ul>
+            `,
+            careContent: `
+                <h3>Jewelry Care Instructions</h3>
+                <p>To maintain the beauty and longevity of your diamond pendant, please follow these care instructions:</p>
+                <ul>
+                    <li>Store in the provided jewelry box when not in use</li>
+                    <li>Avoid contact with perfumes, lotions, and cosmetics</li>
+                    <li>Remove before swimming, bathing, or engaging in physical activities</li>
+                    <li>Clean gently with a soft cloth and mild soap solution</li>
+                    <li>Have your jewelry professionally cleaned once a year</li>
+                </ul>
+            `,
+            shippingContent: `
+                <h3>Shipping Information</h3>
+                <p>We offer free insured shipping on all orders.</p>
+                <ul>
+                    <li>Standard delivery: 3-5 business days</li>
+                    <li>Express delivery: 1-2 business days (additional charges apply)</li>
+                    <li>International shipping available</li>
+                </ul>
+                
+                <h3>Return Policy</h3>
+                <p>We want you to be completely satisfied with your purchase. If for any reason you're not, you may return it within 15 days of receipt.</p>
+                <ul>
+                    <li>Item must be unworn and in original condition</li>
+                    <li>Include all original packaging and documentation</li>
+                    <li>Custom orders are non-returnable</li>
+                    <li>Return shipping costs are the responsibility of the customer</li>
+                </ul>
+            `
         },
         'emerald-studs': {
             name: 'Emerald Studs',
@@ -258,7 +298,84 @@ function fetchProductDetails(productId) {
                 'https://images.unsplash.com/photo-1599459183200-59c7687a0275?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80',
                 'https://images.unsplash.com/photo-1599643477337-3413ad0061c1?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80',
                 'https://images.unsplash.com/photo-1611591437136-2d9159a2f466?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80'
-            ]
+            ],
+            detailsContent: `
+                <p>These exquisite emerald studs represent the perfect marriage of traditional craftsmanship and contemporary design. Each piece is meticulously handcrafted by our master artisans using ethically sourced, genuine emeralds and precious metals.</p>
+                <ul>
+                    <li><strong>Material:</strong> 18K Gold with genuine emerald center stones</li>
+                    <li><strong>Gemstone:</strong> Natural emeralds (0.85 carats total weight)</li>
+                    <li><strong>Clarity:</strong> VS clarity with exceptional color saturation</li>
+                    <li><strong>Setting:</strong> Secure 4-prong setting for daily wear</li>
+                    <li><strong>Certificate:</strong> Includes gemstone authenticity certificate</li>
+                    <li><strong>Backing:</strong> Push-back closures for comfort and security</li>
+                    <li><strong>Dimensions:</strong> 8mm diameter facing</li>
+                    <li><strong>Weight:</strong> 3.2 grams (pair)</li>
+                    <li><strong>Packaging:</strong> Presented in a signature Divas Mantra luxury gift box</li>
+                    <li><strong>Origin:</strong> Handcrafted in Jaipur, India</li>
+                </ul>
+            `,
+            careContent: `
+                <h3>Emerald Jewelry Care Instructions</h3>
+                <p>Emeralds require special care to maintain their brilliance and integrity. Following these guidelines will help preserve the beauty of your emerald studs for generations:</p>
+                <ul>
+                    <li><strong>Storage:</strong> Store your emerald studs separately in the provided jewelry box to prevent scratches. Emeralds rank 7.5-8 on the Mohs hardness scale and can be scratched by harder gemstones.</li>
+                    <li><strong>Chemical Exposure:</strong> Emeralds are particularly sensitive to chemicals. Avoid exposure to household cleaning products, hairspray, perfumes, and cosmetics which can damage the gem's surface or affect the clarity treatment.</li>
+                    <li><strong>Cleaning:</strong> Clean your emerald studs gently using a soft, lint-free cloth. For deeper cleaning, use only lukewarm water with a mild, phosphate-free soap. Never use ultrasonic cleaners or steam cleaners, as these can damage emeralds.</li>
+                    <li><strong>Temperature:</strong> Avoid extreme temperature changes, as thermal shock can cause emeralds to crack. Remove your studs before saunas, hot tubs, or any high-heat activities.</li>
+                    <li><strong>Physical Activities:</strong> Remove your emerald studs before engaging in sports, exercise, or manual labor to prevent damage from impact or excessive pressure.</li>
+                    <li><strong>Professional Care:</strong> We recommend bringing your emerald jewelry for professional inspection and gentle cleaning once a year to ensure the settings remain secure.</li>
+                    <li><strong>Oil Treatment Maintenance:</strong> Many emeralds are oil-treated to enhance clarity. This treatment may need to be refreshed every few years depending on wear. Our lifetime care program includes complimentary re-oiling when necessary.</li>
+                </ul>
+            `,
+            shippingContent: `
+                <h3>Shipping Information</h3>
+                <p>At Divas Mantra, we understand the importance of your fine jewelry purchase. All our pieces are securely packaged and fully insured during transit.</p>
+                
+                <h4>Domestic Shipping</h4>
+                <ul>
+                    <li><strong>Free Standard Shipping:</strong> 3-5 business days (orders over ₹15,000)</li>
+                    <li><strong>Premium Delivery:</strong> 2-3 business days (₹1,200)</li>
+                    <li><strong>Express Delivery:</strong> 1-2 business days (₹2,500)</li>
+                    <li><strong>Same-Day Delivery:</strong> Available in select metro cities for orders placed before 11 AM (₹3,500)</li>
+                </ul>
+                
+                <h4>International Shipping</h4>
+                <ul>
+                    <li><strong>Standard International:</strong> 7-10 business days (₹5,000)</li>
+                    <li><strong>Express International:</strong> 3-5 business days (₹8,000)</li>
+                    <li><strong>Note:</strong> Import duties and taxes are the responsibility of the recipient</li>
+                </ul>
+                
+                <h4>Packaging</h4>
+                <p>Each piece arrives in our signature gift packaging, which includes:</p>
+                <ul>
+                    <li>Handcrafted wooden jewelry box with soft velvet interior</li>
+                    <li>Certificate of authenticity and gemstone details</li>
+                    <li>Jewelry care guide</li>
+                    <li>Complementary cleaning cloth</li>
+                </ul>
+                
+                <h3>Return Policy</h3>
+                <p>We want you to be completely satisfied with your Divas Mantra jewelry. If for any reason you're not entirely happy with your purchase, we offer an easy return process.</p>
+                
+                <h4>Return Eligibility</h4>
+                <ul>
+                    <li><strong>Return Window:</strong> Within 30 days of delivery</li>
+                    <li><strong>Condition:</strong> Item must be unworn, unaltered, with all original tags and protective coverings</li>
+                    <li><strong>Packaging:</strong> All original packaging, certificates, and accessories must be included</li>
+                    <li><strong>Exceptions:</strong> Custom-designed pieces, engraved items, and special orders are non-returnable</li>
+                </ul>
+                
+                <h4>Exchange & Refund Process</h4>
+                <ul>
+                    <li><strong>Exchange:</strong> Complimentary for size adjustments or different styles</li>
+                    <li><strong>Store Credit:</strong> Full value of the purchase (valid for 1 year)</li>
+                    <li><strong>Refund:</strong> Original payment method (processed within 7-10 business days after inspection)</li>
+                    <li><strong>Return Shipping:</strong> Return shipping costs are covered for exchanges; ₹1,000 deduction applies for refunds</li>
+                </ul>
+                
+                <p>To initiate a return, please contact our customer care team at <strong>care@divasmantra.com</strong> or call us at <strong>+91 98765 43210</strong>.</p>
+            `
         },
         'rose-gold-bracelet': {
             name: 'Rose Gold Bracelet',
@@ -276,7 +393,85 @@ function fetchProductDetails(productId) {
                 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80',
                 'https://images.unsplash.com/photo-1608042314453-ae338d80c427?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80',
                 'https://images.unsplash.com/photo-1599643477337-3413ad0061c1?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80'
-            ]
+            ],
+            detailsContent: `
+                <p>This exquisite rose gold bracelet is an elegant masterpiece from our exclusive Mathuram Collection. Inspired by classical floral motifs with a contemporary twist, each piece is meticulously handcrafted by our master artisans using the finest materials.</p>
+                <ul>
+                    <li><strong>Material:</strong> 18K Rose Gold with signature polished finish</li>
+                    <li><strong>Design:</strong> Intricate filigree work with hand-engraved floral motifs</li>
+                    <li><strong>Weight:</strong> 12 grams of solid gold</li>
+                    <li><strong>Dimensions:</strong> 6mm width with adjustable 6.5-7.5 inch length</li>
+                    <li><strong>Clasp:</strong> Custom-designed secure lobster clasp with safety catch</li>
+                    <li><strong>Surface Finish:</strong> Hand-polished with satin accents</li>
+                    <li><strong>Craftsmanship:</strong> Each piece requires 25+ hours of skilled artisan work</li>
+                    <li><strong>Hallmark:</strong> BIS hallmarked and certified</li>
+                    <li><strong>Packaging:</strong> Presented in a signature velvet-lined wooden jewelry box</li>
+                    <li><strong>Origin:</strong> Handcrafted in Jaipur, India</li>
+                </ul>
+            `,
+            careContent: `
+                <h3>Rose Gold Jewelry Care Instructions</h3>
+                <p>Rose gold jewelry requires special attention to maintain its distinctive warm hue and delicate craftsmanship. Follow these guidelines to preserve your bracelet's beauty for generations:</p>
+                <ul>
+                    <li><strong>Daily Wear:</strong> While rose gold is durable for everyday wear, we recommend removing your bracelet during activities that may subject it to harsh impact or chemicals.</li>
+                    <li><strong>Storage:</strong> Store your rose gold bracelet separately in the provided jewelry box to prevent scratches and tangling with other pieces.</li>
+                    <li><strong>Chemical Exposure:</strong> Avoid contact with chlorine, household cleaners, perfumes, and lotions which can affect the color and finish of rose gold.</li>
+                    <li><strong>Cleaning:</strong> Clean your bracelet gently with a soft, lint-free cloth. For deeper cleaning, use warm water with mild soap and a soft brush to gently clean intricate areas. Rinse thoroughly and pat dry with a soft cloth.</li>
+                    <li><strong>Professional Care:</strong> We recommend professional cleaning twice a year to maintain the bracelet's luster and structural integrity.</li>
+                    <li><strong>Color Maintenance:</strong> Rose gold may naturally develop a richer patina over time. This is normal and often enhances the vintage appeal of the piece. If you prefer the original finish, professional polishing can restore it.</li>
+                    <li><strong>Clasp Check:</strong> Periodically check the clasp mechanism to ensure it remains secure. If you notice any issues, please contact our jewelry care specialists.</li>
+                </ul>
+                <p>As part of our commitment to lifelong quality, we offer complimentary basic cleaning and clasp checks for all registered pieces twice a year.</p>
+            `,
+            shippingContent: `
+                <h3>Shipping Information</h3>
+                <p>At Divas Mantra, we understand the importance of your fine jewelry purchase. All our pieces are securely packaged and fully insured during transit.</p>
+                
+                <h4>Domestic Shipping</h4>
+                <ul>
+                    <li><strong>Free Standard Shipping:</strong> 3-5 business days (orders over ₹15,000)</li>
+                    <li><strong>Premium Delivery:</strong> 2-3 business days (₹1,200)</li>
+                    <li><strong>Express Delivery:</strong> 1-2 business days (₹2,500)</li>
+                    <li><strong>Same-Day Delivery:</strong> Available in select metro cities for orders placed before 11 AM (₹3,500)</li>
+                </ul>
+                
+                <h4>International Shipping</h4>
+                <ul>
+                    <li><strong>Standard International:</strong> 7-10 business days (₹5,000)</li>
+                    <li><strong>Express International:</strong> 3-5 business days (₹8,000)</li>
+                    <li><strong>Note:</strong> Import duties and taxes are the responsibility of the recipient</li>
+                </ul>
+                
+                <h4>Packaging</h4>
+                <p>Each piece arrives in our signature gift packaging, which includes:</p>
+                <ul>
+                    <li>Handcrafted wooden jewelry box with soft velvet interior</li>
+                    <li>Certificate of authenticity</li>
+                    <li>Jewelry care guide</li>
+                    <li>Complementary cleaning cloth</li>
+                </ul>
+                
+                <h3>Return Policy</h3>
+                <p>We want you to be completely satisfied with your Divas Mantra jewelry. If for any reason you're not entirely happy with your purchase, we offer an easy return process.</p>
+                
+                <h4>Return Eligibility</h4>
+                <ul>
+                    <li><strong>Return Window:</strong> Within 30 days of delivery</li>
+                    <li><strong>Condition:</strong> Item must be unworn, unaltered, with all original tags and protective coverings</li>
+                    <li><strong>Packaging:</strong> All original packaging, certificates, and accessories must be included</li>
+                    <li><strong>Exceptions:</strong> Custom-designed pieces, engraved items, and special orders are non-returnable</li>
+                </ul>
+                
+                <h4>Exchange & Refund Process</h4>
+                <ul>
+                    <li><strong>Exchange:</strong> Complimentary for size adjustments or different styles</li>
+                    <li><strong>Store Credit:</strong> Full value of the purchase (valid for 1 year)</li>
+                    <li><strong>Refund:</strong> Original payment method (processed within 7-10 business days after inspection)</li>
+                    <li><strong>Return Shipping:</strong> Return shipping costs are covered for exchanges; ₹1,000 deduction applies for refunds</li>
+                </ul>
+                
+                <p>To initiate a return, please contact our customer care team at <strong>care@divasmantra.com</strong> or call us at <strong>+91 98765 43210</strong>.</p>
+            `
         }
     };
 
@@ -285,17 +480,57 @@ function fetchProductDetails(productId) {
 
     // Update page content with product data
     document.getElementById('product-title').textContent = product.name;
-    document.getElementById('product-breadcrumb-name').textContent = product.name;
-    document.getElementById('product-collection').textContent = product.collection;
+    try {
+        document.getElementById('product-breadcrumb-name').textContent = product.name;
+    } catch (e) {
+        console.log('Breadcrumb element not found, skipping update');
+    }
+    try {
+        document.getElementById('product-collection').textContent = product.collection;
+    } catch (e) {
+        console.log('Collection element not found, skipping update');
+    }
     document.getElementById('product-price').textContent = product.price;
-    document.getElementById('product-original-price').textContent = product.originalPrice;
-    document.getElementById('product-description').textContent = product.description;
+    try {
+        document.getElementById('product-original-price').textContent = product.originalPrice;
+    } catch (e) {
+        console.log('Original price element not found, skipping update');
+    }
+    try {
+        document.getElementById('product-description').textContent = product.description;
+    } catch (e) {
+        console.log('Description element not found, skipping update');
+    }
     
     // Update product details
-    if (product.material) document.getElementById('product-material').textContent = product.material;
-    if (product.stone) document.getElementById('product-stone').textContent = product.stone;
-    if (product.carat) document.getElementById('product-carat').textContent = product.carat;
-    if (product.chainLength) document.getElementById('product-chain-length').textContent = product.chainLength;
+    try {
+        if (product.material) document.getElementById('product-material').textContent = product.material;
+        if (product.stone) document.getElementById('product-stone').textContent = product.stone;
+        if (product.carat) document.getElementById('product-carat').textContent = product.carat;
+        if (product.chainLength) document.getElementById('product-chain-length').textContent = product.chainLength;
+    } catch (e) {
+        console.log('Some product detail elements not found, skipping updates');
+    }
+    
+    // Update tab content
+    try {
+        if (product.detailsContent) {
+            const detailsTab = document.getElementById('details');
+            if (detailsTab) detailsTab.innerHTML = product.detailsContent;
+        }
+        
+        if (product.careContent) {
+            const careTab = document.getElementById('care');
+            if (careTab) careTab.innerHTML = product.careContent;
+        }
+        
+        if (product.shippingContent) {
+            const shippingTab = document.getElementById('shipping');
+            if (shippingTab) shippingTab.innerHTML = product.shippingContent;
+        }
+    } catch (e) {
+        console.error('Error updating tab content:', e);
+    }
     
     // Update main image
     document.getElementById('main-product-image').src = product.mainImage;
