@@ -514,7 +514,7 @@ a {
 
 .view-details {
     display: inline-block;
-    background: #724114;
+    background: #693208;
     color: white;
     font-weight: 500;
     padding: 10px 20px;
@@ -596,7 +596,7 @@ a {
     position: absolute;
     top: 10px;
     right: 10px;
-    background: linear-gradient(45deg, #6B3400, #5E2900);
+    background: linear-gradient(45deg, #693208, #5E2900);
     color: white;
     font-size: 12px;
     font-weight: 600;
@@ -617,7 +617,7 @@ a {
 
 .view-all-button {
     display: inline-block;
-    background-color: #6B3400;
+    background-color: #693208;
     color: white;
     font-family: 'Lato', sans-serif;
     font-size: 16px;
@@ -675,7 +675,7 @@ a {
 }
 
 .tab.active {
-    border-bottom-color: #6B3400;
+    border-bottom-color: #693208;
 }
 
 .tab-content {
@@ -733,7 +733,7 @@ a {
     text-align: center;
     margin-bottom: 30px;
     font-weight: 600;
-    color: #6B3400;
+    color: #693208;
 }
 
 .product-scroll-container {
@@ -787,7 +787,7 @@ a {
     position: absolute;
     top: 10px;
     left: 10px;
-    background: linear-gradient(45deg, #6B3400, #5E2900);
+    background: linear-gradient(45deg, #693208, #5E2900);
     color: white;
     padding: 4px 8px;
     font-size: 11px;
@@ -800,7 +800,7 @@ a {
     position: absolute;
     top: 10px;
     left: 10px;
-    background: linear-gradient(45deg, #6B3400, #5E2900);
+    background: linear-gradient(45deg, #693208, #5E2900);
     color: white;
     padding: 4px 8px;
     font-size: 11px;
@@ -840,7 +840,7 @@ a {
 }
 
 .add-to-wishlist:hover {
-    background: linear-gradient(45deg, #6B3400, #5E2900);
+    background: linear-gradient(45deg, #693208, #5E2900);
     color: white;
     transform: scale(1.1);
 }
@@ -888,7 +888,7 @@ a {
 }
 
 .view-all-btn {
-    background: #724114;
+    background: #693208;
     color: white;
     font-family: 'Lato', sans-serif;
     font-size: 14px;
