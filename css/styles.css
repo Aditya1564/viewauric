@@ -761,14 +761,14 @@ a {
     background-color: #fff;
     flex: 0 0 auto;
     width: 280px;
-    border: 1px solid rgba(139, 69, 19, 0.2);
-    box-shadow: 0 3px 10px rgba(139, 69, 19, 0.1);
+    border: 1px solid rgba(107, 52, 0, 0.2);
+    box-shadow: 0 3px 10px rgba(107, 52, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .product-item:hover {
     transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(139, 69, 19, 0.2);
+    box-shadow: 0 5px 15px rgba(107, 52, 0, 0.2);
 }
 
 .product-image {
@@ -826,7 +826,7 @@ a {
     width: 25px;
     height: 25px;
     background-color: white;
-    border: 1px solid rgba(139, 69, 19, 0.2);
+    border: 1px solid rgba(107, 52, 0, 0.2);
     border-radius: 0;
     display: flex;
     align-items: center;
