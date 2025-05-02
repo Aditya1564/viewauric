@@ -46,9 +46,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // Get product ID from URL if available
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('id');
-
+    
+    console.log('URL Parameters:', urlParams.toString());
+    console.log('Product ID from URL:', productId);
+    
     if (productId) {
+        console.log('Loading product details for:', productId);
         fetchProductDetails(productId);
+    } else {
+        // Default to emerald-studs if no ID is specified
+        console.log('No product ID found in URL, defaulting to emerald-studs');
+        fetchProductDetails('emerald-studs');
     }
 
     // Quantity selector functionality
@@ -492,23 +500,36 @@ function fetchProductDetails(productId) {
     safeUpdateElement('product-brand', 'Jewellery Hubb Jaipur');
     
     // Update tab content
-    try {
-        if (product.detailsContent) {
-            const detailsTab = document.getElementById('details');
-            if (detailsTab) detailsTab.innerHTML = product.detailsContent;
+    console.log('Attempting to update tab content for', product.name);
+    
+    if (product.detailsContent) {
+        const detailsTab = document.getElementById('details');
+        if (detailsTab) {
+            console.log('Found details tab, updating content');
+            detailsTab.innerHTML = product.detailsContent;
+        } else {
+            console.error('Details tab element not found');
         }
-        
-        if (product.careContent) {
-            const careTab = document.getElementById('care');
-            if (careTab) careTab.innerHTML = product.careContent;
+    }
+    
+    if (product.careContent) {
+        const careTab = document.getElementById('care');
+        if (careTab) {
+            console.log('Found care tab, updating content');
+            careTab.innerHTML = product.careContent;
+        } else {
+            console.error('Care tab element not found');
         }
-        
-        if (product.shippingContent) {
-            const shippingTab = document.getElementById('shipping');
-            if (shippingTab) shippingTab.innerHTML = product.shippingContent;
+    }
+    
+    if (product.shippingContent) {
+        const shippingTab = document.getElementById('shipping');
+        if (shippingTab) {
+            console.log('Found shipping tab, updating content');
+            shippingTab.innerHTML = product.shippingContent;
+        } else {
+            console.error('Shipping tab element not found');
         }
-    } catch (e) {
-        console.error('Error updating tab content:', e);
     }
     
     // Update main image
