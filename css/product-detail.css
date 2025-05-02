@@ -387,7 +387,7 @@
 }
 
 .grand-total span:last-child {
-    color: #6B3400 !important;
+    color: #C6A567 !important;
 }
 
 /* Payment Methods */
@@ -523,7 +523,7 @@
 }
 
 .breadcrumb a {
-    color: #8B4513;
+    color: #C6A567;
     text-decoration: none;
 }
 
@@ -537,7 +537,7 @@
     gap: 30px;
     margin-bottom: 40px;
     background-color: #f8f8f3;
-    padding: 20px;
+    padding: 0;
 }
 
 .product-gallery {
@@ -630,7 +630,7 @@
 .current-price {
     font-size: 28px;
     font-weight: 500;
-    color: #6B3400 !important;
+    color: #C6A567 !important;
     font-family: 'Lato', sans-serif;
 }
 
@@ -771,7 +771,7 @@ input[type=number]::-webkit-outer-spin-button {
 
 .add-to-cart-button {
     width: 100%;
-    background: #5E2900;
+    background: #C6A567;
     color: white;
     font-family: 'Lato', sans-serif;
     font-size: 14px;
@@ -784,10 +784,11 @@ input[type=number]::-webkit-outer-spin-button {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-top: 5px;
+    text-align: center;
 }
 
 .add-to-cart-button:hover {
-    background: #6B3400;
+    background: #D6B577;
 }
 
 .buy-now-button {
