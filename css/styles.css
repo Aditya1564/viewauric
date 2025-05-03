@@ -1325,13 +1325,13 @@ a {
 
 .header-icons {
     display: flex;
-    gap: 15px;
+    gap: 8px;
 }
 
 .icon-link {
     color: #333;
     text-decoration: none;
-    margin: 0 10px;
+    margin: 0 5px;
 }
 
 .menu-button {
@@ -1341,13 +1341,13 @@ a {
     padding: 5px;
 }
 
-.menu-icon, .search-icon, .account-icon, .cart-icon {
+.menu-icon, .search-icon, .account-icon, .wishlist-icon, .cart-icon {
     display: inline-block;
     position: relative;
     color: #333;
 }
 
-.menu-icon i, .search-icon i, .account-icon i, .cart-icon i {
+.menu-icon i, .search-icon i, .account-icon i, .wishlist-icon i, .cart-icon i {
     font-size: 18px;
 }
 
