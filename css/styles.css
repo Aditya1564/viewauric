@@ -1030,6 +1030,23 @@ a {
     border-radius: 6px;
 }
 
+/* Force vertical layout for smaller screens (below 680px) */
+@media (max-width: 680px) {
+    .product-details-horizontal {
+        flex-direction: column !important;
+        padding: 15px !important;
+        display: block !important;
+    }
+    
+    .product-details-horizontal > div {
+        width: 100% !important;
+        margin: 0 0 20px 0 !important;
+        flex: none !important;
+        display: block !important;
+        max-width: 100% !important;
+    }
+}
+
 /* Mobile-specific styling override in responsive.css */
 
 .product-description {
