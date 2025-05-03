@@ -837,7 +837,7 @@ a {
 .product-thumbnails {
     display: flex;
     gap: 15px;
-    margin-top: -10px; /* Using more aggressive negative margin to pull thumbnails up */
+    margin-top: 15px; /* Adding positive margin for spacing from main image */
     justify-content: center;
 }
 
