@@ -733,7 +733,7 @@ a {
     flex-direction: column;
     max-width: 100%;
     margin: 0 auto;
-    padding: 0;
+    padding: 20px 15px;
     background-color: #f8f8f5;
 }
 
@@ -742,8 +742,8 @@ a {
         flex-direction: row;
         gap: 30px;
         max-width: 1200px;
-        padding: 0 15px;
-        margin-top: 40px;
+        padding: 40px 15px;
+        margin-top: 0;
     }
     
     .product-detail-images {
@@ -752,6 +752,8 @@ a {
     
     .product-detail-info {
         flex: 0 0 40%;
+        max-width: 40%;
+        margin: 0; /* Reset the auto margin for desktop */
     }
 }
 
@@ -821,6 +823,9 @@ a {
 
 .product-detail-info {
     padding: 0;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
 }
 
 .product-title {
