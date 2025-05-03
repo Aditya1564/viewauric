@@ -1443,7 +1443,7 @@ a {
 
 /* Modern Redesigned Footer */
 .footer-modern {
-    background-color: #f8f8f5;
+    background-color: #C1B2A3; /* Updated to match the screenshot background color */
     color: #333;
     margin-top: 60px;
     font-family: 'Lato', sans-serif;
@@ -1537,6 +1537,7 @@ a {
 .footer-main {
     padding: 50px 0 30px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    background-color: #C1B2A3; /* Match the footer background color */
 }
 
 .footer-widgets {
@@ -1630,6 +1631,7 @@ a {
 /* Footer Bottom Section */
 .footer-bottom {
     padding: 20px 0;
+    background-color: #C1B2A3; /* Match the footer background color */
 }
 
 .footer-info {
