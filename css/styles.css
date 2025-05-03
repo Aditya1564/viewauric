@@ -1679,32 +1679,49 @@ a {
     gap: 10px;
 }
 
+/* Payment method icons with original brand colors */
+/* Add enhanced styling for all payment icons */
 .payment-methods span {
     font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin: 0 2px;
 }
 
-/* Payment method icons with original brand colors */
 /* Visa - Blue */
 .payment-methods span i.fa-cc-visa {
     color: #1A1F71;
+    text-shadow: 0 0 1px #1A1F71;
 }
 
 /* Mastercard - Red and Yellow */
 .payment-methods span i.fa-cc-mastercard {
-    background: linear-gradient(135deg, #EB001B 0%, #FF9900 50%, #EB001B 100%);
+    background: linear-gradient(90deg, #FF5F00 30%, #EB001B 48%, #F79E1B 65%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+    font-weight: bold;
 }
 
 /* American Express - Blue */
 .payment-methods span i.fa-cc-amex {
-    color: #006FCF;
+    color: #2E77BC;
+    text-shadow: 0 0 1px #2E77BC;
 }
 
-/* PayPal - Blue */
+/* PayPal - Blue and Light Blue */
 .payment-methods span i.fa-cc-paypal {
-    color: #003087;
+    background: linear-gradient(90deg, #253B80 35%, #179BD7 65%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: bold;
 }
 
 /* Google Pay - Multicolor */
