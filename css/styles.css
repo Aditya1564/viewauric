@@ -936,6 +936,9 @@ a {
 
 .product-actions {
     margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .add-to-cart-btn {
@@ -950,11 +953,32 @@ a {
     transition: background-color 0.3s ease;
     letter-spacing: 1px;
     display: block;
-    margin-top: 20px;
+    margin-top: 0;
 }
 
 .add-to-cart-btn:hover {
     background-color: #7B410A;
+}
+
+.add-to-wishlist-btn {
+    background-color: #fff;
+    color: #603000;
+    border: 1px solid #603000;
+    padding: 15px 0;
+    width: 100%;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 1px;
+    display: block;
+    margin-top: 0;
+}
+
+.add-to-wishlist-btn:hover {
+    background-color: #f8f0e8;
+    color: #7B410A;
+    border-color: #7B410A;
 }
 
 .specifications {
