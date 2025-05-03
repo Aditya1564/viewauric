@@ -2386,7 +2386,8 @@ a {
     }
     
     .product-item {
-        width: 240px;
+        width: 280px;
+        margin-right: 15px;
     }
     
     .product-image {
@@ -2480,7 +2481,8 @@ a {
     }
     
     .product-item {
-        width: 200px;
+        width: 260px;
+        margin-right: 15px;
     }
     
     .product-image {
@@ -2488,7 +2490,13 @@ a {
     }
     
     .product-name {
-        font-size: 13px;
+        font-size: 15px;
+        font-weight: 500;
+        padding: 5px 0;
+    }
+    
+    .current-price {
+        font-size: 16px;
     }
     
     .view-all-btn {
