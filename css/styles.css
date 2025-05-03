@@ -922,9 +922,13 @@ a {
 .discount-tag {
     background: #5E2900;
     color: white;
-    padding: 3px 8px;
-    font-size: 14px;
+    padding: 2px 5px;
+    font-size: 12px;
     font-weight: 500;
+    border-radius: 3px;
+    display: inline-block;
+    min-width: 50px;
+    text-align: center;
 }
 
 .product-rating {
