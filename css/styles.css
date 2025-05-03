@@ -737,24 +737,64 @@ a {
     background-color: #f8f8f5;
 }
 
+/* New desktop layout as requested */
 @media (min-width: 768px) {
     .product-detail-container {
         flex-direction: row;
-        gap: 30px;
+        flex-wrap: wrap;
+        gap: 0;
         max-width: 1200px;
         padding: 40px 15px;
         margin-top: 0;
     }
     
-    .product-detail-images {
-        flex: 0 0 60%;
+    /* Left side with main image and thumbnails */
+    .product-detail-left {
+        flex: 0 0 50%;
+        width: 50%;
+        padding-right: 20px;
     }
     
-    .product-detail-info {
-        flex: 0 0 40%;
-        max-width: 40%;
-        margin: 0; /* Reset the auto margin for desktop */
-        padding-top: 25px; /* Add top spacing for better vertical alignment */
+    /* Right side with product details */
+    .product-detail-right {
+        flex: 0 0 50%;
+        width: 50%;
+        padding-left: 20px;
+    }
+    
+    /* Full-width container for horizontal product details */
+    .product-details-horizontal {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 30px 15px;
+        background-color: #f8f8f5;
+        gap: 20px;
+    }
+    
+    .product-details-horizontal > div {
+        flex: 1;
+        border-top: 1px solid #e5e0d5;
+        padding: 20px;
+        margin: 0;
+        background-color: #fafafa;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        border-radius: 6px;
+    }
+    
+    .product-details-horizontal .product-description {
+        border-left: 4px solid #4a90e2;
+    }
+    
+    .product-details-horizontal .product-specifications {
+        border-left: 4px solid #e2994a;
+    }
+    
+    .product-details-horizontal .product-care {
+        border-left: 4px solid #4abe7b;
     }
 }
 
@@ -835,8 +875,15 @@ a {
 .product-detail-info {
     padding: 0 15px;
     width: 100%;
-    max-width: 500px;
+    max-width: 100%;
     margin: 30px auto 0;
+}
+
+@media (min-width: 768px) {
+    .product-detail-right .product-detail-info {
+        margin-top: 0;
+        padding-top: 10px;
+    }
 }
 
 .product-title {
@@ -958,6 +1005,16 @@ a {
     padding: 18px 15px 5px;
     border-radius: 6px;
     transition: all 0.3s ease;
+}
+
+/* Mobile styling for the horizontal product details */
+.product-details-horizontal {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px 15px;
+    background-color: #f8f8f5;
 }
 
 .product-description {

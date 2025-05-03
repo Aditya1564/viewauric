@@ -69,79 +69,89 @@
 
 
     <main>
-        <div class="main-image-container">
-            <img src="images/slider-image1.jpg" alt="Emerald Studs" class="main-product-image">
-        </div>
         <div class="product-detail-container">
-            <div class="product-detail-images">
-                <div class="product-thumbnails">
-                    <div class="thumbnail active" data-image="images/slider-image1.jpg">
-                        <img src="images/slider-image1.jpg" alt="Thumbnail 1">
-                    </div>
-                    <div class="thumbnail" data-image="images/slider-image2.jpg">
-                        <img src="images/slider-image2.jpg" alt="Thumbnail 2">
+            <!-- Left side: Image gallery -->
+            <div class="product-detail-left">
+                <div class="main-image-container">
+                    <img src="images/slider-image1.jpg" alt="Emerald Studs" class="main-product-image">
+                </div>
+                <div class="product-detail-images">
+                    <div class="product-thumbnails">
+                        <div class="thumbnail active" data-image="images/slider-image1.jpg">
+                            <img src="images/slider-image1.jpg" alt="Thumbnail 1">
+                        </div>
+                        <div class="thumbnail" data-image="images/slider-image2.jpg">
+                            <img src="images/slider-image2.jpg" alt="Thumbnail 2">
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="product-detail-info">
-                <h1 class="product-title">Emerald Studs</h1>
-                <div class="product-price">
-                    <span class="price-value">Rs. 25,999.00</span>
-                </div>
-                
-                <div class="product-meta">
-                    <div class="meta-item">
-                        <span class="meta-label">Brand:</span>
-                        <span class="meta-value">Jewellery Hubb Jaipur</span>
+            
+            <!-- Right side: Product info -->
+            <div class="product-detail-right">
+                <div class="product-detail-info">
+                    <h1 class="product-title">Emerald Studs</h1>
+                    <div class="product-price">
+                        <span class="price-value">Rs. 25,999.00</span>
                     </div>
-                    <div class="meta-item">
-                        <span class="meta-label">Availability:</span>
-                        <span class="meta-value in-stock">In stock ✓</span>
+                    
+                    <div class="product-meta">
+                        <div class="meta-item">
+                            <span class="meta-label">Brand:</span>
+                            <span class="meta-value">Jewellery Hubb Jaipur</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Availability:</span>
+                            <span class="meta-value in-stock">In stock ✓</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">SKU:</span>
+                            <span class="meta-value">EM-ST-2025</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Category:</span>
+                            <span class="meta-value">Earrings</span>
+                        </div>
                     </div>
-                    <div class="meta-item">
-                        <span class="meta-label">SKU:</span>
-                        <span class="meta-value">EM-ST-2025</span>
+                    
+                    <div class="product-quantity">
+                        <button class="quantity-btn decrement">-</button>
+                        <input type="text" value="1" class="quantity-input" readonly>
+                        <button class="quantity-btn increment">+</button>
                     </div>
-                    <div class="meta-item">
-                        <span class="meta-label">Category:</span>
-                        <span class="meta-value">Earrings</span>
+                    
+                    <div class="product-actions">
+                        <button class="buy-now-btn">BUY NOW</button>
+                        <button class="add-to-cart-btn">ADD TO CART</button>
+                        <button class="add-to-wishlist-btn"><i class="fas fa-heart"></i> ADD TO WISHLIST</button>
                     </div>
                 </div>
-                
-                <div class="product-quantity">
-                    <button class="quantity-btn decrement">-</button>
-                    <input type="text" value="1" class="quantity-input" readonly>
-                    <button class="quantity-btn increment">+</button>
-                </div>
-                
-                <div class="product-actions">
-                    <button class="buy-now-btn">BUY NOW</button>
-                    <button class="add-to-cart-btn">ADD TO CART</button>
-                    <button class="add-to-wishlist-btn"><i class="fas fa-heart"></i> ADD TO WISHLIST</button>
-                </div>
-                
-                <div class="product-description">
-                    <h3>Product Description</h3>
-                    <p>Handcrafted with precision, these exquisite emerald studs feature brilliant-cut natural emeralds set in 18-karat gold. The intense green color of these premium quality emeralds is perfectly complemented by the warm gold setting, creating a timeless accessory suitable for both everyday wear and special occasions.</p>
-                </div>
-                
-                <div class="product-specifications">
-                    <h3>Specifications</h3>
-                    <ul>
-                        <li><strong>Metal:</strong> 18-karat gold</li>
-                        <li><strong>Stone:</strong> Natural emerald</li>
-                        <li><strong>Stone Weight:</strong> 0.75 carats</li>
-                        <li><strong>Stone Cut:</strong> Brilliant</li>
-                        <li><strong>Stone Color:</strong> Intense green</li>
-                        <li><strong>Stone Clarity:</strong> VS</li>
-                        <li><strong>Dimensions:</strong> 6mm diameter</li>
-                    </ul>
-                </div>
-                
-                <div class="product-care">
-                    <h3>Care Instructions</h3>
-                    <p>Store your emerald studs in a separate pouch to prevent scratches. Clean with a soft, damp cloth and mild soap. Avoid exposure to harsh chemicals and excessive sunlight. We recommend professional cleaning once a year.</p>
-                </div>
+            </div>
+        </div>
+        
+        <!-- Product details in horizontal layout below -->
+        <div class="product-details-horizontal">
+            <div class="product-description">
+                <h3>Product Description</h3>
+                <p>Handcrafted with precision, these exquisite emerald studs feature brilliant-cut natural emeralds set in 18-karat gold. The intense green color of these premium quality emeralds is perfectly complemented by the warm gold setting, creating a timeless accessory suitable for both everyday wear and special occasions.</p>
+            </div>
+            
+            <div class="product-specifications">
+                <h3>Specifications</h3>
+                <ul>
+                    <li><strong>Metal:</strong> 18-karat gold</li>
+                    <li><strong>Stone:</strong> Natural emerald</li>
+                    <li><strong>Stone Weight:</strong> 0.75 carats</li>
+                    <li><strong>Stone Cut:</strong> Brilliant</li>
+                    <li><strong>Stone Color:</strong> Intense green</li>
+                    <li><strong>Stone Clarity:</strong> VS</li>
+                    <li><strong>Dimensions:</strong> 6mm diameter</li>
+                </ul>
+            </div>
+            
+            <div class="product-care">
+                <h3>Care Instructions</h3>
+                <p>Store your emerald studs in a separate pouch to prevent scratches. Clean with a soft, damp cloth and mild soap. Avoid exposure to harsh chemicals and excessive sunlight. We recommend professional cleaning once a year.</p>
             </div>
         </div>
         
