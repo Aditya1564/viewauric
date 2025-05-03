@@ -1682,16 +1682,11 @@ a {
 /* Payment method icons with original brand colors */
 /* Add enhanced styling for all payment icons */
 .payment-methods span {
-    font-size: 24px;
+    font-size: 26px;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 46px;
-    height: 46px;
-    background: white;
-    border-radius: 4px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    margin: 0 2px;
+    margin: 0 5px;
 }
 
 /* Visa - Blue */
