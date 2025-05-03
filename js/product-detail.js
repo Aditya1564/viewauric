@@ -23,44 +23,54 @@ document.addEventListener('DOMContentLoaded', function() {
     const thumbnails = document.querySelectorAll('.thumbnail');
     const mainImage = document.getElementById('main-product-image');
 
-    thumbnails.forEach(thumbnail => {
-        thumbnail.addEventListener('click', function() {
-            // Update active class
-            thumbnails.forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
+    // Only attach event listeners if thumbnails exist
+    if (thumbnails && thumbnails.length > 0 && mainImage) {
+        thumbnails.forEach(thumbnail => {
+            thumbnail.addEventListener('click', function() {
+                // Update active class
+                thumbnails.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
 
-            // Update main image
-            const thumbnailImg = this.querySelector('img');
-            if (thumbnailImg && mainImage) {
-                mainImage.src = thumbnailImg.src.replace('w=200', 'w=800');
-                mainImage.alt = thumbnailImg.alt;
-            }
+                // Update main image
+                const thumbnailImg = this.querySelector('img');
+                if (thumbnailImg) {
+                    mainImage.src = thumbnailImg.src.replace('w=200', 'w=800');
+                    mainImage.alt = thumbnailImg.alt;
+                }
+            });
         });
-    });
+    } else {
+        console.log('Product thumbnails or main image not found');
+    }
 
     // Tab Functionality
     const tabs = document.querySelectorAll('.tab');
     const tabPanes = document.querySelectorAll('.tab-pane');
 
-    tabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            // Remove active class from all tabs
-            tabs.forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
+    // Only attach event listeners if tabs exist
+    if (tabs && tabs.length > 0 && tabPanes && tabPanes.length > 0) {
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs
+                tabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
 
-            // Hide all tab panes
-            tabPanes.forEach(pane => pane.classList.remove('active'));
+                // Hide all tab panes
+                tabPanes.forEach(pane => pane.classList.remove('active'));
 
-            // Show the selected tab pane
-            const tabId = this.getAttribute('data-tab');
-            const selectedPane = document.getElementById(tabId);
-            if (selectedPane) {
-                selectedPane.classList.add('active');
-            } else {
-                console.warn(`Tab pane with ID '${tabId}' not found`);
-            }
+                // Show the selected tab pane
+                const tabId = this.getAttribute('data-tab');
+                const selectedPane = document.getElementById(tabId);
+                if (selectedPane) {
+                    selectedPane.classList.add('active');
+                } else {
+                    console.warn(`Tab pane with ID '${tabId}' not found`);
+                }
+            });
         });
-    });
+    } else {
+        console.log('Product tabs or tab panes not found');
+    }
 
     // Get product ID from URL if available
     const urlParams = new URLSearchParams(window.location.search);
