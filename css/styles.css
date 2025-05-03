@@ -1576,7 +1576,7 @@ a {
 }
 
 .footer-widget ul li a {
-    color: #666;
+    color: #000000; /* Changed from #666 to black */
     text-decoration: none;
     font-size: 14px;
     transition: all 0.3s ease;
@@ -1589,7 +1589,7 @@ a {
 }
 
 .contact-widget p {
-    color: #666;
+    color: #000000; /* Changed from #666 to black */
     margin-bottom: 12px;
     font-size: 14px;
     display: flex;
@@ -1645,7 +1645,7 @@ a {
 .copyright p {
     margin: 0;
     font-size: 13px;
-    color: #777;
+    color: #000000; /* Changed from #777 to black */
 }
 
 .footer-bottom .footer-links {
@@ -1654,7 +1654,7 @@ a {
 }
 
 .footer-bottom .footer-links a {
-    color: #666;
+    color: #000000; /* Changed from #666 to black */
     font-size: 13px;
     text-decoration: none;
     transition: color 0.3s ease;
