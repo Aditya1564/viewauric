@@ -795,7 +795,7 @@ a {
 .product-thumbnails {
     display: flex;
     gap: 10px;
-    margin-top: 15px;
+    margin-top: 5px;
 }
 
 .thumbnail {
