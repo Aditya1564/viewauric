@@ -47,6 +47,7 @@
     
     .product-details-horizontal > div {
         margin-bottom: 20px;
+        width: 100%; /* Full width on mobile */
     }
 }
 
@@ -80,17 +81,13 @@
     
     .product-details-horizontal {
         flex-direction: row;
-        flex-wrap: wrap;
         padding: 20px;
     }
     
     .product-details-horizontal > div {
-        flex: 0 0 calc(50% - 20px);
-        margin-bottom: 20px;
-    }
-    
-    .product-details-horizontal .product-care {
-        flex: 0 0 100%;
+        width: 33.33%;
+        flex: 1;
+        margin-bottom: 0;
     }
 }
 
