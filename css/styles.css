@@ -1677,19 +1677,38 @@ a {
 .payment-methods {
     display: flex;
     gap: 10px;
-    color: #603000;
 }
 
 .payment-methods span {
     font-size: 24px;
 }
 
-/* Google Pay icon with original brand colors */
-.payment-methods .google-pay {
-    color: inherit; /* Override parent color */
+/* Payment method icons with original brand colors */
+/* Visa - Blue */
+.payment-methods span i.fa-cc-visa {
+    color: #1A1F71;
 }
 
-.payment-methods .google-pay i {
+/* Mastercard - Red and Yellow */
+.payment-methods span i.fa-cc-mastercard {
+    background: linear-gradient(135deg, #EB001B 0%, #FF9900 50%, #EB001B 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+/* American Express - Blue */
+.payment-methods span i.fa-cc-amex {
+    color: #006FCF;
+}
+
+/* PayPal - Blue */
+.payment-methods span i.fa-cc-paypal {
+    color: #003087;
+}
+
+/* Google Pay - Multicolor */
+.payment-methods span i.fa-google-pay {
     background: linear-gradient(45deg, #4285F4 0%, #34A853 33%, #FBBC05 66%, #EA4335 100%);
     -webkit-background-clip: text;
     background-clip: text;
