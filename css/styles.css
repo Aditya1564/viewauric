@@ -1585,7 +1585,7 @@ a {
 
 .footer-widget ul li a:hover {
     color: #603000;
-    transform: translateX(3px);
+    /* Removed transform that was causing the chevron to disappear */
 }
 
 .contact-widget p {
