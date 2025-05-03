@@ -779,7 +779,7 @@ a {
         flex: 1;
         border-top: 1px solid #e5e0d5;
         padding: 20px;
-        margin: 0;
+        margin: 0 10px;
         background-color: #fafafa;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         border-radius: 6px;
@@ -1008,15 +1008,29 @@ a {
     transition: all 0.3s ease;
 }
 
-/* Mobile styling for the horizontal product details */
+/* Base styling for the horizontal product details */
 .product-details-horizontal {
     display: flex;
-    flex-direction: column;
     width: 100%;
     margin: 0 auto;
     padding: 20px 15px;
     background-color: #f8f8f5;
+    flex-direction: row; /* Default to horizontal layout */
 }
+
+/* Default for each detail section */
+.product-details-horizontal > div {
+    flex: 1;
+    margin: 0 10px;
+    width: 33.33%;
+    border-top: 1px solid #e5e0d5;
+    padding: 20px;
+    background-color: #fafafa;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border-radius: 6px;
+}
+
+/* Mobile-specific styling override in responsive.css */
 
 .product-description {
     margin-top: 30px;

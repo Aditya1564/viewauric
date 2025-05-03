@@ -40,14 +40,16 @@
         padding: 0;
     }
     
+    /* Override the default horizontal layout for mobile */
     .product-details-horizontal {
-        flex-direction: column;
+        flex-direction: column !important;
         padding: 15px;
     }
     
     .product-details-horizontal > div {
         margin-bottom: 20px;
-        width: 100%; /* Full width on mobile */
+        width: 100% !important; /* Full width on mobile, override desktop setting */
+        margin: 0 0 20px 0;
     }
 }
 
