@@ -830,8 +830,8 @@ a {
 }
 
 .product-title {
-    font-family: 'Lato', sans-serif;
-    font-size: 22px;
+    font-family: 'Lora', serif;
+    font-size: 24px;
     margin: 0 0 20px 0;
     color: #333;
     font-weight: 400;
@@ -851,7 +851,7 @@ a {
     font-family: 'Lato', sans-serif;
     font-size: 20px;
     font-weight: 500;
-    color: #603000;
+    color: #9c7c38;
     letter-spacing: 0;
 }
 
@@ -905,9 +905,11 @@ a {
 }
 
 .price-value {
-    font-size: 28px;
-    font-weight: 700;
-    color: #603000;
+    font-family: 'Lato', sans-serif;
+    font-size: 20px;
+    font-weight: 500;
+    color: #9c7c38;
+    letter-spacing: 0;
 }
 
 .product-meta {
