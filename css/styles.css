@@ -830,12 +830,13 @@ a {
 }
 
 .product-title {
-    font-family: 'Arial', sans-serif;
-    font-size: 24px;
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
     margin: 0 0 20px 0;
     color: #333;
-    font-weight: 500;
+    font-weight: 600;
     line-height: 1.3;
+    letter-spacing: 0.5px;
 }
 
 .product-pricing {
@@ -846,9 +847,11 @@ a {
 }
 
 .current-price {
-    font-size: 24px;
-    font-weight: 600;
+    font-family: 'Lato', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
     color: #B08F4C;
+    letter-spacing: 0.5px;
 }
 
 .original-price {
