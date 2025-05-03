@@ -1679,53 +1679,73 @@ a {
     gap: 10px;
 }
 
-/* Payment method icons with original brand colors */
-/* Add enhanced styling for all payment icons */
+/* Payment method icons with original brand colors and white backgrounds */
+.payment-methods {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
 .payment-methods span {
-    font-size: 26px;
+    font-size: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 5px;
+    background: white;
+    border-radius: 4px;
+    padding: 6px;
+    width: 44px;
+    height: 28px;
+    border: 1px solid #e0e0e0;
+}
+
+/* American Express - Blue */
+.payment-methods span i.fa-cc-amex {
+    color: #006FCF;
+}
+
+/* Apple Pay - Black */
+.payment-methods span i.fa-apple-pay {
+    color: #000000;
+}
+
+/* Diners Club - Blue */
+.payment-methods span i.fa-cc-diners-club {
+    color: #0079BE;
+}
+
+/* Discover - Orange */
+.payment-methods span i.fa-cc-discover {
+    color: #FF6000;
+}
+
+/* Google Pay - Multicolor */
+.payment-methods span i.fa-google-pay {
+    color: #000000;
+}
+
+/* Mastercard - Red and Orange */
+.payment-methods span i.fa-cc-mastercard {
+    color: #EB001B;
+}
+
+/* PayPal - Blue */
+.payment-methods span i.fa-cc-paypal {
+    color: #003087;
+}
+
+/* UnionPay - Red */
+.payment-methods span.union-pay {
+    background-color: #E21836;
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    font-family: Arial, sans-serif;
 }
 
 /* Visa - Blue */
 .payment-methods span i.fa-cc-visa {
     color: #1A1F71;
-    text-shadow: 0 0 1px #1A1F71;
-}
-
-/* Mastercard - Red and Yellow */
-.payment-methods span i.fa-cc-mastercard {
-    background: linear-gradient(90deg, #FF5F00 30%, #EB001B 48%, #F79E1B 65%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    font-weight: bold;
-}
-
-/* American Express - Blue */
-.payment-methods span i.fa-cc-amex {
-    color: #2E77BC;
-    text-shadow: 0 0 1px #2E77BC;
-}
-
-/* PayPal - Blue and Light Blue */
-.payment-methods span i.fa-cc-paypal {
-    background: linear-gradient(90deg, #253B80 35%, #179BD7 65%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    font-weight: bold;
-}
-
-/* Google Pay - Multicolor */
-.payment-methods span i.fa-google-pay {
-    background: linear-gradient(45deg, #4285F4 0%, #34A853 33%, #FBBC05 66%, #EA4335 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    font-weight: bold;
 }
 
 /* Responsive Design */
