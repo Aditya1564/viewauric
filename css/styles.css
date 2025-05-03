@@ -942,12 +942,15 @@ a {
     background-color: #603000;
     color: white;
     border: none;
-    padding: 12px 0;
+    padding: 15px 0;
     width: 100%;
     font-size: 16px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    letter-spacing: 1px;
+    display: block;
+    margin-top: 20px;
 }
 
 .add-to-cart-btn:hover {
@@ -1328,6 +1331,7 @@ a {
 .icon-link {
     color: #333;
     text-decoration: none;
+    margin: 0 10px;
 }
 
 .menu-button {
@@ -1339,29 +1343,10 @@ a {
 
 .menu-icon, .search-icon, .account-icon, .cart-icon {
     display: inline-block;
-    width: 20px;
-    height: 20px;
     position: relative;
-}
-
-.menu-icon:before {
-    content: "☰";
-    font-size: 20px;
-}
-
-.search-icon:before {
-    content: "🔍";
-    font-size: 20px;
-}
-
-.account-icon:before {
-    content: "👤";
-    font-size: 20px;
-}
-
-.cart-icon:before {
-    content: "🛒";
-    font-size: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
 }
 
 /* Responsive styles */
