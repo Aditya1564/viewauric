@@ -914,6 +914,10 @@ a {
     padding-top: 15px;
 }
 
+.product-description {
+    margin-top: 25px;
+}
+
 .product-description h3,
 .product-specifications h3,
 .product-care h3 {
