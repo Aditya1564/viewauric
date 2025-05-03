@@ -1441,6 +1441,149 @@ a {
     font-size: 18px;
 }
 
+/* Footer Section */
+.footer {
+    background-color: #f8f8f5;
+    color: #333;
+    padding: 40px 0 20px;
+    margin-top: 40px;
+    border-top: 1px solid rgba(107, 52, 0, 0.1);
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+}
+
+.footer-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.footer-column h3 {
+    color: #603000;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.footer-column h3:after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 40px;
+    height: 2px;
+    background-color: #B08F4C;
+}
+
+.footer-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.footer-links a {
+    color: #666;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: #603000;
+}
+
+.footer-contact p {
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.footer-contact i {
+    color: #603000;
+    font-size: 16px;
+}
+
+.footer-social {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.footer-social a {
+    color: #666;
+    font-size: 18px;
+    transition: color 0.3s ease;
+}
+
+.footer-social a:hover {
+    color: #603000;
+}
+
+.footer-newsletter p {
+    margin-bottom: 15px;
+    font-size: 14px;
+    color: #666;
+    line-height: 1.6;
+}
+
+.newsletter-form {
+    display: flex;
+    margin-bottom: 15px;
+}
+
+.newsletter-input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    background-color: white;
+    font-size: 14px;
+}
+
+.newsletter-button {
+    background-color: #603000;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.newsletter-button:hover {
+    background-color: #7B410A;
+}
+
+.copyright {
+    text-align: center;
+    padding-top: 20px;
+    margin-top: 30px;
+    border-top: 1px solid rgba(107, 52, 0, 0.1);
+    font-size: 14px;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .footer-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .footer-container {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* Responsive styles */
 @media (min-width: 1200px) {
     /* Large desktop */
