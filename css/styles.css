@@ -769,12 +769,12 @@ a {
     border-radius: 0;
     overflow: hidden;
     position: relative;
+    height: 350px; /* Fixed height for mobile */
 }
 
 .main-product-image {
     width: 100%;
-    height: auto;
-    max-height: none;
+    height: 100%; /* Fill container completely */
     object-fit: cover;
     display: block;
     margin: 0;
@@ -782,7 +782,7 @@ a {
 
 @media (min-width: 768px) {
     .main-image-container {
-        height: 500px;
+        height: 400px;
     }
     
     .main-product-image {
