@@ -3,40 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Detail - Jewelry Collection</title>
+    <title>Emerald Studs - Jewellery Hubb Jaipur</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/mobile-menu.css">
+    <link rel="stylesheet" href="css/desktop-menu.css">
 </head>
 <body>
     <header>
-        <div class="logo">
-            <h1>Divas Mantra</h1>
-        </div>
-        <nav>
-            <button class="menu-button">Menu</button>
-            <div class="mobile-menu">
-                <div class="close-menu">×</div>
-                <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li class="submenu-parent">
-                        <a href="#">Categories</a>
-                        <ul class="submenu">
-                            <li><a href="index.html">Earrings</a></li>
-                            <li><a href="index.html">Silver Jewelry</a></li>
-                            <li><a href="index.html">Golden Brass</a></li>
-                        </ul>
-                    </li>
-                    <li><a href="index.html">About</a></li>
-                    <li><a href="index.html">Contact</a></li>
-                </ul>
+        <!-- Mobile Header Bar -->
+        <div class="mobile-header">
+            <button class="menu-button">
+                <span class="menu-icon"></span>
+            </button>
+            <div class="logo">
+                <h1>Jewellery Hubb Jaipur</h1>
             </div>
-        </nav>
+            <div class="header-icons">
+                <a href="#" class="icon-link">
+                    <span class="search-icon"></span>
+                </a>
+                <a href="#" class="icon-link">
+                    <span class="account-icon"></span>
+                </a>
+                <a href="#" class="icon-link">
+                    <span class="cart-icon">0</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Mobile Navigation Menu -->
+        <div class="mobile-menu">
+            <div class="mobile-menu-header">
+                <div class="close-menu">&times;</div>
+            </div>
+            <ul class="mobile-nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li class="has-submenu">
+                    <a href="#">Collections</a>
+                    <span class="submenu-toggle">+</span>
+                    <ul class="submenu">
+                        <li><a href="index.html">Earrings</a></li>
+                        <li><a href="index.html">Rings</a></li>
+                        <li><a href="index.html">Necklaces</a></li>
+                        <li><a href="index.html">Bracelets</a></li>
+                    </ul>
+                </li>
+                <li><a href="index.html">About Us</a></li>
+                <li><a href="index.html">Contact</a></li>
+            </ul>
+        </div>
     </header>
+
+    <!-- Promo Banner -->
+    <div class="promo-banner">
+        <button class="banner-arrow banner-prev">&#10094;</button>
+        <p>Save 21% on exclusive selections - <a href="#">Shop Now</a></p>
+        <button class="banner-arrow banner-next">&#10095;</button>
+    </div>
 
     <main>
         <div class="product-detail-container">
             <div class="product-detail-images">
-                <img src="images/slider-image1.jpg" alt="Generic Product Image" class="main-product-image">
+                <div class="main-image-container">
+                    <img src="images/slider-image1.jpg" alt="Emerald Studs" class="main-product-image">
+                </div>
                 <div class="product-thumbnails">
                     <div class="thumbnail active">
                         <img src="images/slider-image1.jpg" alt="Thumbnail 1">
@@ -44,62 +75,50 @@
                     <div class="thumbnail">
                         <img src="images/slider-image2.jpg" alt="Thumbnail 2">
                     </div>
+                    <div class="thumbnail">
+                        <img src="images/slider-image1.jpg" alt="Thumbnail 3">
+                    </div>
                 </div>
             </div>
             <div class="product-detail-info">
-                <h2>Elegant Diamond Earrings</h2>
-                <div class="product-pricing">
-                    <span class="current-price">₹1,499.00</span>
-                    <span class="original-price">₹1,999.00</span>
-                    <span class="discount-tag">25% Off</span>
+                <h1 class="product-title">Emerald Studs</h1>
+                <div class="product-price">
+                    <span class="price-value">Rs. 25,999.00</span>
                 </div>
-                <div class="product-rating">
-                    <span class="stars">★★★★★</span>
-                    <span class="review-count">(48 reviews)</span>
-                </div>
-                <p class="availability">In Stock</p>
-                <p class="description">Handcrafted with love, these elegant diamond earrings feature intricate detailing and premium quality materials. Perfect for everyday wear or special occasions.</p>
                 
                 <div class="product-meta">
                     <div class="meta-item">
-                        <span class="meta-label">SKU:</span>
-                        <span class="meta-value">JE-1001</span>
+                        <span class="meta-label">Brand:</span>
+                        <span class="meta-value">Jewellery Hubb Jaipur</span>
                     </div>
                     <div class="meta-item">
-                        <span class="meta-label">Category:</span>
-                        <span class="meta-value">Earrings</span>
+                        <span class="meta-label">Availability:</span>
+                        <span class="meta-value in-stock">In stock ✓</span>
                     </div>
                 </div>
                 
-                <div class="specifications">
-                    <h3>Specifications</h3>
-                    <ul>
-                        <li>Material: 925 Sterling Silver</li>
-                        <li>Gemstone: Cubic Zirconia</li>
-                        <li>Plating: 18K Gold</li>
-                        <li>Weight: 3.5 grams</li>
-                        <li>Size: Standard</li>
-                    </ul>
+                <div class="product-quantity">
+                    <button class="quantity-btn decrement">-</button>
+                    <input type="text" value="1" class="quantity-input" readonly>
+                    <button class="quantity-btn increment">+</button>
                 </div>
                 
-                <div class="product-share">
-                    <h4>Share this product:</h4>
-                    <div class="social-icons">
-                        <a href="#" class="social-icon">Facebook</a>
-                        <a href="#" class="social-icon">Instagram</a>
-                        <a href="#" class="social-icon">Pinterest</a>
-                    </div>
+                <div class="product-actions">
+                    <button class="add-to-cart-btn">ADD TO CART</button>
                 </div>
-                
-                <a href="index.html" class="back-button">Back to Products</a>
             </div>
         </div>
     </main>
 
+    <div class="whatsapp-btn">
+        <!-- You can add WhatsApp icon here -->
+    </div>
+
     <footer>
-        <p>&copy; 2025 Divas Mantra Jewelry Collection. All rights reserved.</p>
+        <p>&copy; 2025 Jewellery Hubb Jaipur. All rights reserved.</p>
     </footer>
 
     <script src="js/navigation.js"></script>
+    <script src="js/banner-rotator.js"></script>
 </body>
 </html>
