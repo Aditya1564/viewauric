@@ -779,6 +779,7 @@ a {
     object-fit: cover;
     display: block;
     margin: 0;
+    transition: opacity 0.3s ease;
 }
 
 @media (min-width: 768px) {
