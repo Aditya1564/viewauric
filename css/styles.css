@@ -1441,13 +1441,23 @@ a {
     font-size: 18px;
 }
 
-/* Footer Section */
+/* Footer Section - Modern Design */
 .footer {
-    background-color: #f8f8f5;
-    color: #333;
-    padding: 40px 0 20px;
+    background-color: #333;
+    color: #fff;
+    padding: 60px 0 30px;
     margin-top: 40px;
-    border-top: 1px solid rgba(107, 52, 0, 0.1);
+    position: relative;
+}
+
+.footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(to right, #B08F4C, #603000);
 }
 
 .footer-container {
@@ -1456,7 +1466,7 @@ a {
     padding: 0 15px;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 30px;
+    gap: 40px;
 }
 
 .footer-column {
@@ -1465,20 +1475,21 @@ a {
 }
 
 .footer-column h3 {
-    color: #603000;
+    color: #fff;
     font-size: 18px;
     font-weight: 600;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
     position: relative;
-    padding-bottom: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
 }
 
-.footer-column h3:after {
+.footer-column h3::after {
     content: '';
     position: absolute;
     left: 0;
-    bottom: 0;
-    width: 40px;
+    bottom: -8px;
+    width: 30px;
     height: 2px;
     background-color: #B08F4C;
 }
@@ -1486,101 +1497,156 @@ a {
 .footer-links {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
 }
 
 .footer-links a {
-    color: #666;
+    color: #ccc;
     text-decoration: none;
     font-size: 14px;
-    transition: color 0.3s ease;
+    transition: all 0.3s ease;
+    position: relative;
+    padding-left: 0;
+    display: inline-block;
 }
 
 .footer-links a:hover {
-    color: #603000;
+    color: #B08F4C;
+    transform: translateX(5px);
 }
 
 .footer-contact p {
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     font-size: 14px;
-    color: #666;
+    color: #ccc;
     display: flex;
-    align-items: center;
-    gap: 10px;
+    align-items: flex-start;
+    gap: 12px;
+    line-height: 1.6;
 }
 
 .footer-contact i {
-    color: #603000;
+    color: #B08F4C;
     font-size: 16px;
+    margin-top: 3px;
 }
 
 .footer-social {
     display: flex;
     gap: 15px;
-    margin-top: 20px;
+    margin-top: 25px;
 }
 
 .footer-social a {
-    color: #666;
-    font-size: 18px;
-    transition: color 0.3s ease;
+    color: #ccc;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .footer-social a:hover {
-    color: #603000;
+    color: #fff;
+    background-color: #B08F4C;
+    transform: translateY(-3px);
 }
 
 .footer-newsletter p {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     font-size: 14px;
-    color: #666;
+    color: #ccc;
     line-height: 1.6;
 }
 
 .newsletter-form {
     display: flex;
     margin-bottom: 15px;
+    position: relative;
 }
 
 .newsletter-input {
     flex: 1;
-    padding: 10px 15px;
-    border: 1px solid #ddd;
-    background-color: white;
+    padding: 12px 15px;
+    border: none;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
     font-size: 14px;
+    width: 100%;
+}
+
+.newsletter-input::placeholder {
+    color: #999;
+}
+
+.newsletter-input:focus {
+    outline: none;
+    background-color: rgba(255, 255, 255, 0.15);
 }
 
 .newsletter-button {
-    background-color: #603000;
+    background-color: #B08F4C;
     color: white;
     border: none;
-    padding: 10px 15px;
+    border-radius: 0 4px 4px 0;
+    padding: 0 15px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .newsletter-button:hover {
-    background-color: #7B410A;
+    background-color: #603000;
 }
 
 .copyright {
     text-align: center;
-    padding-top: 20px;
-    margin-top: 30px;
-    border-top: 1px solid rgba(107, 52, 0, 0.1);
+    padding-top: 30px;
+    margin-top: 40px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
     font-size: 14px;
-    color: #666;
+    color: #999;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 991px) {
     .footer-container {
         grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+    }
+    
+    .footer {
+        padding: 50px 0 30px;
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 576px) {
     .footer-container {
         grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    .footer-column h3 {
+        margin-bottom: 20px;
+    }
+    
+    .footer {
+        padding: 40px 0 30px;
+    }
+    
+    .copyright {
+        margin-top: 30px;
+        padding-top: 20px;
     }
 }
 
