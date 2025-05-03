@@ -1625,7 +1625,7 @@ a {
 .social-icons a:hover {
     background-color: #603000;
     color: white;
-    transform: translateY(-3px);
+    /* Removed transform effect that was causing icons to disappear */
 }
 
 /* Footer Bottom Section */
