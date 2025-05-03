@@ -1344,9 +1344,11 @@ a {
 .menu-icon, .search-icon, .account-icon, .cart-icon {
     display: inline-block;
     position: relative;
-    font-size: 14px;
-    font-weight: 500;
     color: #333;
+}
+
+.menu-icon i, .search-icon i, .account-icon i, .cart-icon i {
+    font-size: 18px;
 }
 
 /* Responsive styles */
