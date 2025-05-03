@@ -952,21 +952,21 @@ a {
 
 .product-description {
     margin-top: 30px;
-    background-color: #f0f7ff;
+    background-color: #fafafa;
     border-left: 4px solid #4a90e2;
-    box-shadow: 0 2px 8px rgba(74, 144, 226, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .product-specifications {
-    background-color: #fff6e9;
+    background-color: #fafafa;
     border-left: 4px solid #e2994a;
-    box-shadow: 0 2px 8px rgba(226, 153, 74, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .product-care {
-    background-color: #f0fff4;
+    background-color: #fafafa;
     border-left: 4px solid #4abe7b;
-    box-shadow: 0 2px 8px rgba(74, 190, 123, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .product-description:hover {
