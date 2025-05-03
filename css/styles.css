@@ -732,7 +732,7 @@ a {
     display: flex;
     flex-direction: column;
     max-width: 1200px;
-    margin: 20px auto;
+    margin: 20px auto 0;
     padding: 0 15px;
     background-color: #f8f8f5;
 }
@@ -1132,7 +1132,8 @@ a {
     font-family: 'Playfair Display', serif;
     font-size: 28px;
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 15px;
+    margin-top: 0;
     font-weight: 600;
     color: #000000;
 }
@@ -1144,9 +1145,9 @@ a {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    gap: 15px;
-    padding: 10px 20px;
-    margin-bottom: 20px;
+    gap: 12px;
+    padding: 5px 20px 10px;
+    margin-bottom: 15px;
     width: 100%;
 }
 
@@ -1278,7 +1279,8 @@ a {
 .view-all-container {
     display: flex;
     justify-content: center;
-    margin-bottom: 40px;
+    margin-bottom: 20px;
+    margin-top: 5px;
 }
 
 .view-all-btn {
@@ -1938,8 +1940,8 @@ a {
 
 /* You May Also Like Section */
 .you-may-also-like {
-    margin: 60px 0;
-    padding: 40px 0;
+    margin: 20px 0 60px 0;
+    padding: 20px 0 40px 0;
     width: 100%;
     overflow: hidden;
     background-color: #f8f8f5;
@@ -1961,7 +1963,8 @@ a {
     font-family: 'Playfair Display', serif;
     font-size: 28px;
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
+    margin-top: 0;
     font-weight: 600;
     color: #603000;
     position: relative;
