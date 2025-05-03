@@ -1556,6 +1556,16 @@ a {
         max-width: 600px;
     }
     
+    .you-may-also-like {
+        margin: 40px 0;
+    }
+    
+    .section-title {
+        font-size: 24px;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+    }
+    
     /* Style the decorative element */
     .categories::before {
         top: 25px;
@@ -1927,4 +1937,37 @@ a {
     .product-specifications strong {
         min-width: 100px;
     }
+}
+
+/* You May Also Like Section */
+.you-may-also-like {
+    margin: 60px 0;
+    padding: 0 15px;
+}
+
+.you-may-also-like .container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: 600;
+    color: #603000;
+    position: relative;
+    padding-bottom: 15px;
+}
+
+.section-title:after {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 2px;
+    background-color: #B08F4C;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
 }
