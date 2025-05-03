@@ -882,7 +882,7 @@ a {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
 }
 
 .meta-item {
@@ -895,6 +895,7 @@ a {
 .meta-label {
     font-weight: 500;
     color: #333;
+    min-width: 80px;
 }
 
 .meta-value {
@@ -903,6 +904,49 @@ a {
 
 .meta-value.in-stock {
     color: #4CAF50;
+}
+
+.product-description,
+.product-specifications,
+.product-care {
+    margin-bottom: 20px;
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+}
+
+.product-description h3,
+.product-specifications h3,
+.product-care h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #603000;
+}
+
+.product-description p,
+.product-care p {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.product-specifications ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.product-specifications li {
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: #666;
+}
+
+.product-specifications strong {
+    color: #333;
+    display: inline-block;
+    min-width: 120px;
 }
 
 .product-quantity {
@@ -1819,5 +1863,45 @@ a {
     
     .view-all-container {
         margin-bottom: 30px;
+    }
+    
+    /* Product Detail Page - Mobile */
+    .product-detail-container {
+        margin: 20px auto;
+        flex-direction: column;
+    }
+    
+    .product-detail-gallery {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    
+    .product-detail-info {
+        width: 100%;
+        padding-left: 0;
+    }
+    
+    .product-detail-info h1 {
+        font-size: 22px;
+    }
+    
+    .product-actions {
+        flex-direction: column;
+    }
+    
+    .product-description h3,
+    .product-specifications h3,
+    .product-care h3 {
+        font-size: 16px;
+    }
+    
+    .product-description p,
+    .product-care p,
+    .product-specifications li {
+        font-size: 13px;
+    }
+    
+    .product-specifications strong {
+        min-width: 100px;
     }
 }
