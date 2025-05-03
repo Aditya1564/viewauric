@@ -1,6 +1,15 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log("Product detail script loading...");
     
+    // Detect if we're on the product detail page
+    const isProductPage = document.querySelector('.product-details-container') !== null;
+    
+    // If we're not on the product detail page, exit early
+    if (!isProductPage) {
+        console.log("Not on product detail page, exiting product detail script");
+        return;
+    }
+    
     // Function to safely update an element's text content if it exists
     function safeUpdateElement(id, value) {
         try {
