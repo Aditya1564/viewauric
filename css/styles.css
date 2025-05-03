@@ -922,12 +922,13 @@ a {
 .product-description h3,
 .product-specifications h3,
 .product-care h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 20px;
-    margin-bottom: 15px;
+    font-family: 'Lato', sans-serif;
+    font-size: 18px;
+    margin-bottom: 10px;
     color: #603000;
     font-weight: 600;
-    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .product-description p,
@@ -1044,12 +1045,13 @@ a {
 }
 
 .specifications h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 20px;
-    margin-bottom: 15px;
+    font-family: 'Lato', sans-serif;
+    font-size: 18px;
+    margin-bottom: 10px;
     color: #603000;
     font-weight: 600;
-    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .specifications ul {
@@ -1079,12 +1081,13 @@ a {
 }
 
 .product-share h4 {
-    font-family: 'Playfair Display', serif;
-    font-size: 20px;
-    margin-bottom: 15px;
+    font-family: 'Lato', sans-serif;
+    font-size: 18px;
+    margin-bottom: 12px;
     color: #603000;
     font-weight: 600;
-    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .social-icons {
