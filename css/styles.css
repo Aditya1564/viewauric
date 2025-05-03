@@ -868,6 +868,16 @@ a {
     margin-bottom: 25px;
 }
 
+.product-price {
+    margin-bottom: 15px;
+}
+
+.price-value {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+}
+
 .product-meta {
     display: flex;
     flex-direction: column;
@@ -1220,6 +1230,63 @@ a {
     font-size: 32px;
 }
 
+/* Promo Banner */
+.promo-banner {
+    width: 100%;
+    background-color: #000;
+    color: white;
+    padding: 10px 0;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.promo-banner a {
+    color: white;
+    text-decoration: underline;
+    margin-left: 5px;
+    font-weight: bold;
+}
+
+.promo-banner a:hover {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Banner fade transitions */
+.fade-in {
+    opacity: 1;
+    transition: opacity 0.3s ease-in;
+}
+
+.fade-out {
+    opacity: 0;
+    transition: opacity 0.3s ease-out;
+}
+
+.banner-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    color: white;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.banner-prev {
+    left: 10px;
+}
+
+.banner-next {
+    right: 10px;
+}
+
 /* WhatsApp Button */
 .whatsapp-btn {
     position: fixed;
@@ -1237,6 +1304,66 @@ a {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     z-index: 99;
 }
+/* Mobile Header */
+.mobile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-header .logo h1 {
+    font-size: 18px;
+    margin: 0;
+    font-weight: 600;
+}
+
+.header-icons {
+    display: flex;
+    gap: 15px;
+}
+
+.icon-link {
+    color: #333;
+    text-decoration: none;
+}
+
+.menu-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.menu-icon, .search-icon, .account-icon, .cart-icon {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    position: relative;
+}
+
+.menu-icon:before {
+    content: "\2630";
+    font-size: 20px;
+}
+
+.search-icon:before {
+    content: "\1F50D";
+    font-size: 20px;
+}
+
+.account-icon:before {
+    content: "\1F464";
+    font-size: 20px;
+}
+
+.cart-icon:before {
+    content: "\1F6D2";
+    font-size: 20px;
+}
+
 /* Responsive styles */
 @media (min-width: 1200px) {
     /* Large desktop */
