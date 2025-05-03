@@ -1620,12 +1620,22 @@ a {
     color: #603000;
     font-size: 16px;
     transition: all 0.3s ease;
+    position: relative;
+}
+
+.social-icons a i {
+    position: relative;
+    z-index: 2; /* Ensure icons stay above background */
 }
 
 .social-icons a:hover {
     background-color: #603000;
-    color: white;
-    /* Removed transform effect that was causing icons to disappear */
+}
+
+/* Keep icons visible with stronger contrast */
+.social-icons a:hover i {
+    color: #ffffff;
+    font-weight: bold; /* Make icons bolder on hover for better visibility */
 }
 
 /* Footer Bottom Section */
