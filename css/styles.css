@@ -1345,22 +1345,22 @@ a {
 }
 
 .menu-icon:before {
-    content: "\2630";
+    content: "☰";
     font-size: 20px;
 }
 
 .search-icon:before {
-    content: "\1F50D";
+    content: "🔍";
     font-size: 20px;
 }
 
 .account-icon:before {
-    content: "\1F464";
+    content: "👤";
     font-size: 20px;
 }
 
 .cart-icon:before {
-    content: "\1F6D2";
+    content: "🛒";
     font-size: 20px;
 }
 
