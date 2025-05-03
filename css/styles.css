@@ -1441,23 +1441,25 @@ a {
     font-size: 18px;
 }
 
-/* Footer Section - Modern Design */
+/* Footer Section - Modern Design with Original Colors */
 .footer {
-    background-color: #333;
-    color: #fff;
-    padding: 60px 0 30px;
+    background-color: #f8f8f5;
+    color: #333;
+    padding: 50px 0 30px;
     margin-top: 40px;
     position: relative;
+    border-top: 1px solid rgba(107, 52, 0, 0.1);
 }
 
 .footer::before {
     content: '';
     position: absolute;
     top: 0;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    background: linear-gradient(to right, #B08F4C, #603000);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background-color: #B08F4C;
 }
 
 .footer-container {
@@ -1466,7 +1468,7 @@ a {
     padding: 0 15px;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 40px;
+    gap: 35px;
 }
 
 .footer-column {
@@ -1475,12 +1477,12 @@ a {
 }
 
 .footer-column h3 {
-    color: #fff;
-    font-size: 18px;
+    color: #603000;
+    font-size: 16px;
     font-weight: 600;
-    margin-bottom: 25px;
+    margin-bottom: 22px;
     position: relative;
-    letter-spacing: 1.5px;
+    letter-spacing: 1px;
     text-transform: uppercase;
 }
 
@@ -1501,7 +1503,7 @@ a {
 }
 
 .footer-links a {
-    color: #ccc;
+    color: #666;
     text-decoration: none;
     font-size: 14px;
     transition: all 0.3s ease;
@@ -1511,14 +1513,14 @@ a {
 }
 
 .footer-links a:hover {
-    color: #B08F4C;
+    color: #603000;
     transform: translateX(5px);
 }
 
 .footer-contact p {
     margin-bottom: 15px;
     font-size: 14px;
-    color: #ccc;
+    color: #666;
     display: flex;
     align-items: flex-start;
     gap: 12px;
@@ -1526,7 +1528,7 @@ a {
 }
 
 .footer-contact i {
-    color: #B08F4C;
+    color: #603000;
     font-size: 16px;
     margin-top: 3px;
 }
@@ -1534,17 +1536,17 @@ a {
 .footer-social {
     display: flex;
     gap: 15px;
-    margin-top: 25px;
+    margin-top: 20px;
 }
 
 .footer-social a {
-    color: #ccc;
+    color: #666;
     font-size: 16px;
     transition: all 0.3s ease;
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(107, 52, 0, 0.05);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1552,14 +1554,14 @@ a {
 
 .footer-social a:hover {
     color: #fff;
-    background-color: #B08F4C;
+    background-color: #603000;
     transform: translateY(-3px);
 }
 
 .footer-newsletter p {
-    margin-bottom: 20px;
+    margin-bottom: 18px;
     font-size: 14px;
-    color: #ccc;
+    color: #666;
     line-height: 1.6;
 }
 
@@ -1572,10 +1574,10 @@ a {
 .newsletter-input {
     flex: 1;
     padding: 12px 15px;
-    border: none;
+    border: 1px solid rgba(107, 52, 0, 0.2);
     border-radius: 4px;
-    background-color: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    background-color: white;
+    color: #333;
     font-size: 14px;
     width: 100%;
 }
@@ -1586,11 +1588,11 @@ a {
 
 .newsletter-input:focus {
     outline: none;
-    background-color: rgba(255, 255, 255, 0.15);
+    border-color: #603000;
 }
 
 .newsletter-button {
-    background-color: #B08F4C;
+    background-color: #603000;
     color: white;
     border: none;
     border-radius: 0 4px 4px 0;
@@ -1607,16 +1609,16 @@ a {
 }
 
 .newsletter-button:hover {
-    background-color: #603000;
+    background-color: #7B410A;
 }
 
 .copyright {
     text-align: center;
-    padding-top: 30px;
-    margin-top: 40px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 25px;
+    margin-top: 30px;
+    border-top: 1px solid rgba(107, 52, 0, 0.1);
     font-size: 14px;
-    color: #999;
+    color: #666;
 }
 
 @media (max-width: 991px) {
@@ -1626,14 +1628,14 @@ a {
     }
     
     .footer {
-        padding: 50px 0 30px;
+        padding: 40px 0 30px;
     }
 }
 
 @media (max-width: 576px) {
     .footer-container {
         grid-template-columns: 1fr;
-        gap: 30px;
+        gap: 25px;
     }
     
     .footer-column h3 {
@@ -1641,11 +1643,11 @@ a {
     }
     
     .footer {
-        padding: 40px 0 30px;
+        padding: 35px 0 25px;
     }
     
     .copyright {
-        margin-top: 30px;
+        margin-top: 25px;
         padding-top: 20px;
     }
 }
