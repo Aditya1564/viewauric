@@ -1684,6 +1684,19 @@ a {
     font-size: 24px;
 }
 
+/* Google Pay icon with original brand colors */
+.payment-methods .google-pay {
+    color: inherit; /* Override parent color */
+}
+
+.payment-methods .google-pay i {
+    background: linear-gradient(45deg, #4285F4 0%, #34A853 33%, #FBBC05 66%, #EA4335 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: bold;
+}
+
 /* Responsive Design */
 @media (max-width: 991px) {
     .footer-top .container {
