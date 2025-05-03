@@ -1,7 +1,7 @@
 /* Responsive Styles for Divas Mantra Website */
 
 /* Small devices (smartphones and small tablets) */
-@media (max-width: 767px) {
+@media (max-width: 680px) {
     /* Mobile Menu takes 70% width on small screens as requested */
     .mobile-menu {
         width: 70%;
@@ -55,6 +55,43 @@
         box-sizing: border-box !important;
         flex: none !important; /* Don't allow flex to override */
         display: block !important; /* Ensure no flexbox issues */
+    }
+}
+
+/* Small-to-medium tablets (681px-767px) */
+@media (min-width: 681px) and (max-width: 767px) {
+    /* Menu width for smaller tablets */
+    .mobile-menu {
+        width: 70%;
+    }
+    
+    /* Product detail page for small tablets */
+    .product-detail-container {
+        flex-direction: column;
+        padding: 15px;
+    }
+    
+    .product-detail-left,
+    .product-detail-right {
+        width: 100%;
+        padding: 0;
+    }
+    
+    /* Override the default horizontal layout for small tablets */
+    .product-details-horizontal {
+        flex-direction: column !important;
+        padding: 15px;
+        gap: 20px;
+        width: 100% !important;
+    }
+    
+    .product-details-horizontal > div {
+        margin-bottom: 20px !important;
+        width: 100% !important;
+        margin: 0 0 20px 0 !important;
+        box-sizing: border-box !important;
+        flex: none !important;
+        display: block !important;
     }
 }
 
