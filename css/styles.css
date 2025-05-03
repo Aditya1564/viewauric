@@ -1106,6 +1106,34 @@ a {
     gap: 10px;
 }
 
+.buy-now-btn {
+    background-color: #9c7c38;
+    color: white;
+    border: none;
+    padding: 15px 0;
+    width: 100%;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 1px;
+    display: block;
+    margin-bottom: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+.buy-now-btn:hover {
+    background-color: #b08f4c;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(156, 124, 56, 0.3);
+}
+
+.buy-now-btn i {
+    margin-right: 8px;
+    font-size: 14px;
+}
+
 .add-to-cart-btn {
     background-color: #603000;
     color: white;
