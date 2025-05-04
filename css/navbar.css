@@ -246,18 +246,19 @@
 @media (max-width: 991px) {
     .hamburger {
         display: block;
-        order: 1;
+        order: 0; /* First item on left side */
+        margin-right: 10px;
     }
     
     .brand {
-        order: 0; /* Keep on left side */
+        order: 1; /* Comes after hamburger menu */
         margin: 0 auto 0 0;
         font-size: 26px;
         text-align: left;
     }
     
     .nav-icons {
-        order: 3;
+        order: 2;
         display: flex;
         justify-content: flex-end;
         min-width: 140px; /* Ensure enough space for icons */
