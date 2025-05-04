@@ -217,7 +217,7 @@
     
     .nav-link {
         padding: 25px 3px; /* Reduce padding */
-        font-size: 13px; /* Smaller font size */
+        font-size: 11px; /* Smaller font size */
     }
     
     .icon-link {
@@ -307,7 +307,7 @@
     .nav-link {
         padding: 15px 0;
         width: 100%;
-        font-size: 14px;
+        font-size: 12px;
     }
     
     .dropdown-menu {
@@ -371,7 +371,7 @@
     }
     
     .nav-link {
-        font-size: 14px;
+        font-size: 12px;
     }
     
     .nav-icons {
