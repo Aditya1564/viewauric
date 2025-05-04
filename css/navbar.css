@@ -20,8 +20,8 @@
 
 /* Brand/Logo */
 .brand {
-    font-size: 38px; /* Increased font size further */
-    font-weight: 600;
+    font-size: 42px; /* Increased font size further */
+    font-weight: 700; /* Increased font weight */
     font-family: 'Playfair Display', serif;
     color: #333;
     text-decoration: none;
@@ -225,7 +225,8 @@
     }
     
     .brand {
-        font-size: 22px; /* Slightly smaller brand */
+        font-size: 32px; /* Increased font size */
+        font-weight: 700; /* Increased font weight */
         margin-right: 10px;
     }
 }
@@ -254,7 +255,8 @@
     .brand {
         order: 1; /* Comes after hamburger menu */
         margin: 0 auto 0 15px; /* Added left margin */
-        font-size: 32px;
+        font-size: 36px; /* Increased font size */
+        font-weight: 700; /* Increased font weight */
         text-align: left;
     }
     
@@ -356,7 +358,8 @@
     }
     
     .brand {
-        font-size: 28px;
+        font-size: 32px; /* Increased font size */
+        font-weight: 700; /* Increased font weight */
     }
     
     .icon-link {
