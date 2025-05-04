@@ -20,7 +20,7 @@
 
 /* Brand/Logo */
 .brand {
-    font-size: 30px; /* Increased font size */
+    font-size: 38px; /* Increased font size further */
     font-weight: 600;
     font-family: 'Playfair Display', serif;
     color: #333;
@@ -253,7 +253,7 @@
     .brand {
         order: 1; /* Comes after hamburger menu */
         margin: 0 auto 0 0;
-        font-size: 26px;
+        font-size: 32px;
         text-align: left;
     }
     
@@ -355,7 +355,7 @@
     }
     
     .brand {
-        font-size: 22px;
+        font-size: 28px;
     }
     
     .icon-link {
