@@ -25,8 +25,11 @@ function initializeFirebase() {
   try {
     // First attempt: check if Firebase is already initialized using apps array
     if (typeof firebase !== 'undefined') {
+      // Use the firebaseConfig from firebase-config.js (available in window.firebaseConfig)
+      const config = window.firebaseConfig || firebaseConfig;
+
       if (firebase.apps && !firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
+        firebase.initializeApp(config);
         console.log('Firebase initialized successfully (Method 1)');
       } else {
         console.log('Firebase already initialized');
@@ -55,7 +58,9 @@ function initializeFirebase() {
     // Second attempt: Try alternative initialization method for older browsers
     try {
       if (typeof firebase !== 'undefined') {
-        const app = firebase.initializeApp(firebaseConfig);
+        // Use the firebaseConfig from firebase-config.js (available in window.firebaseConfig)
+        const config = window.firebaseConfig || firebaseConfig;
+        const app = firebase.initializeApp(config);
         auth = app.auth();
         console.log('Firebase initialized successfully (Method 2)');
         return true;
@@ -70,6 +75,7 @@ function initializeFirebase() {
       }
     } catch (fallbackError) {
       console.error('Firebase initialization fallback error:', fallbackError);
+      console.error('Error details:', fallbackError.message);
       
       // Display visible error on the page
       const errorElement = document.getElementById('error-message');
@@ -162,6 +168,7 @@ const ErrorHandler = {
     console.error('Authentication error:', error);
     console.error('Error code:', error.code);
     console.error('Error message:', error.message);
+    console.error('Firebase config:', window.firebaseConfig);
     
     let errorMessage = 'An error occurred during authentication.';
     
@@ -176,7 +183,9 @@ const ErrorHandler = {
       'auth/popup-closed-by-user': 'The sign-in popup was closed before authentication was completed.',
       'auth/network-request-failed': 'Network error. Please check your internet connection and try again.',
       'auth/too-many-requests': 'Too many unsuccessful login attempts. Please try again later.',
-      'auth/internal-error': 'An internal error occurred. Please try again later.'
+      'auth/internal-error': 'An internal error occurred. Please try again later.',
+      'auth/configuration-not-found': 'Authentication configuration not found. Please check the Firebase setup in your Firebase console.',
+      'auth/unauthorized-domain': 'This domain is not authorized for OAuth operations for your Firebase project. Add it in your Firebase console.'
     };
     
     if (error.code && errorMap[error.code]) {
@@ -187,6 +196,12 @@ const ErrorHandler = {
     }
     
     UI.showError(errorMessage);
+    
+    // Show debug instructions if available
+    const debugElement = document.getElementById('debug-instructions');
+    if (debugElement) {
+      debugElement.style.display = 'block';
+    }
   }
 };
 
