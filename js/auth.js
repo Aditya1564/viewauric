@@ -21,8 +21,24 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase and get auth instance
-firebase.initializeApp(firebaseConfig);
+try {
+  // Check if Firebase is already initialized
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+    console.log('Firebase initialized successfully');
+  } else {
+    console.log('Firebase already initialized');
+  }
+} catch (error) {
+  console.error('Firebase initialization error:', error);
+}
+
 const auth = firebase.auth();
+
+// Enable persistent login sessions
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(error => {
+  console.error('Error setting persistence:', error);
+});
 
 /**
  * DOM ELEMENTS SECTION
@@ -97,7 +113,11 @@ const ErrorHandler = {
    * @param {Error} error - The Firebase auth error object
    */
   handleAuthError: function(error) {
+    // Log detailed error information for debugging
     console.error('Authentication error:', error);
+    console.error('Error code:', error.code);
+    console.error('Error message:', error.message);
+    
     let errorMessage = 'An error occurred during authentication.';
     
     const errorMap = {
@@ -108,11 +128,17 @@ const ErrorHandler = {
       'auth/user-not-found': 'No account found with this email. Please sign up first.',
       'auth/account-exists-with-different-credential': 'An account already exists with the same email but different sign-in credentials.',
       'auth/operation-not-allowed': 'This sign-in method is not enabled. Please contact support.',
-      'auth/popup-closed-by-user': 'The sign-in popup was closed before authentication was completed.'
+      'auth/popup-closed-by-user': 'The sign-in popup was closed before authentication was completed.',
+      'auth/network-request-failed': 'Network error. Please check your internet connection and try again.',
+      'auth/too-many-requests': 'Too many unsuccessful login attempts. Please try again later.',
+      'auth/internal-error': 'An internal error occurred. Please try again later.'
     };
     
     if (error.code && errorMap[error.code]) {
       errorMessage = errorMap[error.code];
+    } else {
+      // If we don't have a specific message for this error code, show the Firebase error message
+      errorMessage = error.message || 'An error occurred during authentication.';
     }
     
     UI.showError(errorMessage);
@@ -209,41 +235,50 @@ const AuthHandlers = {
   handleGoogleLogin: function() {
     const googleProvider = new firebase.auth.GoogleAuthProvider();
     
-    auth.signInWithPopup(googleProvider)
-      .then((result) => {
-        // Google login successful
-        UI.showSuccess('Login successful! Redirecting to your account...');
-        
-        // Redirect to profile page after successful login
-        UI.redirectAfterDelay('profile.html');
-      })
+    // Add scopes for additional permissions
+    googleProvider.addScope('profile');
+    googleProvider.addScope('email');
+    
+    // Use a redirect for mobile compatibility instead of popup
+    auth.signInWithRedirect(googleProvider)
       .catch((error) => {
         ErrorHandler.handleAuthError(error);
       });
   },
   
   /**
-   * Google Signup handler
+   * Google Signup handler - same as login since Google handles both cases
    */
   handleGoogleSignup: function() {
-    const googleProvider = new firebase.auth.GoogleAuthProvider();
-    
-    auth.signInWithPopup(googleProvider)
+    this.handleGoogleLogin();
+  },
+  
+  /**
+   * Handle return from Google redirect flow
+   */
+  handleGoogleRedirectResult: function() {
+    // Check for redirect result on page load
+    auth.getRedirectResult()
       .then((result) => {
-        // Check if this is a new or existing user
-        const isNewUser = result.additionalUserInfo.isNewUser;
-        
-        if (isNewUser) {
-          UI.showSuccess('Account created successfully! Redirecting to your account...');
-        } else {
-          UI.showSuccess('Welcome back! Redirecting to your account...');
+        if (result.user) {
+          // Check if this is a new or existing user
+          const isNewUser = result.additionalUserInfo?.isNewUser;
+          
+          if (isNewUser) {
+            UI.showSuccess('Account created successfully! Redirecting to your account...');
+          } else {
+            UI.showSuccess('Welcome back! Redirecting to your account...');
+          }
+          
+          // Redirect to profile page after successful signup/login
+          UI.redirectAfterDelay('profile.html');
         }
-        
-        // Redirect to profile page after successful signup
-        UI.redirectAfterDelay('profile.html');
       })
       .catch((error) => {
-        ErrorHandler.handleAuthError(error);
+        // Only show error if it's not just the initial load
+        if (error.code !== 'auth/credential-already-in-use') {
+          ErrorHandler.handleAuthError(error);
+        }
       });
   },
   
@@ -335,6 +370,9 @@ function initAuth() {
   if (ELEMENTS.googleSignupBtn) {
     ELEMENTS.googleSignupBtn.addEventListener('click', AuthHandlers.handleGoogleSignup);
   }
+  
+  // Handle redirect result from Google authentication
+  AuthHandlers.handleGoogleRedirectResult();
   
   // Initialize session management
   SessionManager.init();
