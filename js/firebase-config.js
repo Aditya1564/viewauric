@@ -5,10 +5,9 @@ const firebaseConfig = {
   authDomain: "auric-a0c92.firebaseapp.com",
   projectId: "auric-a0c92",
   storageBucket: "auric-a0c92.appspot.com",
+  messagingSenderId: "878979958342",  // Required for proper authentication
   appId: "1:878979958342:web:e6092f7522488d21eaec47",
-  // Add additional Firebase configuration settings here as needed
-  measurementId: null,  // Optional: for Google Analytics
-  messagingSenderId: null  // Optional: for Firebase Cloud Messaging
+  measurementId: null  // Optional: for Google Analytics
 };
 
 // Export the Firebase configuration

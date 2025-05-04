@@ -162,3 +162,16 @@
   background-color: rgba(46, 204, 113, 0.1);
   border-radius: 4px;
 }
+
+/* Debug instructions styling */
+#debug-instructions {
+  background-color: #fffbf0; 
+  border: 1px solid #ffeeba;
+  color: #856404;
+  padding: 10px;
+  margin: 15px 0;
+  border-radius: 4px;
+  font-family: 'Lato', sans-serif;
+  font-size: 14px;
+  text-align: left;
+}

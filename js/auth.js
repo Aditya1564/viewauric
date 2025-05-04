@@ -293,53 +293,77 @@ const AuthHandlers = {
    * Google Login handler
    */
   handleGoogleLogin: function() {
-    const googleProvider = new firebase.auth.GoogleAuthProvider();
-    
-    // Add scopes for additional permissions
-    googleProvider.addScope('profile');
-    googleProvider.addScope('email');
-    
-    // Use a redirect for mobile compatibility instead of popup
-    auth.signInWithRedirect(googleProvider)
-      .catch((error) => {
-        ErrorHandler.handleAuthError(error);
+    try {
+      console.log('Google login handler called');
+      const googleProvider = new firebase.auth.GoogleAuthProvider();
+      
+      // Add scopes for additional permissions
+      googleProvider.addScope('profile');
+      googleProvider.addScope('email');
+      
+      // Add custom parameters for authorization
+      googleProvider.setCustomParameters({
+        'prompt': 'select_account'
       });
+      
+      console.log('Google provider configured, starting redirect flow');
+      // Use a redirect for mobile compatibility instead of popup
+      auth.signInWithRedirect(googleProvider)
+        .catch((error) => {
+          console.error('Redirect error:', error);
+          ErrorHandler.handleAuthError(error);
+        });
+    } catch (e) {
+      console.error('Error in Google login handler:', e);
+      UI.showError('Error initializing Google sign-in. Please try again later or use email sign-in.');
+    }
   },
   
   /**
    * Google Signup handler - same as login since Google handles both cases
    */
   handleGoogleSignup: function() {
-    this.handleGoogleLogin();
+    // Call the Google login handler directly to handle both signup and login
+    AuthHandlers.handleGoogleLogin();
   },
   
   /**
    * Handle return from Google redirect flow
    */
   handleGoogleRedirectResult: function() {
-    // Check for redirect result on page load
-    auth.getRedirectResult()
-      .then((result) => {
-        if (result.user) {
-          // Check if this is a new or existing user
-          const isNewUser = result.additionalUserInfo?.isNewUser;
-          
-          if (isNewUser) {
-            UI.showSuccess('Account created successfully! Redirecting to your account...');
+    try {
+      console.log('Checking for Google redirect result');
+      // Check for redirect result on page load
+      auth.getRedirectResult()
+        .then((result) => {
+          console.log('Redirect result received:', result);
+          if (result && result.user) {
+            // Check if this is a new or existing user
+            const isNewUser = result.additionalUserInfo?.isNewUser;
+            console.log('User signed in via redirect, isNewUser:', isNewUser);
+            
+            if (isNewUser) {
+              UI.showSuccess('Account created successfully! Redirecting to your account...');
+            } else {
+              UI.showSuccess('Welcome back! Redirecting to your account...');
+            }
+            
+            // Redirect to profile page after successful signup/login
+            UI.redirectAfterDelay('profile.html');
           } else {
-            UI.showSuccess('Welcome back! Redirecting to your account...');
+            console.log('No user from redirect result');
           }
-          
-          // Redirect to profile page after successful signup/login
-          UI.redirectAfterDelay('profile.html');
-        }
-      })
-      .catch((error) => {
-        // Only show error if it's not just the initial load
-        if (error.code !== 'auth/credential-already-in-use') {
-          ErrorHandler.handleAuthError(error);
-        }
-      });
+        })
+        .catch((error) => {
+          console.error('Error in redirect result:', error);
+          // Only show error if it's not just the initial load
+          if (error.code !== 'auth/credential-already-in-use') {
+            ErrorHandler.handleAuthError(error);
+          }
+        });
+    } catch (e) {
+      console.error('Exception in handleGoogleRedirectResult:', e);
+    }
   },
   
   /**
