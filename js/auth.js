@@ -4,92 +4,34 @@
  * This file contains all Firebase authentication functionality for user management
  * including login, signup, Google auth, and session handling.
  * 
- * @version 1.0.0
+ * @version 2.0.0
  * @author Auric Development Team
  */
 
 /**
  * CONFIGURATION SECTION
- * Contains all Firebase configuration and initialization code
+ * Firebase configuration and auth instance are now imported from firebase-config.js
  */
-let auth; // Declare auth variable in global scope
 
-// Get Firebase configuration from firebase-config.js
-// The configuration will be imported from firebase-config.js which is loaded before this file
+// Get the auth instance from firebase-config.js
+let auth = window.firebaseAuth;
 
-/**
- * Initialize Firebase app and authentication
- * With fallback for browser compatibility issues
- */
-function initializeFirebase() {
-  try {
-    // First attempt: check if Firebase is already initialized using apps array
-    if (typeof firebase !== 'undefined') {
-      // Use the firebaseConfig from firebase-config.js (available in window.firebaseConfig)
-      const config = window.firebaseConfig || firebaseConfig;
-
-      if (firebase.apps && !firebase.apps.length) {
-        firebase.initializeApp(config);
-        console.log('Firebase initialized successfully (Method 1)');
-      } else {
-        console.log('Firebase already initialized');
-      }
-      
-      // Get auth instance
-      auth = firebase.auth();
-      
-      // Enable persistent login sessions
-      try {
-        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-        console.log('Auth persistence set successfully');
-      } catch (persistenceError) {
-        console.error('Error setting persistence:', persistenceError);
-        // Continue anyway as this is not critical
-      }
-      
-      return true;
-    } else {
-      console.error('Firebase is not defined');
-      return false;
-    }
-  } catch (error) {
-    console.error('Firebase initialization error (Method 1):', error);
-    
-    // Second attempt: Try alternative initialization method for older browsers
-    try {
-      if (typeof firebase !== 'undefined') {
-        // Use the firebaseConfig from firebase-config.js (available in window.firebaseConfig)
-        const config = window.firebaseConfig || firebaseConfig;
-        const app = firebase.initializeApp(config);
-        auth = app.auth();
-        console.log('Firebase initialized successfully (Method 2)');
-        return true;
-      } else {
-        // Display visible error on the page
-        const errorElement = document.getElementById('error-message');
-        if (errorElement) {
-          errorElement.textContent = 'Firebase library could not be loaded. Please check your internet connection.';
-          errorElement.style.display = 'block';
-        }
-        return false;
-      }
-    } catch (fallbackError) {
-      console.error('Firebase initialization fallback error:', fallbackError);
-      console.error('Error details:', fallbackError.message);
-      
-      // Display visible error on the page
-      const errorElement = document.getElementById('error-message');
-      if (errorElement) {
-        errorElement.textContent = 'There was a problem connecting to the authentication service. Please try again later.';
-        errorElement.style.display = 'block';
-      }
-      return false;
-    }
-  }
+// Check if auth is properly initialized
+if (!auth && typeof firebase !== 'undefined') {
+  console.log('Getting auth from firebase directly');
+  auth = firebase.auth();
 }
 
-// Initialize Firebase when the script loads
-const firebaseInitialized = initializeFirebase();
+// Final verification
+if (!auth) {
+  console.error('Firebase auth is not available');
+  // Display visible error on the page
+  const errorElement = document.getElementById('error-message');
+  if (errorElement) {
+    errorElement.textContent = 'There was a problem with the authentication service. Please refresh the page and try again.';
+    errorElement.style.display = 'block';
+  }
+}
 
 /**
  * DOM ELEMENTS SECTION
