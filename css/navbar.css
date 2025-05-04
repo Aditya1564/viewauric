@@ -26,6 +26,7 @@
     color: #333;
     text-decoration: none;
     margin-right: 20px;
+    margin-left: 15px; /* Added left margin for spacing */
     min-width: 80px;
     order: 0; /* Ensure it stays on the left */
 }
@@ -252,7 +253,7 @@
     
     .brand {
         order: 1; /* Comes after hamburger menu */
-        margin: 0 auto 0 0;
+        margin: 0 auto 0 15px; /* Added left margin */
         font-size: 32px;
         text-align: left;
     }
