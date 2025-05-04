@@ -596,15 +596,17 @@ a {
     position: absolute;
     top: 10px;
     right: 10px;
-    background: linear-gradient(45deg, #9C27B0, #673AB7);
+    background: linear-gradient(45deg, #8E2DE2, #4A00E0);
     color: white;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
     padding: 5px 10px;
-    border-radius: 12px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
+    border: 1px solid #fff;
+    transform: rotate(-5deg);
 }
 
 .arrivals-cta {
