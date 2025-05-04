@@ -2,9 +2,10 @@
  * Auric E-commerce Authentication Module
  * 
  * This file contains all Firebase authentication functionality for user management
- * including login, signup, Google auth, and session handling.
+ * including login, signup, and session handling.
+ * Note: Google authentication has been moved to a dedicated auth-google.js file.
  * 
- * @version 2.0.0
+ * @version 3.0.0
  * @author Auric Development Team
  */
 
@@ -226,80 +227,31 @@ const AuthHandlers = {
   },
   
   /**
-   * Google Login handler
+   * Note: Google authentication handlers have been moved to auth-google.js
+   * These methods are kept for backwards compatibility but delegate to the new module
    */
   handleGoogleLogin: function() {
-    try {
-      console.log('Google login handler called');
-      const googleProvider = new firebase.auth.GoogleAuthProvider();
-      
-      // Add scopes for additional permissions
-      googleProvider.addScope('profile');
-      googleProvider.addScope('email');
-      
-      // Add custom parameters for authorization
-      googleProvider.setCustomParameters({
-        'prompt': 'select_account'
-      });
-      
-      console.log('Google provider configured, starting redirect flow');
-      // Use a redirect for mobile compatibility instead of popup
-      window.Auric.auth.signInWithRedirect(googleProvider)
-        .catch((error) => {
-          console.error('Redirect error:', error);
-          ErrorHandler.handleAuthError(error);
-        });
-    } catch (e) {
-      console.error('Error in Google login handler:', e);
-      UI.showError('Error initializing Google sign-in. Please try again later or use email sign-in.');
-    }
+    console.log('Google login handler called - deferring to auth-google.js');
+    // This functionality is now handled by auth-google.js
+    // This method is kept for backward compatibility
   },
   
   /**
-   * Google Signup handler - same as login since Google handles both cases
+   * Google Signup handler - has been moved to auth-google.js
    */
   handleGoogleSignup: function() {
-    // Call the Google login handler directly to handle both signup and login
-    AuthHandlers.handleGoogleLogin();
+    console.log('Google signup handler called - deferring to auth-google.js');
+    // This functionality is now handled by auth-google.js
+    // This method is kept for backward compatibility
   },
   
   /**
-   * Handle return from Google redirect flow
+   * Handle return from Google redirect flow - has been moved to auth-google.js
    */
   handleGoogleRedirectResult: function() {
-    try {
-      console.log('Checking for Google redirect result');
-      // Check for redirect result on page load
-      window.Auric.auth.getRedirectResult()
-        .then((result) => {
-          console.log('Redirect result received:', result);
-          if (result && result.user) {
-            // Check if this is a new or existing user
-            const isNewUser = result.additionalUserInfo?.isNewUser;
-            console.log('User signed in via redirect, isNewUser:', isNewUser);
-            
-            if (isNewUser) {
-              UI.showSuccess('Account created successfully! Redirecting to your account...');
-            } else {
-              UI.showSuccess('Welcome back! Redirecting to your account...');
-            }
-            
-            // Redirect to profile page after successful signup/login
-            UI.redirectAfterDelay('profile.html');
-          } else {
-            console.log('No user from redirect result');
-          }
-        })
-        .catch((error) => {
-          console.error('Error in redirect result:', error);
-          // Only show error if it's not just the initial load
-          if (error.code !== 'auth/credential-already-in-use') {
-            ErrorHandler.handleAuthError(error);
-          }
-        });
-    } catch (e) {
-      console.error('Exception in handleGoogleRedirectResult:', e);
-    }
+    console.log('Google redirect result check - deferring to auth-google.js');
+    // This functionality is now handled by auth-google.js
+    // This method is kept for backward compatibility
   },
   
   /**

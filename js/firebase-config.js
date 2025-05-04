@@ -1,5 +1,5 @@
 /**
- * Firebase Configuration Module - v2.0.0
+ * Firebase Configuration Module - v3.0.0
  * Handles Firebase initialization and provides global access to Firebase services
  * DO NOT MODIFY THIS FILE DIRECTLY
  */
