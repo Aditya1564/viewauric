@@ -9,10 +9,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const navToggle = document.getElementById('navToggle');
     const navMenu = document.getElementById('navMenu');
     const menuOverlay = document.getElementById('menuOverlay');
+    const closeMenuBtn = document.getElementById('closeMenu');
     
     // Dropdown navigation elements
     const dropdownItems = document.querySelectorAll('.dropdown');
     const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+    
+    // Log what elements we found (for debugging)
+    console.log('Navigation elements found:', {
+        menuButton: navToggle ? true : false,
+        closeButton: closeMenuBtn ? true : false,
+        mobileMenu: navMenu ? true : false,
+        menuLinks: document.querySelectorAll('.nav-link').length
+    });
     
     /**
      * Toggle mobile menu open/closed
@@ -77,6 +86,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (menuOverlay) {
         menuOverlay.addEventListener('click', closeMobileMenu);
+    }
+    
+    // Close button event listener
+    if (closeMenuBtn) {
+        closeMenuBtn.addEventListener('click', closeMobileMenu);
     }
     
     // Add click events to dropdown toggles for mobile
