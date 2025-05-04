@@ -10,28 +10,22 @@
 
 /**
  * CONFIGURATION SECTION
- * Firebase configuration and auth instance are now imported from firebase-config.js
+ * Firebase auth instance is imported from the Auric namespace
  */
 
-// Get the auth instance from firebase-config.js
-let auth = window.firebaseAuth;
-
-// Check if auth is properly initialized
-if (!auth && typeof firebase !== 'undefined') {
-  console.log('Getting auth from firebase directly');
-  auth = firebase.auth();
-}
-
-// Final verification
-if (!auth) {
-  console.error('Firebase auth is not available');
-  // Display visible error on the page
-  const errorElement = document.getElementById('error-message');
-  if (errorElement) {
-    errorElement.textContent = 'There was a problem with the authentication service. Please refresh the page and try again.';
-    errorElement.style.display = 'block';
+// Verify Auric namespace and auth are available
+document.addEventListener('DOMContentLoaded', function() {
+  if (!window.Auric || !window.Auric.auth) {
+    console.error('Firebase auth is not available - Auric namespace not properly initialized');
+    const errorElement = document.getElementById('error-message');
+    if (errorElement) {
+      errorElement.textContent = 'Authentication service not available. Please refresh the page and try again.';
+      errorElement.style.display = 'block';
+    }
+  } else {
+    console.log('Firebase auth is ready through Auric namespace');
   }
-}
+});
 
 /**
  * DOM ELEMENTS SECTION
@@ -110,7 +104,7 @@ const ErrorHandler = {
     console.error('Authentication error:', error);
     console.error('Error code:', error.code);
     console.error('Error message:', error.message);
-    console.error('Firebase config:', window.firebaseConfig);
+    console.error('Firebase config:', window.Auric.firebaseConfig);
     
     let errorMessage = 'An error occurred during authentication.';
     
@@ -168,7 +162,7 @@ const AuthHandlers = {
     }
     
     // Sign in with Firebase
-    auth.signInWithEmailAndPassword(email, password)
+    window.Auric.auth.signInWithEmailAndPassword(email, password)
       .then((userCredential) => {
         // Login successful
         UI.showSuccess('Login successful! Redirecting to your account...');
@@ -208,7 +202,7 @@ const AuthHandlers = {
     }
     
     // Create user with Firebase
-    auth.createUserWithEmailAndPassword(email, password)
+    window.Auric.auth.createUserWithEmailAndPassword(email, password)
       .then((userCredential) => {
         // Signup successful
         const user = userCredential.user;
@@ -250,7 +244,7 @@ const AuthHandlers = {
       
       console.log('Google provider configured, starting redirect flow');
       // Use a redirect for mobile compatibility instead of popup
-      auth.signInWithRedirect(googleProvider)
+      window.Auric.auth.signInWithRedirect(googleProvider)
         .catch((error) => {
           console.error('Redirect error:', error);
           ErrorHandler.handleAuthError(error);
@@ -276,7 +270,7 @@ const AuthHandlers = {
     try {
       console.log('Checking for Google redirect result');
       // Check for redirect result on page load
-      auth.getRedirectResult()
+      window.Auric.auth.getRedirectResult()
         .then((result) => {
           console.log('Redirect result received:', result);
           if (result && result.user) {
@@ -312,7 +306,7 @@ const AuthHandlers = {
    * Logout handler
    */
   handleLogout: function() {
-    auth.signOut()
+    window.Auric.auth.signOut()
       .then(() => {
         // Sign-out successful
         window.location.href = 'login.html';
@@ -368,7 +362,7 @@ const SessionManager = {
    * Initializes the authentication state listener
    */
   init: function() {
-    auth.onAuthStateChanged(SessionManager.handleAuthStateChange);
+    window.Auric.auth.onAuthStateChanged(SessionManager.handleAuthStateChange);
   }
 };
 
@@ -407,5 +401,9 @@ function initAuth() {
 // Initialize all authentication functionality when the page loads
 document.addEventListener('DOMContentLoaded', initAuth);
 
-// Export the logout function for use in other scripts
-window.logoutUser = AuthHandlers.handleLogout;
+// Export auth functionality to the Auric namespace
+window.Auric = window.Auric || {};
+window.Auric.logoutUser = AuthHandlers.handleLogout;
+
+// Legacy export for backward compatibility
+window.logoutUser = window.Auric.logoutUser;

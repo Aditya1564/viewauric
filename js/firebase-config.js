@@ -1,10 +1,14 @@
 /**
- * Firebase Configuration Module
+ * Firebase Configuration Module - v2.0.0
+ * Handles Firebase initialization and provides global access to Firebase services
  * DO NOT MODIFY THIS FILE DIRECTLY
  */
 
-// Firebase configuration with hardcoded values for reliability
-const firebaseConfig = {
+// Create a namespace for Auric app services
+window.Auric = window.Auric || {};
+
+// Initialize Firebase configuration with reliable values
+window.Auric.firebaseConfig = {
   apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
   authDomain: "auric-a0c92.firebaseapp.com",
   projectId: "auric-a0c92",
@@ -13,33 +17,36 @@ const firebaseConfig = {
   appId: "1:878979958342:web:e6092f7522488d21eaec47"
 };
 
-// Initialize Firebase app
-if (typeof firebase !== 'undefined') {
-  // Check if Firebase is already initialized
-  if (!firebase.apps.length) {
-    // Initialize if not already initialized
-    firebase.initializeApp(firebaseConfig);
-    console.log('Firebase initialized from config.js');
-  } else {
-    console.log('Firebase already initialized');
+// Function to initialize Firebase app and services
+(function initFirebase() {
+  try {
+    // Verify Firebase library is loaded
+    if (typeof firebase === 'undefined') {
+      console.error('Firebase SDK not loaded');
+      return;
+    }
+    
+    // Initialize Firebase if not already initialized
+    if (!firebase.apps.length) {
+      firebase.initializeApp(window.Auric.firebaseConfig);
+      console.log('Firebase initialized successfully');
+    } else {
+      console.log('Firebase already initialized');
+    }
+    
+    // Initialize auth and store in Auric namespace
+    window.Auric.auth = firebase.auth();
+    
+    // Configure persistence to keep users logged in
+    window.Auric.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+      .then(() => {
+        console.log('Auth persistence set to LOCAL');
+      })
+      .catch(error => {
+        console.error('Error setting persistence:', error);
+      });
+      
+  } catch (error) {
+    console.error('Firebase initialization error:', error);
   }
-} else {
-  console.error('Firebase SDK not loaded');
-}
-
-// Make auth instance available globally
-const auth = firebase.auth ? firebase.auth() : null;
-if (auth) {
-  // Enable persistent login sessions
-  auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-    .then(() => {
-      console.log('Auth persistence set to LOCAL');
-    })
-    .catch(error => {
-      console.error('Error setting persistence:', error);
-    });
-}
-
-// Export configuration and auth instance for use in other modules
-window.firebaseConfig = firebaseConfig;
-window.firebaseAuth = auth;
+})();
