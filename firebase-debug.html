@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firebase Configuration Debugger</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1 {
+      color: #4285F4;
+      border-bottom: 2px solid #FBBC05;
+      padding-bottom: 10px;
+    }
+    .container {
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .field {
+      margin-bottom: 10px;
+      display: flex;
+    }
+    .field-name {
+      font-weight: bold;
+      width: 180px;
+    }
+    .field-value {
+      font-family: monospace;
+      word-break: break-all;
+    }
+    .success {
+      color: #34A853;
+    }
+    .warning {
+      color: #FBBC05;
+    }
+    .error {
+      color: #EA4335;
+    }
+    button {
+      background-color: #4285F4;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-right: 10px;
+    }
+    button:hover {
+      background-color: #3367D6;
+    }
+    pre {
+      background-color: #f1f1f1;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+    #auth-status {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 4px;
+    }
+    .authenticated {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .unauthenticated {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+  </style>
+</head>
+<body>
+  <h1>Firebase Configuration Debugger</h1>
+  
+  <div class="container">
+    <h2>Firebase Configuration</h2>
+    <div id="config-info">Loading...</div>
+  </div>
+  
+  <div class="container">
+    <h2>Environment Information</h2>
+    <div id="env-info">Loading...</div>
+  </div>
+  
+  <div class="container">
+    <h2>Authentication Test</h2>
+    <div>
+      <button id="test-anonymous">Test Anonymous Auth</button>
+      <button id="test-google-popup">Test Google Auth (Popup)</button>
+      <button id="sign-out" style="display: none;">Sign Out</button>
+    </div>
+    <div id="auth-status" class="unauthenticated">Not authenticated</div>
+    <pre id="auth-details"></pre>
+  </div>
+  
+  <div class="container">
+    <h2>Domain Configuration</h2>
+    <p>Your application is currently running on: <span id="current-domain" class="field-value"></span></p>
+    <p>This domain must be added to Firebase Console under:</p>
+    <ol>
+      <li>Authentication > Settings</li>
+      <li>Authorized Domains</li>
+    </ol>
+    <p><strong>Note:</strong> For Google authentication to work, you need to add your domain here.</p>
+  </div>
+  
+  <div class="container">
+    <h2>Troubleshooting Steps</h2>
+    <ol>
+      <li>Verify that all required configuration values are present</li>
+      <li>Ensure that Google sign-in method is enabled in Firebase Console</li>
+      <li>Confirm that your domain is added to authorized domains list</li>
+      <li>Check your browser console for any JavaScript errors</li>
+      <li>Try clearing your browser cache and cookies</li>
+    </ol>
+  </div>
+
+  <!-- Firebase scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  
+  <script>
+    // Function to display Firebase configuration
+    function displayFirebaseConfig() {
+      // Get configuration from window.Auric or create it from environment variables
+      const config = window.Auric?.firebaseConfig || {
+        apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
+        authDomain: "auric-a0c92.firebaseapp.com",
+        projectId: "auric-a0c92",
+        storageBucket: "auric-a0c92.appspot.com",
+        messagingSenderId: "878979958342",
+        appId: "1:878979958342:web:e6092f7522488d21eaec47"
+      };
+      
+      const configHTML = `
+        <div class="field">
+          <div class="field-name">API Key:</div>
+          <div class="field-value">${config.apiKey || '<span class="error">Missing</span>'}</div>
+        </div>
+        <div class="field">
+          <div class="field-name">Auth Domain:</div>
+          <div class="field-value">${config.authDomain || '<span class="error">Missing</span>'}</div>
+        </div>
+        <div class="field">
+          <div class="field-name">Project ID:</div>
+          <div class="field-value">${config.projectId || '<span class="error">Missing</span>'}</div>
+        </div>
+        <div class="field">
+          <div class="field-name">Storage Bucket:</div>
+          <div class="field-value">${config.storageBucket || '<span class="warning">Missing (optional)</span>'}</div>
+        </div>
+        <div class="field">
+          <div class="field-name">Messaging Sender ID:</div>
+          <div class="field-value">${config.messagingSenderId || '<span class="warning">Missing (optional)</span>'}</div>
+        </div>
+        <div class="field">
+          <div class="field-name">App ID:</div>
+          <div class="field-value">${config.appId || '<span class="error">Missing</span>'}</div>
+        </div>
+      `;
+      
+      document.getElementById('config-info').innerHTML = configHTML;
+    }
+    
+    // Function to display environment information
+    function displayEnvironmentInfo() {
+      const envHTML = `
+        <div class="field">
+          <div class="field-name">Current URL:</div>
+          <div class="field-value">${window.location.href}</div>
+        </div>
+        <div class="field">
+          <div class="field-name">Hostname:</div>
+          <div class="field-value">${window.location.hostname}</div>
+        </div>
+        <div class="field">
+          <div class="field-name">Protocol:</div>
+          <div class="field-value">${window.location.protocol}</div>
+        </div>
+        <div class="field">
+          <div class="field-name">Browser:</div>
+          <div class="field-value">${navigator.userAgent}</div>
+        </div>
+        <div class="field">
+          <div class="field-name">Firebase SDK:</div>
+          <div class="field-value">${firebase ? `<span class="success">Available</span>` : `<span class="error">Not Available</span>`}</div>
+        </div>
+      `;
+      
+      document.getElementById('env-info').innerHTML = envHTML;
+      document.getElementById('current-domain').textContent = window.location.hostname;
+    }
+    
+    // Function to initialize Firebase
+    function initializeFirebase() {
+      try {
+        // Get configuration or use default
+        const config = window.Auric?.firebaseConfig || {
+          apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
+          authDomain: "auric-a0c92.firebaseapp.com",
+          projectId: "auric-a0c92",
+          storageBucket: "auric-a0c92.appspot.com",
+          messagingSenderId: "878979958342",
+          appId: "1:878979958342:web:e6092f7522488d21eaec47"
+        };
+        
+        // Initialize Firebase if not already initialized
+        if (!firebase.apps.length) {
+          firebase.initializeApp(config);
+          console.log('Firebase initialized for debugging');
+        }
+        
+        // Set up auth state listener
+        firebase.auth().onAuthStateChanged(function(user) {
+          updateAuthDisplay(user);
+        });
+        
+      } catch (error) {
+        console.error('Error initializing Firebase:', error);
+        document.getElementById('auth-details').textContent = `Initialization Error: ${error.message}`;
+      }
+    }
+    
+    // Function to update the auth display
+    function updateAuthDisplay(user) {
+      const authStatus = document.getElementById('auth-status');
+      const authDetails = document.getElementById('auth-details');
+      const signOutButton = document.getElementById('sign-out');
+      
+      if (user) {
+        // User is signed in
+        authStatus.textContent = `Authenticated as: ${user.email || 'Anonymous'}`;
+        authStatus.className = 'authenticated';
+        signOutButton.style.display = 'inline-block';
+        
+        // Display user details
+        const userDetails = {
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+          emailVerified: user.emailVerified,
+          isAnonymous: user.isAnonymous,
+          providerData: user.providerData
+        };
+        
+        authDetails.textContent = JSON.stringify(userDetails, null, 2);
+      } else {
+        // User is signed out
+        authStatus.textContent = 'Not authenticated';
+        authStatus.className = 'unauthenticated';
+        signOutButton.style.display = 'none';
+        authDetails.textContent = '';
+      }
+    }
+    
+    // Test anonymous auth
+    function testAnonymousAuth() {
+      firebase.auth().signInAnonymously()
+        .then(() => {
+          console.log('Signed in anonymously');
+        })
+        .catch((error) => {
+          console.error('Anonymous auth error:', error);
+          document.getElementById('auth-details').textContent = `Anonymous Auth Error: ${error.code} - ${error.message}`;
+        });
+    }
+    
+    // Test Google auth with popup
+    function testGoogleAuthPopup() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      firebase.auth().signInWithPopup(provider)
+        .then((result) => {
+          console.log('Google auth successful', result);
+        })
+        .catch((error) => {
+          console.error('Google auth error:', error);
+          document.getElementById('auth-details').textContent = `Google Auth Error: ${error.code} - ${error.message}`;
+          
+          // Special handling for unauthorized domain error
+          if (error.code === 'auth/unauthorized-domain') {
+            document.getElementById('auth-details').textContent += `\n\nYou need to add ${window.location.hostname} to your Firebase authorized domains list.`;
+          }
+        });
+    }
+    
+    // Sign out
+    function signOut() {
+      firebase.auth().signOut()
+        .then(() => {
+          console.log('Signed out');
+        })
+        .catch((error) => {
+          console.error('Sign out error:', error);
+        });
+    }
+    
+    // Set up event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize Firebase
+      initializeFirebase();
+      
+      // Display information
+      displayFirebaseConfig();
+      displayEnvironmentInfo();
+      
+      // Set up button event listeners
+      document.getElementById('test-anonymous').addEventListener('click', testAnonymousAuth);
+      document.getElementById('test-google-popup').addEventListener('click', testGoogleAuthPopup);
+      document.getElementById('sign-out').addEventListener('click', signOut);
+    });
+  </script>
+</body>
+</html>

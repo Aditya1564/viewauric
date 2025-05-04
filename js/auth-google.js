@@ -49,6 +49,19 @@ function handleGoogleAuth(e) {
   e.preventDefault();
   console.log('Google authentication started');
   
+  // Create a detailed error message element to help with debugging
+  const debugElement = document.getElementById('debug-instructions');
+  if (debugElement) {
+    debugElement.innerHTML = `
+      <p>Checking Firebase project configuration...</p>
+      <p>API Key: ${window.Auric.firebaseConfig.apiKey ? '✓ Present' : '✗ Missing'}</p>
+      <p>Auth Domain: ${window.Auric.firebaseConfig.authDomain ? '✓ Present' : '✗ Missing'}</p>
+      <p>Project ID: ${window.Auric.firebaseConfig.projectId ? '✓ Present' : '✗ Missing'}</p>
+      <p>App ID: ${window.Auric.firebaseConfig.appId ? '✓ Present' : '✗ Missing'}</p>
+    `;
+    debugElement.style.display = 'block';
+  }
+  
   try {
     // Create Google provider
     const googleProvider = new firebase.auth.GoogleAuthProvider();
@@ -57,12 +70,16 @@ function handleGoogleAuth(e) {
     googleProvider.addScope('profile');
     googleProvider.addScope('email');
     
-    // Set custom parameters
+    // Set custom parameters - using select_account to force account picker
     googleProvider.setCustomParameters({
       'prompt': 'select_account'
     });
     
-    // Perform the sign-in using popup (more reliable than redirect)
+    // Log the current authentication domain for debugging
+    console.log('Current auth domain:', window.Auric.firebaseConfig.authDomain);
+    console.log('Current location:', window.location.href);
+    
+    // Use signInWithPopup which is more reliable than redirect
     window.Auric.auth.signInWithPopup(googleProvider)
       .then((result) => {
         console.log('Google authentication successful', result);
