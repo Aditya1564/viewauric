@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>My Profile - Auric - Timeless & Classic Jewellery</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lato:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css?v=1.0.3">
+    <link rel="stylesheet" href="css/responsive.css?v=1.0.3">
+    <link rel="stylesheet" href="css/navbar.css?v=1.1.0">
+    <link rel="stylesheet" href="css/auth.css">
+    <style>
+      .profile-container {
+        max-width: 1000px;
+        margin: 50px auto;
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 5px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      
+      .profile-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #eee;
+      }
+      
+      .profile-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background-color: #c8a97e;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 20px;
+        color: white;
+        font-size: 36px;
+      }
+      
+      .profile-info h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 28px;
+        margin: 0 0 5px 0;
+      }
+      
+      .profile-info p {
+        color: #777;
+        margin: 0;
+      }
+      
+      .profile-nav {
+        display: flex;
+        border-bottom: 1px solid #eee;
+        margin-bottom: 30px;
+      }
+      
+      .profile-nav-item {
+        padding: 15px 20px;
+        font-family: 'Lato', sans-serif;
+        font-weight: 600;
+        color: #777;
+        cursor: pointer;
+      }
+      
+      .profile-nav-item.active {
+        color: #c8a97e;
+        border-bottom: 2px solid #c8a97e;
+      }
+      
+      .profile-section {
+        display: none;
+      }
+      
+      .profile-section.active {
+        display: block;
+      }
+      
+      .order-card {
+        border: 1px solid #eee;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 15px;
+      }
+      
+      .order-header {
+        display: flex;
+        justify-content: space-between;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+        margin-bottom: 10px;
+      }
+      
+      .order-id {
+        font-weight: bold;
+      }
+      
+      .order-date {
+        color: #777;
+      }
+      
+      .order-item {
+        display: flex;
+        padding: 10px 0;
+      }
+      
+      .order-item-image {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        margin-right: 15px;
+      }
+      
+      .order-item-details h4 {
+        margin: 0 0 5px 0;
+      }
+      
+      .order-item-price {
+        color: #c8a97e;
+        font-weight: bold;
+      }
+      
+      .order-total {
+        text-align: right;
+        font-weight: bold;
+        padding-top: 10px;
+        border-top: 1px solid #eee;
+        margin-top: 10px;
+      }
+      
+      .address-card, .payment-card {
+        border: 1px solid #eee;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 15px;
+      }
+      
+      .address-header, .payment-header {
+        display: flex;
+        justify-content: space-between;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+        margin-bottom: 10px;
+      }
+      
+      .address-title, .payment-title {
+        font-weight: bold;
+      }
+      
+      .address-actions a, .payment-actions a {
+        color: #c8a97e;
+        text-decoration: none;
+        margin-left: 10px;
+      }
+      
+      .logout-button {
+        background-color: #c8a97e;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        font-family: 'Lato', sans-serif;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        margin-top: 20px;
+      }
+      
+      .logout-button:hover {
+        background-color: #b39063;
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- Header -->
+    <header class="header">
+        <!-- Promo Banner -->
+        <div class="promo-banner">
+            <button class="banner-arrow banner-prev">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <p>Save 21% on exclusive selections - <a href="#">Shop Now</a></p>
+            <button class="banner-arrow banner-next">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        
+        <!-- New Responsive Navigation -->
+        <nav class="navbar">
+            <div class="nav-container">
+                <!-- Logo -->
+                <a href="index.html" class="brand">Auric</a>
+                
+                <!-- Mobile Toggle Button -->
+                <div class="hamburger" id="navToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                
+                <!-- Navigation Links -->
+                <div class="nav-menu" id="navMenu">
+                    <!-- Close button for mobile menu -->
+                    <button class="close-menu" id="closeMenu"><i class="fas fa-times"></i></button>
+                    
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
+                        <li class="nav-item"><a href="#" class="nav-link">New Arrivals</a></li>
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle">Necklace <i class="fas fa-chevron-down"></i></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="#">All Necklaces</a></li>
+                                <li><a href="#">Choker</a></li>
+                                <li><a href="#">Layered</a></li>
+                                <li><a href="#">Classic</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle">Earrings <i class="fas fa-chevron-down"></i></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="#">All Earrings</a></li>
+                                <li><a href="#">Chandbali</a></li>
+                                <li><a href="#">Jhumka</a></li>
+                                <li><a href="#">Studs</a></li>
+                                <li><a href="#">Drop</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle">Bangles <i class="fas fa-chevron-down"></i></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="#">All Bangles</a></li>
+                                <li><a href="#">Gold Bangles</a></li>
+                                <li><a href="#">Silver Bangles</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle">Chains & Pendants <i class="fas fa-chevron-down"></i></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="#">All Chains</a></li>
+                                <li><a href="#">Pendants</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle">Collections <i class="fas fa-chevron-down"></i></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="#">Leelah</a></li>
+                                <li><a href="#">Chettinad</a></li>
+                                <li><a href="#">Nabah</a></li>
+                                <li><a href="#">Mathuram</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Navigation Icons -->
+                <div class="nav-icons">
+                    <a href="#" class="icon-link"><i class="fas fa-search"></i></a>
+                    <a href="profile.html" class="icon-link"><i class="fas fa-user"></i></a>
+                    <a href="#" class="icon-link"><i class="fas fa-heart"></i></a>
+                    <a href="#" class="icon-link"><i class="fas fa-shopping-cart"></i></a>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Overlay for menu background -->
+    <div class="menu-overlay" id="menuOverlay"></div>
+
+    <!-- Profile Section -->
+    <section class="profile-container">
+        <div class="profile-header">
+            <div class="profile-avatar" id="profileAvatar">A</div>
+            <div class="profile-info">
+                <h1 id="profileName">Loading...</h1>
+                <p id="profileEmail">Loading...</p>
+            </div>
+        </div>
+        
+        <div class="profile-nav">
+            <div class="profile-nav-item active" data-target="orders">My Orders</div>
+            <div class="profile-nav-item" data-target="addresses">Addresses</div>
+            <div class="profile-nav-item" data-target="payments">Payment Methods</div>
+            <div class="profile-nav-item" data-target="settings">Account Settings</div>
+        </div>
+        
+        <div class="profile-section active" id="orders">
+            <h2>My Orders</h2>
+            <div class="order-card">
+                <div class="order-header">
+                    <span class="order-id">Order #12345</span>
+                    <span class="order-date">May 2, 2025</span>
+                </div>
+                <div class="order-item">
+                    <img src="images/newarrivals/IMG_20250504_150241.jpg" alt="Emerald Studs" class="order-item-image">
+                    <div class="order-item-details">
+                        <h4>Emerald Studs</h4>
+                        <span class="order-item-price">₹32,500</span>
+                    </div>
+                </div>
+                <div class="order-total">Total: ₹32,500</div>
+            </div>
+            
+            <div class="order-card">
+                <div class="order-header">
+                    <span class="order-id">Order #12344</span>
+                    <span class="order-date">April 25, 2025</span>
+                </div>
+                <div class="order-item">
+                    <img src="images/newarrivals/IMG_20250504_150655.jpg" alt="Pearl & Diamond Necklace" class="order-item-image">
+                    <div class="order-item-details">
+                        <h4>Pearl & Diamond Necklace</h4>
+                        <span class="order-item-price">₹52,900</span>
+                    </div>
+                </div>
+                <div class="order-total">Total: ₹52,900</div>
+            </div>
+        </div>
+        
+        <div class="profile-section" id="addresses">
+            <h2>My Addresses</h2>
+            <div class="address-card">
+                <div class="address-header">
+                    <span class="address-title">Home Address</span>
+                    <div class="address-actions">
+                        <a href="#">Edit</a>
+                        <a href="#">Delete</a>
+                    </div>
+                </div>
+                <p>123 Main Street<br>Apartment 4B<br>Mumbai, 400001<br>India</p>
+            </div>
+            
+            <div class="address-card">
+                <div class="address-header">
+                    <span class="address-title">Office Address</span>
+                    <div class="address-actions">
+                        <a href="#">Edit</a>
+                        <a href="#">Delete</a>
+                    </div>
+                </div>
+                <p>456 Business Park<br>Building C, Floor 5<br>Delhi, 110001<br>India</p>
+            </div>
+        </div>
+        
+        <div class="profile-section" id="payments">
+            <h2>Payment Methods</h2>
+            <div class="payment-card">
+                <div class="payment-header">
+                    <span class="payment-title">Credit Card</span>
+                    <div class="payment-actions">
+                        <a href="#">Edit</a>
+                        <a href="#">Delete</a>
+                    </div>
+                </div>
+                <p>XXXX XXXX XXXX 1234<br>Expiry: 05/28</p>
+            </div>
+            
+            <div class="payment-card">
+                <div class="payment-header">
+                    <span class="payment-title">Debit Card</span>
+                    <div class="payment-actions">
+                        <a href="#">Edit</a>
+                        <a href="#">Delete</a>
+                    </div>
+                </div>
+                <p>XXXX XXXX XXXX 5678<br>Expiry: 09/26</p>
+            </div>
+        </div>
+        
+        <div class="profile-section" id="settings">
+            <h2>Account Settings</h2>
+            <button id="logout-button" class="logout-button">Log Out</button>
+        </div>
+    </section>
+
+    <!-- Footer Section (Add your existing footer here) -->
+
+    <!-- Firebase scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    
+    <!-- Auth scripts -->
+    <script src="js/auth.js"></script>
+    
+    <!-- Navigation script -->
+    <script src="js/navigation.js?v=1.0.3"></script>
+    
+    <!-- Banner rotator script -->
+    <script src="js/banner-rotator.js"></script>
+    
+    <script>
+        // Profile page script
+        document.addEventListener('DOMContentLoaded', function() {
+            // Profile navigation tabs
+            const profileNavItems = document.querySelectorAll('.profile-nav-item');
+            const profileSections = document.querySelectorAll('.profile-section');
+            
+            profileNavItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Remove active class from all items
+                    profileNavItems.forEach(navItem => navItem.classList.remove('active'));
+                    profileSections.forEach(section => section.classList.remove('active'));
+                    
+                    // Add active class to clicked item
+                    this.classList.add('active');
+                    
+                    // Show corresponding section
+                    const targetSection = document.getElementById(this.dataset.target);
+                    targetSection.classList.add('active');
+                });
+            });
+            
+            // Log out functionality
+            document.getElementById('logout-button').addEventListener('click', function() {
+                logoutUser(); // This function is defined in auth.js
+            });
+            
+            // Check if user is logged in
+            const auth = firebase.auth();
+            auth.onAuthStateChanged(function(user) {
+                if (user) {
+                    // User is signed in
+                    document.getElementById('profileName').textContent = user.displayName || 'Auric Customer';
+                    document.getElementById('profileEmail').textContent = user.email;
+                    
+                    // Set avatar with first letter of name
+                    const firstLetter = user.displayName ? user.displayName.charAt(0).toUpperCase() : 'A';
+                    document.getElementById('profileAvatar').textContent = firstLetter;
+                } else {
+                    // User is not signed in, redirect to login
+                    window.location.href = 'login.html';
+                }
+            });
+        });
+    </script>
+  </body>
+</html>
