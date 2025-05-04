@@ -130,6 +130,10 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   
+  <!-- Firebase configuration and helper -->
+  <script src="js/firebase-config.js?v=1.0.1"></script>
+  <script src="js/firebase-auth-helper.js?v=1.0.0"></script>
+  
   <script>
     // Function to display Firebase configuration
     function displayFirebaseConfig() {
@@ -279,20 +283,44 @@
     
     // Test Google auth with popup
     function testGoogleAuthPopup() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      firebase.auth().signInWithPopup(provider)
-        .then((result) => {
-          console.log('Google auth successful', result);
-        })
-        .catch((error) => {
-          console.error('Google auth error:', error);
-          document.getElementById('auth-details').textContent = `Google Auth Error: ${error.code} - ${error.message}`;
-          
-          // Special handling for unauthorized domain error
-          if (error.code === 'auth/unauthorized-domain') {
-            document.getElementById('auth-details').textContent += `\n\nYou need to add ${window.location.hostname} to your Firebase authorized domains list.`;
+      // Use the AuthHelper if available, otherwise fall back to standard approach
+      if (window.Auric && window.Auric.AuthHelper) {
+        console.log('Using enhanced AuthHelper for Google sign-in');
+        
+        window.Auric.AuthHelper.signInWithGoogle(
+          // Success callback
+          (result) => {
+            console.log('Google auth successful with AuthHelper', result);
+            // Status is updated via onAuthStateChanged
+          },
+          // Error callback
+          (error) => {
+            console.error('Google auth error with AuthHelper:', error);
+            document.getElementById('auth-details').textContent = `Google Auth Error: ${error.code} - ${error.message}`;
+            
+            // Special handling for unauthorized domain error
+            if (error.code === 'auth/unauthorized-domain') {
+              document.getElementById('auth-details').textContent += `\n\nYou need to add ${window.location.hostname} to your Firebase authorized domains list.`;
+            }
           }
-        });
+        );
+      } else {
+        // Fall back to standard method
+        const provider = new firebase.auth.GoogleAuthProvider();
+        firebase.auth().signInWithPopup(provider)
+          .then((result) => {
+            console.log('Google auth successful', result);
+          })
+          .catch((error) => {
+            console.error('Google auth error:', error);
+            document.getElementById('auth-details').textContent = `Google Auth Error: ${error.code} - ${error.message}`;
+            
+            // Special handling for unauthorized domain error
+            if (error.code === 'auth/unauthorized-domain') {
+              document.getElementById('auth-details').textContent += `\n\nYou need to add ${window.location.hostname} to your Firebase authorized domains list.`;
+            }
+          });
+      }
     }
     
     // Sign out

@@ -43,11 +43,11 @@ function setupGoogleAuth() {
 }
 
 /**
- * Handle Google authentication
+ * Handle Google authentication using our enhanced AuthHelper
  */
 function handleGoogleAuth(e) {
   e.preventDefault();
-  console.log('Google authentication started');
+  console.log('Google authentication started with AuthHelper');
   
   // Create a detailed error message element to help with debugging
   const debugElement = document.getElementById('debug-instructions');
@@ -62,26 +62,11 @@ function handleGoogleAuth(e) {
     debugElement.style.display = 'block';
   }
   
-  try {
-    // Create Google provider
-    const googleProvider = new firebase.auth.GoogleAuthProvider();
-    
-    // Add scopes
-    googleProvider.addScope('profile');
-    googleProvider.addScope('email');
-    
-    // Set custom parameters - using select_account to force account picker
-    googleProvider.setCustomParameters({
-      'prompt': 'select_account'
-    });
-    
-    // Log the current authentication domain for debugging
-    console.log('Current auth domain:', window.Auric.firebaseConfig.authDomain);
-    console.log('Current location:', window.location.href);
-    
-    // Use signInWithPopup which is more reliable than redirect
-    window.Auric.auth.signInWithPopup(googleProvider)
-      .then((result) => {
+  // Use our enhanced authentication helper
+  if (window.Auric.AuthHelper) {
+    window.Auric.AuthHelper.signInWithGoogle(
+      // Success callback
+      (result) => {
         console.log('Google authentication successful', result);
         
         // Check if this is a new or existing user
@@ -98,14 +83,61 @@ function handleGoogleAuth(e) {
         setTimeout(() => {
           window.location.href = 'profile.html';
         }, 1500);
-      })
-      .catch((error) => {
+      },
+      // Error callback
+      (error) => {
         console.error('Google authentication error:', error);
         handleAuthError(error);
+      }
+    );
+  } else {
+    // Fall back to standard method if helper isn't available
+    try {
+      // Create Google provider
+      const googleProvider = new firebase.auth.GoogleAuthProvider();
+      
+      // Add scopes
+      googleProvider.addScope('profile');
+      googleProvider.addScope('email');
+      
+      // Set custom parameters - using select_account to force account picker
+      googleProvider.setCustomParameters({
+        'prompt': 'select_account'
       });
-  } catch (e) {
-    console.error('Error setting up Google authentication:', e);
-    showMessage('Error initializing Google sign-in. Please try again.', 'error');
+      
+      // Log the current authentication domain for debugging
+      console.log('Using fallback authentication method');
+      console.log('Current auth domain:', window.Auric.firebaseConfig.authDomain);
+      console.log('Current location:', window.location.href);
+      
+      // Use signInWithPopup which is more reliable than redirect
+      window.Auric.auth.signInWithPopup(googleProvider)
+        .then((result) => {
+          console.log('Google authentication successful', result);
+          
+          // Check if this is a new or existing user
+          const isNewUser = result.additionalUserInfo?.isNewUser;
+          
+          // Show success message
+          const successMessage = isNewUser
+            ? 'Account created successfully! Redirecting...'
+            : 'Login successful! Redirecting...';
+            
+          showMessage(successMessage, 'success');
+          
+          // Redirect to profile page
+          setTimeout(() => {
+            window.location.href = 'profile.html';
+          }, 1500);
+        })
+        .catch((error) => {
+          console.error('Google authentication error:', error);
+          handleAuthError(error);
+        });
+    } catch (e) {
+      console.error('Error setting up Google authentication:', e);
+      showMessage('Error initializing Google sign-in. Please try again.', 'error');
+    }
   }
 }
 
