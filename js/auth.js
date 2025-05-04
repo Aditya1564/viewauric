@@ -12,6 +12,9 @@
  * CONFIGURATION SECTION
  * Contains all Firebase configuration and initialization code
  */
+let auth; // Declare auth variable in global scope
+
+// Firebase configuration object
 const firebaseConfig = {
   apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
   authDomain: "auric-a0c92.firebaseapp.com",
@@ -20,25 +23,73 @@ const firebaseConfig = {
   appId: "1:878979958342:web:e6092f7522488d21eaec47"
 };
 
-// Initialize Firebase and get auth instance
-try {
-  // Check if Firebase is already initialized
-  if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-    console.log('Firebase initialized successfully');
-  } else {
-    console.log('Firebase already initialized');
+/**
+ * Initialize Firebase app and authentication
+ * With fallback for browser compatibility issues
+ */
+function initializeFirebase() {
+  try {
+    // First attempt: check if Firebase is already initialized using apps array
+    if (typeof firebase !== 'undefined') {
+      if (firebase.apps && !firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+        console.log('Firebase initialized successfully (Method 1)');
+      } else {
+        console.log('Firebase already initialized');
+      }
+      
+      // Get auth instance
+      auth = firebase.auth();
+      
+      // Enable persistent login sessions
+      try {
+        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+        console.log('Auth persistence set successfully');
+      } catch (persistenceError) {
+        console.error('Error setting persistence:', persistenceError);
+        // Continue anyway as this is not critical
+      }
+      
+      return true;
+    } else {
+      console.error('Firebase is not defined');
+      return false;
+    }
+  } catch (error) {
+    console.error('Firebase initialization error (Method 1):', error);
+    
+    // Second attempt: Try alternative initialization method for older browsers
+    try {
+      if (typeof firebase !== 'undefined') {
+        const app = firebase.initializeApp(firebaseConfig);
+        auth = app.auth();
+        console.log('Firebase initialized successfully (Method 2)');
+        return true;
+      } else {
+        // Display visible error on the page
+        const errorElement = document.getElementById('error-message');
+        if (errorElement) {
+          errorElement.textContent = 'Firebase library could not be loaded. Please check your internet connection.';
+          errorElement.style.display = 'block';
+        }
+        return false;
+      }
+    } catch (fallbackError) {
+      console.error('Firebase initialization fallback error:', fallbackError);
+      
+      // Display visible error on the page
+      const errorElement = document.getElementById('error-message');
+      if (errorElement) {
+        errorElement.textContent = 'There was a problem connecting to the authentication service. Please try again later.';
+        errorElement.style.display = 'block';
+      }
+      return false;
+    }
   }
-} catch (error) {
-  console.error('Firebase initialization error:', error);
 }
 
-const auth = firebase.auth();
-
-// Enable persistent login sessions
-auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(error => {
-  console.error('Error setting persistence:', error);
-});
+// Initialize Firebase when the script loads
+const firebaseInitialized = initializeFirebase();
 
 /**
  * DOM ELEMENTS SECTION

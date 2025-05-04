@@ -117,6 +117,11 @@
         <div id="error-message" class="error-message" style="display: none;"></div>
         <div id="success-message" class="success-message" style="display: none;"></div>
         
+        <!-- Debug instructions for users, hidden by default -->
+        <div class="error-message" style="display: none;" id="debug-instructions">
+            <p>If you continue experiencing issues, please check your browser console for detailed error messages (press F12 and go to Console tab).</p>
+        </div>
+        
         <form id="login-form" class="auth-form">
             <div class="form-group">
                 <label for="email">Email</label>
@@ -154,7 +159,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     
     <!-- Auth scripts -->
-    <script src="js/auth.js"></script>
+    <script src="js/auth.js?v=1.0.1"></script>
     
     <!-- Navigation script -->
     <script src="js/navigation.js?v=1.0.3"></script>
