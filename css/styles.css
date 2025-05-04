@@ -813,7 +813,7 @@ a {
     border-radius: 0;
     overflow: hidden;
     position: relative;
-    height: 450px; /* Increased height for mobile */
+    height: 650px !important; /* Significantly increased height for mobile */
 }
 
 .main-product-image {
@@ -827,7 +827,7 @@ a {
 
 @media (min-width: 768px) {
     .main-image-container {
-        height: 550px;
+        height: 750px !important;
     }
     
     .main-product-image {
