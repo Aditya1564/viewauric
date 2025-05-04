@@ -125,6 +125,19 @@
       <li>Try clearing your browser cache and cookies</li>
     </ol>
   </div>
+  
+  <div class="container">
+    <h2>Development Mode Authentication</h2>
+    <p>For Replit and development environments, we've implemented a special authentication mode that allows testing even when Google OAuth isn't fully configured.</p>
+    <p><strong>Features:</strong></p>
+    <ul>
+      <li>Automatically detects when running in Replit or development environments</li>
+      <li>Falls back to anonymous authentication when OAuth providers fail</li>
+      <li>Creates a temporary test user with a Google-like profile for testing</li>
+      <li>Automatically handles "auth/configuration-not-found" and "auth/unauthorized-domain" errors</li>
+    </ul>
+    <p><strong>Note:</strong> This is only for development and testing. For production, make sure to properly configure Firebase authentication.</p>
+  </div>
 
   <!-- Firebase scripts -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>

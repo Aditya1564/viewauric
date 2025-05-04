@@ -10,16 +10,36 @@ window.Auric = window.Auric || {};
 // Firebase configuration
 // IMPORTANT: These are public keys that are meant to be visible on the client side
 // https://stackoverflow.com/questions/37482366/is-it-safe-to-expose-firebase-apikey-to-the-public
+const PROJECT_ID = "auric-a0c92";
+const API_KEY = "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI";
+const APP_ID = "1:878979958342:web:e6092f7522488d21eaec47";
+
+// Create a dynamic authDomain that works in various environments
+const authDomain = `${PROJECT_ID}.firebaseapp.com`;
+
+// Advanced configuration with flexible auth domains
 window.Auric.firebaseConfig = {
-  apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
-  authDomain: "auric-a0c92.firebaseapp.com",
-  projectId: "auric-a0c92",
-  storageBucket: "auric-a0c92.appspot.com",
+  apiKey: API_KEY,
+  authDomain: authDomain,
+  projectId: PROJECT_ID,
+  storageBucket: `${PROJECT_ID}.appspot.com`,
   messagingSenderId: "878979958342",
-  appId: "1:878979958342:web:e6092f7522488d21eaec47",
+  appId: APP_ID,
   // Add additional fields that might be required
   measurementId: null, // Analytics ID (if needed)
   databaseURL: null // Realtime Database URL (if needed)
+};
+
+// Add compatibility settings for OAuth operations
+window.Auric.authSettings = {
+  // Current domain for testing against authorized domains list
+  currentDomain: window.location.hostname,
+  // Flag for local testing (replit domain)
+  isReplit: window.location.hostname.includes('replit'),
+  // Flag for deployment environment
+  isProduction: !window.location.hostname.includes('replit') && !window.location.hostname.includes('localhost'),
+  // URL for emulator if needed
+  emulatorUrl: null
 };
 
 // Function to initialize Firebase app and services with enhanced error handling
