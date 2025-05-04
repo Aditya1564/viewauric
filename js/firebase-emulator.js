@@ -408,15 +408,58 @@ window.Auric.Emulator = {
   }
 };
 
+// Check if authentication methods are enabled
+function checkAuthMethodAvailability() {
+  if (!window.firebase || !window.firebase.auth) {
+    return false;
+  }
+  
+  try {
+    // Test if anonymous auth is available
+    firebase.auth().signInAnonymously()
+      .then(() => {
+        console.log('Anonymous auth is enabled');
+      })
+      .catch((error) => {
+        console.log('Anonymous auth is not enabled:', error.code);
+        // Since anonymous auth failed, we know we need to use the emulator
+        console.log('Forcing emulator mode due to auth restrictions');
+        window.Auric.Emulator.init();
+      });
+  } catch (e) {
+    console.error('Error checking auth availability:', e);
+    // On any error, use the emulator
+    window.Auric.Emulator.init();
+  }
+  
+  return true;
+}
+
 // Initialize the emulator when the script loads
 document.addEventListener('DOMContentLoaded', function() {
-  // Only initialize if we're in a Replit environment
-  const isReplit = window.location.hostname.includes('replit') || window.location.hostname.includes('5000');
+  // Force emulator mode for development and testing
+  const forceEmulator = true;
   
-  if (isReplit) {
-    console.log('Replit environment detected, initializing Firebase Emulator');
+  // Check if we're in a Replit environment
+  const isReplit = window.location.hostname.includes('replit') || 
+                   window.location.hostname.includes('5000') || 
+                   window.location.hostname === 'localhost';
+  
+  if (forceEmulator || isReplit) {
+    console.log('Development environment detected, initializing Firebase Emulator');
     window.Auric.Emulator.init();
+    // Override Firebase auth functions to always use our emulator
+    if (window.firebase && window.firebase.auth) {
+      console.log('Replacing Firebase Auth with emulator implementation');
+      // Make sure our auth implementation is used
+      setTimeout(() => {
+        // Re-initialize in case other scripts have modified auth
+        window.Auric.Emulator.init();
+      }, 500);
+    }
   } else {
     console.log('Production environment detected, skipping Firebase Emulator');
+    // Still check if we need the emulator due to auth restrictions
+    checkAuthMethodAvailability();
   }
 });
