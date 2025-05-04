@@ -27,6 +27,8 @@
     text-decoration: none;
     margin-right: 20px;
     margin-left: 15px; /* Added left margin for spacing */
+    margin-bottom: 5px; /* Added bottom margin for spacing */
+    padding-bottom: 3px; /* Added bottom padding for spacing */
     min-width: 80px;
     order: 0; /* Ensure it stays on the left */
 }
@@ -228,6 +230,8 @@
         font-size: 32px; /* Increased font size */
         font-weight: 700; /* Increased font weight */
         margin-right: 10px;
+        margin-bottom: 5px; /* Added bottom margin for spacing */
+        padding-bottom: 3px; /* Added bottom padding for spacing */
     }
 }
 
@@ -255,6 +259,8 @@
     .brand {
         order: 1; /* Comes after hamburger menu */
         margin: 0 auto 0 15px; /* Added left margin */
+        margin-bottom: 5px; /* Added bottom margin for spacing */
+        padding-bottom: 3px; /* Added bottom padding for spacing */
         font-size: 36px; /* Increased font size */
         font-weight: 700; /* Increased font weight */
         text-align: left;
@@ -360,6 +366,8 @@
     .brand {
         font-size: 32px; /* Increased font size */
         font-weight: 700; /* Increased font weight */
+        margin-bottom: 5px; /* Added bottom margin for spacing */
+        padding-bottom: 3px; /* Added bottom padding for spacing */
     }
     
     .icon-link {
