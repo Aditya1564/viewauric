@@ -14,14 +14,8 @@
  */
 let auth; // Declare auth variable in global scope
 
-// Firebase configuration object
-const firebaseConfig = {
-  apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
-  authDomain: "auric-a0c92.firebaseapp.com",
-  projectId: "auric-a0c92",
-  storageBucket: "auric-a0c92.appspot.com",
-  appId: "1:878979958342:web:e6092f7522488d21eaec47"
-};
+// Get Firebase configuration from firebase-config.js
+// The configuration will be imported from firebase-config.js which is loaded before this file
 
 /**
  * Initialize Firebase app and authentication
