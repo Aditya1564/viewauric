@@ -285,6 +285,8 @@ const SessionManager = {
     
     if (user) {
       // User is signed in
+      console.log('User authenticated:', user.email || user.uid);
+      
       if (userIcon) {
         userIcon.setAttribute('title', 'My Account');
         userIcon.setAttribute('href', 'profile.html');
@@ -293,10 +295,13 @@ const SessionManager = {
       // If we're on the login or signup page and the user is already logged in,
       // redirect to profile page
       if (currentPath.includes('login.html') || currentPath.includes('signup.html')) {
+        console.log('Redirecting authenticated user from auth page to profile');
         window.location.href = 'profile.html';
       }
     } else {
       // User is signed out
+      console.log('User is not authenticated');
+      
       if (userIcon) {
         userIcon.setAttribute('title', 'Login');
         userIcon.setAttribute('href', 'login.html');
@@ -305,9 +310,33 @@ const SessionManager = {
       // If we're on the profile page and the user is not logged in,
       // redirect to login page
       if (currentPath.includes('profile.html')) {
+        console.log('Redirecting unauthenticated user from profile to login');
         window.location.href = 'login.html';
       }
     }
+  },
+  
+  /**
+   * Checks if a user is already authenticated
+   * @returns {Promise<boolean>} Promise that resolves with auth state
+   */
+  isUserAuthenticated: function() {
+    return new Promise((resolve) => {
+      // Use the AuthHelper if available for better compatibility
+      if (window.Auric && window.Auric.AuthHelper && window.Auric.AuthHelper.getCurrentUser) {
+        window.Auric.AuthHelper.getCurrentUser().then(user => {
+          console.log('Auth check using AuthHelper:', !!user);
+          resolve(!!user);
+        });
+      } else {
+        // Fall back to one-time auth state check
+        const unsubscribe = window.Auric.auth.onAuthStateChanged((user) => {
+          unsubscribe();
+          console.log('Auth check using standard method:', !!user);
+          resolve(!!user);
+        });
+      }
+    });
   },
   
   /**
@@ -315,6 +344,16 @@ const SessionManager = {
    */
   init: function() {
     window.Auric.auth.onAuthStateChanged(SessionManager.handleAuthStateChange);
+    console.log('Auth state listener initialized successfully');
+    
+    // Set auth persistence to LOCAL for better user experience
+    window.Auric.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+      .then(() => {
+        console.log('Auth persistence set to LOCAL');
+      })
+      .catch((error) => {
+        console.warn('Could not set auth persistence:', error);
+      });
   }
 };
 

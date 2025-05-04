@@ -114,10 +114,20 @@
                 <h3>Google Provider</h3>
                 <p id="google-status" class="status-pending">Pending</p>
             </div>
+            <div class="test-card">
+                <h3>Pure Emulator</h3>
+                <p id="emulator-status" class="status-pending">Pending</p>
+            </div>
+            <div class="test-card">
+                <h3>Auth State</h3>
+                <p id="auth-state-status" class="status-pending">Not Logged In</p>
+            </div>
         </div>
         
         <button id="run-tests">Run Tests</button>
         <button id="clear-results">Clear Results</button>
+        <button id="create-test-user">Create Test User</button>
+        <button id="sign-out-test">Sign Out</button>
     </div>
     
     <div class="card">
@@ -280,6 +290,100 @@
             }, 2000);
         }
         
+        // Test Pure Emulator
+        function testPureEmulator() {
+            updateTestStatus('emulator-status', 'pending', 'Testing...');
+            log('Testing Pure Emulator...');
+            
+            if (!window.Auric || !window.Auric.PureEmulator) {
+                log('❌ Pure Emulator not loaded', true);
+                updateTestStatus('emulator-status', 'error', 'Not Loaded');
+                return false;
+            }
+            
+            log('✓ Pure Emulator loaded and initialized');
+            updateTestStatus('emulator-status', 'success', 'Loaded');
+            return true;
+        }
+        
+        // Create a test user
+        function createTestUser() {
+            log('Creating test user...');
+            
+            // Make sure the emulator is available
+            if (!testPureEmulator()) {
+                showError('Pure Emulator is not available');
+                return;
+            }
+            
+            // Generate a unique email
+            const testEmail = `test_${Date.now()}@example.com`;
+            const testPassword = 'TestPassword123';
+            
+            log(`Creating user with email: ${testEmail}`);
+            
+            // Use the Auric namespace to create a test user
+            if (window.Auric && window.Auric.auth) {
+                window.Auric.auth.createUserWithEmailAndPassword(testEmail, testPassword)
+                    .then((userCredential) => {
+                        // Update the user profile
+                        return userCredential.user.updateProfile({
+                            displayName: 'Test User',
+                            photoURL: 'https://via.placeholder.com/150'
+                        }).then(() => {
+                            log('✓ Test user created and profile updated');
+                            showSuccess(`Test user created: ${testEmail}`);
+                            updateAuthStateDisplay();
+                        });
+                    })
+                    .catch((error) => {
+                        log(`❌ Error creating test user: ${error.message}`, true);
+                        showError(`Failed to create test user: ${error.message}`);
+                    });
+            } else {
+                log('❌ Auric auth namespace not available', true);
+                showError('Firebase authentication not properly initialized');
+            }
+        }
+        
+        // Sign out test user
+        function signOutTestUser() {
+            log('Signing out...');
+            
+            // Use the Auric namespace to sign out
+            if (window.Auric && window.Auric.auth) {
+                window.Auric.auth.signOut()
+                    .then(() => {
+                        log('✓ Successfully signed out');
+                        showSuccess('User signed out successfully');
+                        updateAuthStateDisplay();
+                    })
+                    .catch((error) => {
+                        log(`❌ Error signing out: ${error.message}`, true);
+                        showError(`Failed to sign out: ${error.message}`);
+                    });
+            } else {
+                log('❌ Auric auth namespace not available', true);
+                showError('Firebase authentication not properly initialized');
+            }
+        }
+        
+        // Update the auth state display
+        function updateAuthStateDisplay() {
+            if (window.Auric && window.Auric.auth) {
+                const user = window.Auric.auth.currentUser;
+                if (user) {
+                    log(`Current user: ${user.email} (${user.displayName || 'No Name'})`);
+                    updateTestStatus('auth-state-status', 'success', `Logged in as: ${user.email}`);
+                } else {
+                    log('No user is currently signed in');
+                    updateTestStatus('auth-state-status', 'pending', 'Not Logged In');
+                }
+            } else {
+                updateTestStatus('auth-state-status', 'error', 'Auth Unavailable');
+            }
+        }
+        
         // Set up event listeners
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('run-tests').addEventListener('click', runTests);
@@ -287,6 +391,9 @@
             document.getElementById('clear-results').addEventListener('click', function() {
                 document.getElementById('results').textContent = '';
             });
+            
+            document.getElementById('create-test-user').addEventListener('click', createTestUser);
+            document.getElementById('sign-out-test').addEventListener('click', signOutTestUser);
             
             // Show Firebase configuration
             const testConfig = {
@@ -298,6 +405,17 @@
                 appId: "1:878979958342:web:e6092f7522488d21eaec47"
             };
             document.getElementById('config-info').textContent = JSON.stringify(testConfig, null, 2);
+            
+            // Test Pure Emulator and update auth state on load
+            testPureEmulator();
+            updateAuthStateDisplay();
+            
+            // Set up auth state listener
+            if (window.Auric && window.Auric.auth) {
+                window.Auric.auth.onAuthStateChanged(function(user) {
+                    updateAuthStateDisplay();
+                });
+            }
         });
     </script>
 </body>
