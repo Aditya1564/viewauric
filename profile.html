@@ -383,11 +383,14 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     
-    <!-- Firebase configuration must be loaded before auth.js -->
-    <script src="js/firebase-config.js?v=1.0.0"></script>
+    <!-- Firebase configuration must be loaded first -->
+    <script src="js/firebase-config.js?v=1.0.1"></script>
     
     <!-- Auth scripts -->
-    <script src="js/auth.js?v=1.0.2"></script>
+    <script src="js/auth.js?v=1.0.3"></script>
+    
+    <!-- Dedicated Google Auth script -->
+    <script src="js/auth-google.js?v=1.0.0"></script>
     
     <!-- Navigation script -->
     <script src="js/navigation.js?v=1.0.3"></script>
@@ -419,25 +422,46 @@
             
             // Log out functionality
             document.getElementById('logout-button').addEventListener('click', function() {
-                logoutUser(); // This function is defined in auth.js
-            });
-            
-            // Check if user is logged in
-            const auth = firebase.auth();
-            auth.onAuthStateChanged(function(user) {
-                if (user) {
-                    // User is signed in
-                    document.getElementById('profileName').textContent = user.displayName || 'Auric Customer';
-                    document.getElementById('profileEmail').textContent = user.email;
-                    
-                    // Set avatar with first letter of name
-                    const firstLetter = user.displayName ? user.displayName.charAt(0).toUpperCase() : 'A';
-                    document.getElementById('profileAvatar').textContent = firstLetter;
+                // Use the Auric namespace to logout
+                if (window.Auric && window.Auric.auth) {
+                    window.Auric.auth.signOut()
+                        .then(() => {
+                            // Success - redirect to login page
+                            window.location.href = 'login.html';
+                        })
+                        .catch((error) => {
+                            console.error('Error during sign out:', error);
+                            alert('Error logging out. Please try again.');
+                        });
                 } else {
-                    // User is not signed in, redirect to login
-                    window.location.href = 'login.html';
+                    console.error('Auric auth not initialized');
+                    alert('Error: Authentication system not available. Please try again later.');
                 }
             });
+            
+            // Check if user is logged in using the Auric namespace
+            if (window.Auric && window.Auric.auth) {
+                window.Auric.auth.onAuthStateChanged(function(user) {
+                    if (user) {
+                        // User is signed in
+                        console.log('User authenticated:', user.email);
+                        document.getElementById('profileName').textContent = user.displayName || 'Auric Customer';
+                        document.getElementById('profileEmail').textContent = user.email;
+                        
+                        // Set avatar with first letter of name
+                        const firstLetter = user.displayName ? user.displayName.charAt(0).toUpperCase() : 'A';
+                        document.getElementById('profileAvatar').textContent = firstLetter;
+                    } else {
+                        // User is not signed in, redirect to login
+                        console.log('No user authenticated, redirecting to login');
+                        window.location.href = 'login.html';
+                    }
+                });
+            } else {
+                console.error('Auric auth not initialized');
+                alert('Error: Authentication system not available. Please try again later.');
+                window.location.href = 'login.html';
+            }
         });
     </script>
   </body>
