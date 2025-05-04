@@ -813,7 +813,17 @@ a {
     border-radius: 0;
     overflow: hidden;
     position: relative;
-    height: 650px !important; /* Significantly increased height for mobile */
+    height: 80vh !important; /* Using viewport height for better responsiveness */
+    min-height: 450px !important; /* Setting a minimum height */
+    max-height: 650px !important; /* Setting a maximum height */
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+    .main-image-container {
+        min-height: 400px !important;
+        height: 75vh !important;
+    }
 }
 
 .main-product-image {
@@ -825,9 +835,20 @@ a {
     transition: opacity 0.3s ease;
 }
 
+/* Medium-sized devices */
+@media (min-width: 481px) and (max-width: 767px) {
+    .main-image-container {
+        height: 82vh !important;
+        min-height: 480px !important;
+        max-height: 700px !important;
+    }
+}
+
 @media (min-width: 768px) {
     .main-image-container {
-        height: 750px !important;
+        height: 85vh !important;
+        min-height: 500px !important;
+        max-height: 800px !important;
     }
     
     .main-product-image {
