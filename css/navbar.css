@@ -106,7 +106,7 @@
 .nav-link {
     color: #333;
     text-decoration: none;
-    font-size: 14px;
+    font-size: 12px; /* Decreased font size */
     font-weight: 500;
     padding: 25px 5px;
     display: block;
