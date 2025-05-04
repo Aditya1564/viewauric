@@ -207,6 +207,28 @@
 }
 
 /* Responsive Design */
+/* Medium Desktop (1199px and below) */
+@media (max-width: 1199px) {
+    .nav-item {
+        margin: 0 10px; /* Reduce margins between items */
+    }
+    
+    .nav-link {
+        padding: 25px 3px; /* Reduce padding */
+        font-size: 13px; /* Smaller font size */
+    }
+    
+    .icon-link {
+        margin-left: 12px; /* Reduce margin between icons */
+    }
+    
+    .brand {
+        font-size: 22px; /* Slightly smaller brand */
+        margin-right: 10px;
+    }
+}
+
+/* Tablet to Small Desktop */
 @media (max-width: 991px) {
     .hamburger {
         display: block;
@@ -223,6 +245,14 @@
     
     .nav-icons {
         order: 3;
+        display: flex;
+        justify-content: flex-end;
+        min-width: 120px; /* Ensure enough space for icons */
+    }
+    
+    .icon-link {
+        margin-left: 10px; /* Even smaller margins for icons */
+        font-size: 16px;
     }
     
     .nav-menu {
@@ -258,6 +288,7 @@
     .nav-link {
         padding: 15px 0;
         width: 100%;
+        font-size: 14px;
     }
     
     .dropdown-menu {
@@ -280,13 +311,25 @@
         right: 0;
         top: 18px;
     }
+}
+
+/* Mobile Landscape (767px and below) */
+@media (max-width: 767px) {
+    .nav-container {
+        padding: 0 15px;
+    }
+    
+    .nav-icons {
+        min-width: 110px;
+    }
     
     .icon-link {
-        margin-left: 15px;
-        font-size: 16px;
+        margin-left: 8px;
+        font-size: 15px;
     }
 }
 
+/* Mobile Portrait */
 @media (max-width: 576px) {
     .nav-container {
         padding: 0 15px;
@@ -298,8 +341,8 @@
     }
     
     .icon-link {
-        margin-left: 12px;
-        font-size: 15px;
+        margin-left: 8px;
+        font-size: 14px;
     }
     
     .nav-menu {
@@ -310,6 +353,10 @@
     
     .nav-link {
         font-size: 13px;
+    }
+    
+    .nav-icons {
+        min-width: 100px;
     }
 }
 
