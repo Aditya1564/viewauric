@@ -327,6 +327,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     /**
      * Save cart to Firestore for authenticated users
+     * Enhanced with better error handling and offline support
      */
     saveCartToFirestore: function(userId) {
       if (!userId) {
@@ -334,60 +335,135 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
       }
       
+      console.log('Attempting to save cart to Firestore for user:', userId);
+      
+      // First, ensure we are saving to localStorage as backup
+      this.saveCartToLocalStorage();
+      
+      // Check if the network is online
+      if (!navigator.onLine) {
+        console.warn('Browser is offline, cart saved to localStorage only');
+        // Set a flag to sync when back online
+        this.pendingFirestoreSync = true;
+        return;
+      }
+      
+      // Try to save to Firestore
       db.collection('carts').doc(userId).set({
         items: this.items,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        lastSyncedDevice: navigator.userAgent, // Track which device made the last update
+        lastSyncedAt: new Date().toISOString()
       })
       .then(() => {
         console.log('Cart saved to Firestore successfully');
+        // Clear any pending sync flag
+        this.pendingFirestoreSync = false;
       })
       .catch((error) => {
         console.error('Error saving cart to Firestore:', error);
-        // Fallback to localStorage
-        this.saveCartToLocalStorage();
+        
+        // Set a flag to retry syncing later
+        this.pendingFirestoreSync = true;
+        
+        // Check if we need to set up a listener for when we're back online
+        if (error.code === 'unavailable' || error.code === 'failed-precondition') {
+          console.log('Setting up online listener to retry saving cart');
+          
+          // Set up one-time event listener for when we're back online
+          window.addEventListener('online', () => {
+            if (this.pendingFirestoreSync) {
+              console.log('Back online, retrying Firestore cart save');
+              this.saveCartToFirestore(userId);
+            }
+          }, { once: true });
+        }
       });
     },
     
     /**
      * Sync localStorage cart with Firestore when user logs in
+     * Enhanced with better error handling and retry logic
      */
     syncCartOnLogin: function(userId) {
-      // First, check if user already has a cart in Firestore
-      db.collection('carts').doc(userId).get()
-        .then((doc) => {
-          let firestoreItems = [];
-          if (doc.exists && doc.data().items) {
-            firestoreItems = doc.data().items;
+      console.log('Syncing cart for user:', userId);
+      
+      // Set up retry mechanism
+      const maxRetries = 3;
+      let retryCount = 0;
+      
+      const attemptSync = () => {
+        console.log(`Attempt ${retryCount + 1} to sync cart with Firestore`);
+        
+        // First, we always load the localStorage cart as a fallback
+        const localStorageCart = localStorage.getItem('auricCart');
+        let localItems = [];
+        if (localStorageCart) {
+          try {
+            localItems = JSON.parse(localStorageCart);
+            console.log('Local cart items loaded:', localItems.length);
+          } catch (error) {
+            console.error('Error parsing cart from localStorage:', error);
           }
-          
-          // Then get localStorage cart
-          const localStorageCart = localStorage.getItem('auricCart');
-          let localItems = [];
-          if (localStorageCart) {
-            try {
-              localItems = JSON.parse(localStorageCart);
-            } catch (error) {
-              console.error('Error parsing cart from localStorage:', error);
-            }
-          }
-          
-          // Merge the carts (giving priority to Firestore for duplicates)
-          const mergedItems = this.mergeCarts(localItems, firestoreItems);
-          
-          // Update the cart with merged items
-          this.items = mergedItems;
-          
-          // Save the merged cart to Firestore
-          this.saveCartToFirestore(userId);
-          
-          // Update the UI
+        }
+        
+        // Set the items from localStorage first so we have something to show immediately
+        if (localItems.length > 0 && this.items.length === 0) {
+          this.items = [...localItems];
           this.updateCartUI();
-          
-          console.log('Cart synced successfully after login');
-        })
-        .catch((error) => {
-          console.error('Error syncing cart on login:', error);
-        });
+        }
+        
+        // Then try to get the cart from Firestore
+        db.collection('carts').doc(userId).get()
+          .then((doc) => {
+            let firestoreItems = [];
+            if (doc.exists && doc.data().items) {
+              firestoreItems = doc.data().items;
+              console.log('Firestore cart items loaded:', firestoreItems.length);
+            }
+            
+            // Merge the carts (giving priority to Firestore for duplicates)
+            // This ensures we don't lose items if the connection is intermittent
+            const mergedItems = this.mergeCarts(localItems, firestoreItems);
+            
+            // Update the cart with merged items
+            this.items = mergedItems;
+            
+            // Only save back to Firestore if we have items to save
+            if (mergedItems.length > 0) {
+              // Save the merged cart to Firestore
+              this.saveCartToFirestore(userId);
+            }
+            
+            // Update the UI
+            this.updateCartUI();
+            
+            console.log('Cart synced successfully after login');
+          })
+          .catch((error) => {
+            console.error('Error syncing cart on login:', error);
+            
+            // If we encounter a network error, retry with exponential backoff
+            if (error.code === 'unavailable' && retryCount < maxRetries) {
+              retryCount++;
+              const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff: 2s, 4s, 8s
+              console.log(`Will retry in ${delay}ms (attempt ${retryCount} of ${maxRetries})`);
+              
+              setTimeout(attemptSync, delay);
+            } else {
+              // If we've exhausted retries or it's not a network error, use localStorage as fallback
+              console.log('Using localStorage cart as fallback due to Firestore error');
+              this.items = [...localItems];
+              this.updateCartUI();
+              
+              // Set a flag to retry syncing when the page is next interacted with
+              this.pendingSync = true;
+            }
+          });
+      };
+      
+      // Start the sync process
+      attemptSync();
     },
     
     /**
@@ -795,20 +871,103 @@ document.addEventListener('DOMContentLoaded', function() {
     
     /**
      * Setup authentication listener for cart syncing
+     * Enhanced with better user feedback and error handling
      */
     setupAuthListener: function() {
+      // Create status indicator for sync operations
+      this.createSyncStatusIndicator();
+      
       auth.onAuthStateChanged((user) => {
         if (user) {
-          // User signed in
+          // User has signed in, show syncing status
+          console.log('User is authenticated:', user.email);
+          this.showSyncStatus('Syncing your cart across devices...');
+          
+          // User has signed in, sync cart with timeout for better reliability
           console.log('User signed in, syncing cart');
-          this.syncCartOnLogin(user.uid);
+          
+          // Short delay to ensure auth is fully processed
+          setTimeout(() => {
+            this.syncCartOnLogin(user.uid);
+          }, 1000);
+          
+          // Set up periodic background sync for logged in users
+          // This helps ensure cart data stays consistent across devices
+          this.startPeriodicSync(user.uid);
         } else {
-          // User signed out
+          // User has signed out, load from localStorage
           console.log('User signed out, loading cart from localStorage');
           this.loadCartFromLocalStorage();
           this.updateCartUI();
+          
+          // Clear any periodic sync
+          this.stopPeriodicSync();
         }
       });
+    },
+    
+    /**
+     * Start periodic background sync for cart data
+     * This ensures cart stays in sync across multiple devices
+     */
+    startPeriodicSync: function(userId) {
+      // Clear any existing sync interval
+      this.stopPeriodicSync();
+      
+      // Set up sync every 5 minutes
+      this.syncInterval = setInterval(() => {
+        if (auth.currentUser && navigator.onLine && this.pendingFirestoreSync) {
+          console.log('Running periodic background sync');
+          this.saveCartToFirestore(userId);
+        }
+      }, 5 * 60 * 1000); // Every 5 minutes
+    },
+    
+    /**
+     * Stop periodic background sync
+     */
+    stopPeriodicSync: function() {
+      if (this.syncInterval) {
+        clearInterval(this.syncInterval);
+        this.syncInterval = null;
+      }
+    },
+    
+    /**
+     * Create a sync status indicator element
+     */
+    createSyncStatusIndicator: function() {
+      // Check if the indicator already exists
+      if (document.getElementById('cart-sync-status')) return;
+      
+      // Create the indicator element
+      const indicator = document.createElement('div');
+      indicator.id = 'cart-sync-status';
+      indicator.style.cssText = 'position: fixed; bottom: 20px; right: 20px; background: rgba(0,0,0,0.8); color: white; padding: 10px 15px; border-radius: 5px; font-size: 14px; z-index: 9999; display: none; transition: opacity 0.3s ease;';
+      
+      // Add to the document
+      document.body.appendChild(indicator);
+    },
+    
+    /**
+     * Show sync status message
+     */
+    showSyncStatus: function(message) {
+      const indicator = document.getElementById('cart-sync-status');
+      if (!indicator) return;
+      
+      // Update message and show
+      indicator.textContent = message;
+      indicator.style.display = 'block';
+      indicator.style.opacity = '1';
+      
+      // Hide after 3 seconds
+      setTimeout(() => {
+        indicator.style.opacity = '0';
+        setTimeout(() => {
+          indicator.style.display = 'none';
+        }, 300);
+      }, 3000);
     }
   };
   
