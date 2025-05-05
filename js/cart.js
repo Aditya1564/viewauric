@@ -461,100 +461,97 @@ document.addEventListener('DOMContentLoaded', function() {
     },
     
     /**
-     * Load cart from Firestore for authenticated users
+     * Load cart from Firestore for authenticated users - COMPLETELY REVISED
+     * Always treats Firestore as the source of truth
      */
     loadCartFromFirestore: function(userId) {
+      console.log('Loading cart from Firestore - server is source of truth');
+      
       // Set a loading flag to prevent race conditions
       this.isLoadingFromFirestore = true;
       
+      // Always use Firestore as the source of truth when user is logged in
       db.collection('carts').doc(userId).get()
         .then((doc) => {
           if (doc.exists && doc.data().items) {
             // Get items from Firestore
-            let firestoreItems = doc.data().items;
-            const firestoreUpdatedAt = doc.data().updatedAt ? doc.data().updatedAt.toMillis() : 0;
+            const firestoreItems = doc.data().items;
+            console.log('Found cart items in Firestore:', firestoreItems.length);
             
-            // Get localStorage timestamp if available
-            let localUpdatedAt = 0;
-            try {
-              const localTimestamp = localStorage.getItem('auricCartTimestamp');
-              if (localTimestamp) {
-                localUpdatedAt = parseInt(localTimestamp, 10);
+            // Ensure all items have valid quantity values
+            const validatedItems = firestoreItems.map(item => {
+              // Force quantity to be 1 if it's invalid or not provided
+              if (!item.quantity || isNaN(item.quantity) || item.quantity < 1) {
+                console.log('Fixed invalid quantity for item:', item.name);
+                item.quantity = 1;
               }
-            } catch (e) {
-              console.error('Error parsing local timestamp:', e);
-            }
+              return item;
+            });
             
-            // Also check if we have a local cart
-            let localCartItems = [];
-            const savedCart = localStorage.getItem('auricCart');
-            if (savedCart) {
-              try {
-                localCartItems = JSON.parse(savedCart);
-              } catch (e) {
-                console.error('Error parsing localStorage cart:', e);
-              }
-            }
+            // Update our cart with Firestore data
+            this.items = validatedItems;
             
-            // Decide which cart to use based on timestamps and content
-            if (firestoreUpdatedAt >= localUpdatedAt || localCartItems.length === 0) {
-              console.log('Using Firestore cart (newer than local or local empty)');
-              
-              // Ensure all items have valid quantity values
-              firestoreItems = firestoreItems.map(item => {
-                // Force quantity to be 1 if it's invalid or not provided
-                if (!item.quantity || isNaN(item.quantity) || item.quantity < 1) {
-                  console.log('Fixed invalid quantity for item:', item.name);
-                  item.quantity = 1;
-                }
-                return item;
-              });
-              
-              this.items = firestoreItems;
-              
-              // Update localStorage with Firestore data
-              localStorage.setItem('auricCart', JSON.stringify(this.items));
-              localStorage.setItem('auricCartTimestamp', firestoreUpdatedAt.toString());
-              
-              console.log('Cart loaded from Firestore:', this.items);
-            } else {
-              console.log('Using localStorage cart (newer than Firestore)');
-              // If local is newer, keep it and update Firestore
-              this.loadCartFromLocalStorage();
-              // Save back to Firestore to sync
-              this.saveCartToFirestore(userId);
-            }
+            // Save to localStorage as backup with Firestore timestamp
+            const firestoreTimestamp = doc.data().updatedAt ? doc.data().updatedAt.toMillis() : Date.now();
+            localStorage.setItem('auricCart', JSON.stringify(this.items));
+            localStorage.setItem('auricCartTimestamp', firestoreTimestamp.toString());
+            localStorage.setItem('auricCartLastSync', Date.now().toString());
             
-            this.updateCartUI();
+            console.log('Cart loaded from Firestore and saved to localStorage');
           } else {
-            // Try to use localStorage cart first
+            console.log('No cart found in Firestore, checking localStorage');
+            
+            // Try to use localStorage cart if Firestore cart doesn't exist
             const savedCart = localStorage.getItem('auricCart');
             if (savedCart) {
               try {
-                this.items = JSON.parse(savedCart);
-                console.log('No cart in Firestore, using localStorage cart');
-                // Save to Firestore for syncing
-                this.saveCartToFirestore(userId);
+                const localItems = JSON.parse(savedCart);
+                if (localItems.length > 0) {
+                  console.log('Using localStorage cart and saving to Firestore');
+                  this.items = localItems;
+                  
+                  // Save to Firestore immediately for sync
+                  this.saveCartToFirestore(userId);
+                } else {
+                  console.log('Empty cart in localStorage');
+                  this.items = [];
+                }
               } catch (e) {
                 console.error('Error parsing localStorage cart:', e);
                 this.items = [];
               }
             } else {
-              console.log('No cart found in Firestore or localStorage, creating new cart');
+              console.log('No cart found in Firestore or localStorage');
               this.items = [];
+              
+              // Create empty cart in Firestore
               this.saveCartToFirestore(userId);
             }
-            this.updateCartUI();
           }
+          
+          // Update UI with whatever cart we've loaded
+          this.updateCartUI();
           
           // Clear loading flag
           this.isLoadingFromFirestore = false;
         })
         .catch((error) => {
           console.error('Error loading cart from Firestore:', error);
-          // Fallback to localStorage if Firestore fails
+          
+          // Fallback to localStorage only if Firestore fails
           this.loadCartFromLocalStorage();
           this.updateCartUI();
+          
+          // Set flag to try again later when online
+          this.pendingFirestoreSync = true;
+          
+          // Set up listener for when we're back online
+          window.addEventListener('online', () => {
+            if (this.pendingFirestoreSync && auth.currentUser) {
+              console.log('Back online, retrying Firestore cart load');
+              this.loadCartFromFirestore(auth.currentUser.uid);
+            }
+          }, { once: true });
           
           // Clear loading flag
           this.isLoadingFromFirestore = false;
