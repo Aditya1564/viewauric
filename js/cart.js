@@ -558,6 +558,9 @@ document.addEventListener('DOMContentLoaded', function() {
         itemElement.className = 'cart-item';
         itemElement.setAttribute('data-index', index);
         
+        // Calculate item total price
+        const itemTotal = (item.price * item.quantity).toLocaleString('en-IN');
+        
         // Different layout for sliding cart
         itemElement.innerHTML = `
           <div class="cart-item-image">
@@ -566,7 +569,10 @@ document.addEventListener('DOMContentLoaded', function() {
           <div class="cart-item-details">
             <h3 class="cart-item-name">${item.name}</h3>
             <div class="cart-item-price-row">
-              <p class="cart-item-price">₹${item.price.toLocaleString('en-IN')}</p>
+              <div class="cart-item-price-info">
+                <p class="cart-item-price">₹${item.price.toLocaleString('en-IN')} × ${item.quantity}</p>
+                <p class="cart-item-total">₹${itemTotal}</p>
+              </div>
               <div class="cart-item-quantity">
                 <button class="quantity-btn decrement" data-index="${index}">-</button>
                 <input type="text" value="${item.quantity}" class="quantity-input" readonly>
@@ -591,33 +597,40 @@ document.addEventListener('DOMContentLoaded', function() {
     },
     
     /**
-     * Setup event listeners for cart item buttons
+     * Setup event listeners for cart item buttons using event delegation
      */
     setupCartItemEventListeners: function() {
-      // Quantity increment/decrement buttons
-      const decrementButtons = document.querySelectorAll('.quantity-btn.decrement');
-      const incrementButtons = document.querySelectorAll('.quantity-btn.increment');
-      const removeButtons = document.querySelectorAll('.remove-item-btn');
+      const container = this.slidingCartItemsContainer;
+      if (!container) return;
       
-      decrementButtons.forEach(button => {
-        button.addEventListener('click', (e) => {
+      // Use event delegation for better reliability
+      container.addEventListener('click', (e) => {
+        // Handle decrement button click
+        if (e.target.classList.contains('decrement')) {
           const index = parseInt(e.target.getAttribute('data-index'));
+          console.log('Decrement clicked for index:', index);
           this.decrementQuantity(index);
-        });
-      });
-      
-      incrementButtons.forEach(button => {
-        button.addEventListener('click', (e) => {
+          return;
+        }
+        
+        // Handle increment button click
+        if (e.target.classList.contains('increment')) {
           const index = parseInt(e.target.getAttribute('data-index'));
+          console.log('Increment clicked for index:', index);
           this.incrementQuantity(index);
-        });
-      });
-      
-      removeButtons.forEach(button => {
-        button.addEventListener('click', (e) => {
-          const index = parseInt(e.target.getAttribute('data-index'));
+          return;
+        }
+        
+        // Handle remove button click
+        if (e.target.classList.contains('fa-trash') || e.target.classList.contains('remove-item-btn')) {
+          const button = e.target.classList.contains('remove-item-btn') ? 
+                         e.target : 
+                         e.target.closest('.remove-item-btn');
+          const index = parseInt(button.getAttribute('data-index'));
+          console.log('Remove clicked for index:', index);
           this.removeItem(index);
-        });
+          return;
+        }
       });
     },
     
