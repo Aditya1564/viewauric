@@ -447,6 +447,16 @@ document.addEventListener('DOMContentLoaded', function() {
           this.closeCartPanel();
         });
       }
+      
+      // Setup Checkout button
+      const checkoutButton = document.querySelector('.cart-panel-buttons .checkout-btn');
+      if (checkoutButton) {
+        checkoutButton.addEventListener('click', (e) => {
+          e.preventDefault();
+          // Redirect to checkout page
+          window.location.href = 'checkout.html';
+        });
+      }
     },
     
     /**
