@@ -249,8 +249,16 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
       }
       
+      // Validate form fields
+      const form = this.elements.checkoutForm;
+      if (!form.checkValidity()) {
+        alert('Please fill in all required fields correctly');
+        form.reportValidity();
+        return;
+      }
+      
       // Get form data
-      const formData = new FormData(this.elements.checkoutForm);
+      const formData = new FormData(form);
       const orderData = {
         customerId: auth.currentUser.uid,
         customerEmail: auth.currentUser.email,
@@ -269,6 +277,8 @@ document.addEventListener('DOMContentLoaded', function() {
         status: 'pending',
         createdAt: new Date().toISOString(),
       };
+      
+      console.log('Processing checkout with data:', orderData);
       
       // Show loading state
       this.setLoadingState(true);
@@ -289,29 +299,37 @@ document.addEventListener('DOMContentLoaded', function() {
       console.log('Creating Razorpay order with data:', orderData);
       
       // Mock order ID - in production, this would come from the Razorpay API via your server
-      const orderId = 'order_' + Math.random().toString(36).substring(2, 15) + 
-                     Math.random().toString(36).substring(2, 15);
+      // We're not actually using this with the test key, so we can skip the order_id parameter
+      orderData.razorpayOrderId = "order_demo_" + Date.now();
       
-      // Store order ID in the order data
-      orderData.razorpayOrderId = orderId;
-      
-      // Open Razorpay payment form
-      this.openRazorpayCheckout(orderData, orderId);
+      // Open Razorpay payment form without order_id for demo purposes
+      // In a real implementation, you would create an order on your server first
+      this.openRazorpayCheckout(orderData);
     },
     
     /**
      * Open the Razorpay checkout popup
      */
-    openRazorpayCheckout: function(orderData, orderId) {
+    openRazorpayCheckout: function(orderData) {
+      console.log('Attempting to open Razorpay checkout...');
+      
+      // Check if Razorpay is available
+      if (typeof Razorpay === 'undefined') {
+        console.error('Razorpay SDK not loaded');
+        alert('Could not load payment gateway. Please refresh the page and try again.');
+        this.setLoadingState(false);
+        return;
+      }
+      
+      const self = this; // Store reference to 'this' for use in callbacks
       const options = {
         key: "rzp_test_T8EE9FAEIYQ8dX", // Razorpay test key
-        amount: orderData.total * 100, // Amount in paisa
+        amount: orderData.total * 100, // Amount in paisa (e.g., 10000 for ₹100)
         currency: this.config.currencyCode,
-        name: "Auric",
-        description: "Jewelry Purchase",
-        order_id: orderId,
-        image: "generated-icon.png", // Logo image (ensure this exists in your project)
-        handler: (response) => {
+        name: "Auric Jewelry",
+        description: "Jewelry Purchase - Order #" + Math.floor(Math.random() * 1000000),
+        image: "https://i.imgur.com/n5tjHFD.png", // Default image URL that definitely works
+        handler: function(response) {
           console.log('Payment successful:', response);
           
           // Add payment details to order data
@@ -320,7 +338,7 @@ document.addEventListener('DOMContentLoaded', function() {
           orderData.status = 'paid';
           
           // Save order to Firestore
-          this.saveOrderToFirestore(orderData);
+          self.saveOrderToFirestore(orderData);
         },
         prefill: {
           name: orderData.customerName,
@@ -334,16 +352,26 @@ document.addEventListener('DOMContentLoaded', function() {
           color: "#D4AF37"
         },
         modal: {
-          ondismiss: () => {
+          ondismiss: function() {
             console.log('Payment canceled by user');
-            this.setLoadingState(false);
+            self.setLoadingState(false);
           }
         }
       };
       
+      console.log('Razorpay options:', options);
+      
       try {
+        console.log('Creating Razorpay instance...');
         const rzp = new Razorpay(options);
+        console.log('Opening Razorpay payment form...');
+        rzp.on('payment.failed', function(response) {
+          console.error('Payment failed:', response.error);
+          alert('Payment failed: ' + response.error.description);
+          self.setLoadingState(false);
+        });
         rzp.open();
+        console.log('Razorpay payment form opened');
       } catch (error) {
         console.error('Error opening Razorpay:', error);
         alert('Could not open payment gateway. Please try again.');
