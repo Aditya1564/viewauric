@@ -7,7 +7,9 @@
 
 document.addEventListener('DOMContentLoaded', function() {
   // Initialize EmailJS with your public key
-  emailjs.init("2AaCWAbz3R8lsB8qA");
+  (function() {
+    emailjs.init("2AaCWAbz3R8lsB8qA");
+  })();
   
   // Set up checkout object with methods for handling the checkout process
   const Checkout = {
