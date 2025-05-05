@@ -497,6 +497,31 @@
   border: 1.5px solid white;
 }
 
+/* Small add to cart buttons for product listings */
+.add-to-cart-btn-small {
+  background: #D4AF37;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  margin-top: 8px;
+  width: 100%;
+  text-align: center;
+}
+
+.add-to-cart-btn-small:hover {
+  background: #B8860B;
+  transform: translateY(-2px);
+}
+
+.add-to-cart-btn-small:active {
+  transform: translateY(0);
+}
+
 /* Responsive styles */
 @media (max-width: 768px) {
   /* Cart page styles */
