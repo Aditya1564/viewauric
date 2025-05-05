@@ -2,14 +2,19 @@
  * Auric Checkout System
  * Handles the checkout process, Razorpay integration, and order processing
  * Author: Auric Jewelry
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 
 document.addEventListener('DOMContentLoaded', function() {
+  console.log('Checkout.js initialized at:', new Date().toISOString());
+  
   // Initialize EmailJS with your public key
-  (function() {
+  try {
     emailjs.init("2AaCWAbz3R8lsB8qA");
-  })();
+    console.log('EmailJS initialized successfully');
+  } catch (error) {
+    console.error('Error initializing EmailJS:', error);
+  }
   
   // Set up checkout object with methods for handling the checkout process
   const Checkout = {
@@ -363,55 +368,72 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       
       const self = this; // Store reference to 'this' for use in callbacks
+      
+      // Simplified options for the most reliable test mode operation
       const options = {
-        key: "rzp_test_qZWULE2MoPHZJv", // Razorpay test key from user
+        key: "rzp_test_qZWULE2MoPHZJv", // Razorpay test key provided by user
         amount: orderData.total * 100, // Amount in paisa (e.g., 10000 for ₹100)
-        currency: this.config.currencyCode,
+        currency: "INR",
         name: "Auric Jewelry",
-        description: "Jewelry Purchase - Order #" + Math.floor(Math.random() * 1000000),
-        image: "https://i.imgur.com/n5tjHFD.png", // Default image URL that definitely works
+        description: "Premium Jewelry Purchase",
+        image: "https://i.imgur.com/n5tjHFD.png", // Hosted image URL
+        
+        // Handler called after payment success
         handler: function(response) {
           console.log('Payment successful:', response);
           
           // Add payment details to order data
           orderData.paymentId = response.razorpay_payment_id;
-          orderData.paymentSignature = response.razorpay_signature || 'test_signature';
           orderData.status = 'paid';
           
           // Save order to Firestore
           self.saveOrderToFirestore(orderData);
         },
+        
+        // Pre-fill customer information
         prefill: {
           name: orderData.customerName,
           email: orderData.customerEmail,
           contact: orderData.phone
         },
+        
+        // Add notes for admin reference
         notes: {
-          address: orderData.address
+          address: orderData.address,
+          orderId: orderData.razorpayOrderId
         },
+        
+        // Theme settings
         theme: {
-          color: "#D4AF37"
+          color: "#D4AF37" // Gold color matching Auric theme
         },
+        
+        // Modal settings
         modal: {
           ondismiss: function() {
-            console.log('Payment canceled by user');
+            console.log('Payment cancelled by user');
             self.setLoadingState(false);
-          }
+          },
+          animate: true,
+          backdropclose: false
         }
       };
       
       console.log('Razorpay options:', options);
       
       try {
-        console.log('Creating Razorpay instance...');
-        const rzp = new Razorpay(options);
-        console.log('Opening Razorpay payment form...');
-        rzp.on('payment.failed', function(response) {
+        // Create and open Razorpay checkout form
+        window.rzp1 = new Razorpay(options);
+        
+        // Add payment failed event handler
+        window.rzp1.on('payment.failed', function(response) {
           console.error('Payment failed:', response.error);
           alert('Payment failed: ' + response.error.description);
           self.setLoadingState(false);
         });
-        rzp.open();
+        
+        // Open the payment form
+        window.rzp1.open();
         console.log('Razorpay payment form opened');
       } catch (error) {
         console.error('Error opening Razorpay:', error);
