@@ -111,6 +111,47 @@ window.cartDebug = {
   }
 };
 
+// Additional method to force sync cart data between devices
+window.cartDebug.forceSyncWithServer = function() {
+  if (firebase.auth().currentUser) {
+    const userId = firebase.auth().currentUser.uid;
+    console.log("Forcing synchronization with server for user:", userId);
+    
+    // Force a load from Firestore first
+    db.collection('carts').doc(userId).get()
+      .then(doc => {
+        if (doc.exists && doc.data().items) {
+          console.log("Retrieved latest cart from server");
+          
+          // Display current cart for debugging
+          console.log("Server cart items:", doc.data().items.length);
+          console.log("Server cart timestamp:", doc.data().updatedAt ? doc.data().updatedAt.toDate() : "None");
+          
+          // Force refresh AuricCart with the latest data
+          window.AuricCart.items = doc.data().items;
+          window.AuricCart.saveCartToLocalStorage();
+          window.AuricCart.updateCartUI();
+          window.AuricCart.renderCartItems();
+          
+          console.log("Sync complete. Page will reload in 1 second.");
+          setTimeout(() => window.location.reload(), 1000);
+        } else {
+          console.log("No cart found on server. Creating empty cart.");
+          window.AuricCart.items = [];
+          window.AuricCart.saveCartToFirestore(userId);
+          window.location.reload();
+        }
+      })
+      .catch(error => {
+        console.error("Error syncing with server:", error);
+        alert("Could not sync with server. Please try again later.");
+      });
+  } else {
+    console.log("User not logged in, cannot force server sync");
+    alert("You must be logged in to sync your cart between devices.");
+  }
+};
+
 // Legacy function for backward compatibility
 window.resetCart = window.cartDebug.resetCart;
 
@@ -423,35 +464,100 @@ document.addEventListener('DOMContentLoaded', function() {
      * Load cart from Firestore for authenticated users
      */
     loadCartFromFirestore: function(userId) {
+      // Set a loading flag to prevent race conditions
+      this.isLoadingFromFirestore = true;
+      
       db.collection('carts').doc(userId).get()
         .then((doc) => {
           if (doc.exists && doc.data().items) {
             // Get items from Firestore
             let firestoreItems = doc.data().items;
+            const firestoreUpdatedAt = doc.data().updatedAt ? doc.data().updatedAt.toMillis() : 0;
             
-            // Ensure all items have valid quantity values
-            firestoreItems = firestoreItems.map(item => {
-              // Force quantity to be 1 if it's invalid or not provided
-              if (!item.quantity || isNaN(item.quantity) || item.quantity < 1) {
-                console.log('Fixed invalid quantity for item:', item.name);
-                item.quantity = 1;
+            // Get localStorage timestamp if available
+            let localUpdatedAt = 0;
+            try {
+              const localTimestamp = localStorage.getItem('auricCartTimestamp');
+              if (localTimestamp) {
+                localUpdatedAt = parseInt(localTimestamp, 10);
               }
-              return item;
-            });
+            } catch (e) {
+              console.error('Error parsing local timestamp:', e);
+            }
             
-            this.items = firestoreItems;
-            console.log('Cart loaded from Firestore:', this.items);
+            // Also check if we have a local cart
+            let localCartItems = [];
+            const savedCart = localStorage.getItem('auricCart');
+            if (savedCart) {
+              try {
+                localCartItems = JSON.parse(savedCart);
+              } catch (e) {
+                console.error('Error parsing localStorage cart:', e);
+              }
+            }
+            
+            // Decide which cart to use based on timestamps and content
+            if (firestoreUpdatedAt >= localUpdatedAt || localCartItems.length === 0) {
+              console.log('Using Firestore cart (newer than local or local empty)');
+              
+              // Ensure all items have valid quantity values
+              firestoreItems = firestoreItems.map(item => {
+                // Force quantity to be 1 if it's invalid or not provided
+                if (!item.quantity || isNaN(item.quantity) || item.quantity < 1) {
+                  console.log('Fixed invalid quantity for item:', item.name);
+                  item.quantity = 1;
+                }
+                return item;
+              });
+              
+              this.items = firestoreItems;
+              
+              // Update localStorage with Firestore data
+              localStorage.setItem('auricCart', JSON.stringify(this.items));
+              localStorage.setItem('auricCartTimestamp', firestoreUpdatedAt.toString());
+              
+              console.log('Cart loaded from Firestore:', this.items);
+            } else {
+              console.log('Using localStorage cart (newer than Firestore)');
+              // If local is newer, keep it and update Firestore
+              this.loadCartFromLocalStorage();
+              // Save back to Firestore to sync
+              this.saveCartToFirestore(userId);
+            }
+            
             this.updateCartUI();
           } else {
-            console.log('No cart found in Firestore, creating new cart');
-            this.items = [];
-            this.saveCartToFirestore(userId);
+            // Try to use localStorage cart first
+            const savedCart = localStorage.getItem('auricCart');
+            if (savedCart) {
+              try {
+                this.items = JSON.parse(savedCart);
+                console.log('No cart in Firestore, using localStorage cart');
+                // Save to Firestore for syncing
+                this.saveCartToFirestore(userId);
+              } catch (e) {
+                console.error('Error parsing localStorage cart:', e);
+                this.items = [];
+              }
+            } else {
+              console.log('No cart found in Firestore or localStorage, creating new cart');
+              this.items = [];
+              this.saveCartToFirestore(userId);
+            }
+            this.updateCartUI();
           }
+          
+          // Clear loading flag
+          this.isLoadingFromFirestore = false;
         })
         .catch((error) => {
           console.error('Error loading cart from Firestore:', error);
           // Fallback to localStorage if Firestore fails
           this.loadCartFromLocalStorage();
+          this.updateCartUI();
+          
+          // Clear loading flag
+          this.isLoadingFromFirestore = false;
         });
     },
     
@@ -459,7 +565,13 @@ document.addEventListener('DOMContentLoaded', function() {
      * Save cart to localStorage for anonymous users
      */
     saveCartToLocalStorage: function() {
+      // Save cart items
       localStorage.setItem('auricCart', JSON.stringify(this.items));
+      
+      // Save current timestamp for synchronization comparisons
+      const currentTime = new Date().getTime();
+      localStorage.setItem('auricCartTimestamp', currentTime.toString());
+      
       console.log('Cart saved to localStorage:', this.items);
     },
     
