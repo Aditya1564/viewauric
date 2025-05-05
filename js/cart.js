@@ -19,20 +19,42 @@ document.addEventListener('DOMContentLoaded', function() {
     // Cart state
     items: [],
     
-    // DOM elements
-    cartCountElement: document.querySelector('.cart-count'),
-    cartTotalElement: document.querySelector('.subtotal-amount'),
-    slidingCartItemsContainer: document.getElementById('sliding-cart-items'),
-    addToCartButtons: document.querySelectorAll('.add-to-cart-btn'),
-    cartPanel: document.querySelector('.cart-panel'),
-    cartOverlay: document.querySelector('.cart-overlay'),
-    cartToggle: document.querySelector('.cart-toggle'),
-    closeCartBtn: document.querySelector('.close-cart-btn'),
+    // We'll select DOM elements at initialization time to ensure they're loaded
+    cartCountElement: null,
+    cartTotalElement: null,
+    slidingCartItemsContainer: null,
+    addToCartButtons: null,
+    cartPanel: null,
+    cartOverlay: null,
+    cartToggle: null,
+    closeCartBtn: null,
+    
+    // Initialize DOM element references
+    initDomElements: function() {
+      this.cartCountElement = document.querySelector('.cart-count');
+      this.cartTotalElement = document.querySelector('.subtotal-amount');
+      this.slidingCartItemsContainer = document.getElementById('sliding-cart-items');
+      this.addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
+      this.cartPanel = document.querySelector('.cart-panel');
+      this.cartOverlay = document.querySelector('.cart-overlay');
+      this.cartToggle = document.querySelector('.cart-toggle');
+      this.closeCartBtn = document.querySelector('.close-cart-btn');
+      
+      console.log('DOM elements initialized:', {
+        cartToggle: !!this.cartToggle,
+        cartPanel: !!this.cartPanel,
+        cartOverlay: !!this.cartOverlay,
+        closeCartBtn: !!this.closeCartBtn
+      });
+    },
     
     /**
      * Initialize the cart system
      */
     init: function() {
+      // Initialize DOM elements references
+      this.initDomElements();
+      
       // Get cart from localStorage or Firebase based on authentication status
       this.loadCart();
       
@@ -52,6 +74,17 @@ document.addEventListener('DOMContentLoaded', function() {
       this.setupAuthListener();
       
       console.log('Cart system initialized');
+      
+      // Direct attachment of click event to cart toggle (fallback method)
+      const cartToggleElement = document.querySelector('.cart-toggle');
+      if (cartToggleElement) {
+        console.log('Adding direct click event to cart toggle as fallback');
+        cartToggleElement.addEventListener('click', (e) => {
+          e.preventDefault();
+          console.log('Cart toggle clicked (direct), opening panel');
+          this.openCartPanel();
+        });
+      }
     },
     
     /**
@@ -105,11 +138,33 @@ document.addEventListener('DOMContentLoaded', function() {
      * Open the sliding cart panel
      */
     openCartPanel: function() {
-      if (this.cartPanel && this.cartOverlay) {
-        this.cartPanel.classList.add('active');
-        this.cartOverlay.classList.add('active');
-        document.body.style.overflow = 'hidden'; // Prevent scrolling
+      console.log('Opening cart panel...');
+      
+      // Re-fetch elements in case they were not available at initialization
+      const panel = this.cartPanel || document.querySelector('.cart-panel');
+      const overlay = this.cartOverlay || document.querySelector('.cart-overlay');
+      
+      if (panel && overlay) {
+        console.log('Cart panel elements found, setting active state');
+        
+        // Remove any inline styles that might interfere
+        panel.style.right = '';
+        overlay.style.display = '';
+        
+        // Add active classes
+        panel.classList.add('active');
+        overlay.classList.add('active');
+        
+        // Prevent scrolling
+        document.body.style.overflow = 'hidden';
+        
+        // Re-render cart items
         this.renderCartItems();
+      } else {
+        console.error('Cannot open cart panel - elements not found:', {
+          panel: !!panel,
+          overlay: !!overlay
+        });
       }
     },
     
@@ -118,17 +173,31 @@ document.addEventListener('DOMContentLoaded', function() {
      * @param {boolean} isInit - Whether this is being called during initialization
      */
     closeCartPanel: function(isInit) {
-      if (this.cartPanel && this.cartOverlay) {
-        this.cartPanel.classList.remove('active');
-        this.cartOverlay.classList.remove('active');
+      console.log('Closing cart panel, isInit:', isInit);
+      
+      // Re-fetch elements in case they were not available at initialization
+      const panel = this.cartPanel || document.querySelector('.cart-panel');
+      const overlay = this.cartOverlay || document.querySelector('.cart-overlay');
+      
+      if (panel && overlay) {
+        // Remove active classes
+        panel.classList.remove('active');
+        overlay.classList.remove('active');
         
         // Set explicit styles on initialization to ensure it's properly hidden
         if (isInit) {
-          this.cartPanel.style.right = '-100%';
-          this.cartOverlay.style.display = 'none';
+          console.log('Setting initial cart panel styles (hidden state)');
+          panel.style.right = '-100%';
+          overlay.style.display = 'none';
         }
         
-        document.body.style.overflow = ''; // Re-enable scrolling
+        // Re-enable scrolling
+        document.body.style.overflow = '';
+      } else {
+        console.error('Cannot close cart panel - elements not found:', {
+          panel: !!panel,
+          overlay: !!overlay
+        });
       }
     },
     
