@@ -38,6 +38,25 @@
   margin-top: 8px;
 }
 
+.cart-item-price-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cart-item-price {
+  color: #999;
+  font-size: 14px;
+  font-weight: normal;
+}
+
+.cart-item-total {
+  color: #D4AF37;
+  font-weight: 600;
+  font-size: 16px;
+  margin-top: 2px;
+}
+
 .sliding-cart-items .cart-item-quantity {
   display: flex;
   align-items: center;
