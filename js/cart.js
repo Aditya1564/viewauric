@@ -823,6 +823,11 @@ document.addEventListener('DOMContentLoaded', function() {
      * Add item to cart
      */
     addItem: function(productItem) {
+      // Ensure quantity is valid
+      if (!productItem.quantity || isNaN(productItem.quantity) || productItem.quantity < 1) {
+        productItem.quantity = 1;
+      }
+      
       // Check if item already exists in cart
       const existingItemIndex = this.items.findIndex(item => 
         item.productId === productItem.productId &&
@@ -840,7 +845,10 @@ document.addEventListener('DOMContentLoaded', function() {
       // Save cart
       this.saveCart();
       
-      // Update UI
+      // Re-render the cart items to update display immediately
+      this.renderCartItems();
+      
+      // Update full UI (count badge, etc)
       this.updateCartUI();
       
       return true;
@@ -857,7 +865,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Save cart
         this.saveCart();
         
-        // Update UI
+        // Re-render the cart items to update display immediately
+        this.renderCartItems();
+        
+        // Update full UI (count badge, etc)
         this.updateCartUI();
         
         return true;
@@ -877,7 +888,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Save cart
         this.saveCart();
         
-        // Update UI
+        // Re-render the cart items to update display immediately
+        this.renderCartItems();
+        
+        // Update full UI (count badge, etc)
         this.updateCartUI();
         
         return true;
@@ -897,7 +911,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Save cart
         this.saveCart();
         
-        // Update UI
+        // Re-render the cart items to update display immediately
+        this.renderCartItems();
+        
+        // Update full UI (count badge, etc)
         this.updateCartUI();
         
         return true;
