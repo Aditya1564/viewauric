@@ -1315,6 +1315,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
       }
       
+      // Small add to cart buttons in recommended products section
+      const smallAddToCartButtons = document.querySelectorAll('.add-to-cart-btn-small');
+      if (smallAddToCartButtons) {
+        smallAddToCartButtons.forEach(button => {
+          button.addEventListener('click', this.handleAddToCart.bind(this));
+        });
+      }
+      
       // Individual product page add to cart button
       const productAddToCartBtn = document.querySelector('.product-detail-info .add-to-cart-btn');
       if (productAddToCartBtn) {
@@ -1328,6 +1336,9 @@ document.addEventListener('DOMContentLoaded', function() {
     handleAddToCart: function(e) {
       e.preventDefault();
       
+      // Check if this is a small cart button click
+      const isSmallButton = e.target.classList.contains('add-to-cart-btn-small');
+      
       // Get product information from the closest product item
       const productItem = e.target.closest('.product-item');
       if (!productItem) return;
@@ -1336,6 +1347,14 @@ document.addEventListener('DOMContentLoaded', function() {
       const name = productItem.querySelector('.product-name')?.textContent || 'Product';
       const price = parseFloat(productItem.querySelector('.current-price')?.textContent.replace(/[^0-9.]/g, '')) || 0;
       const image = productItem.querySelector('.product-image img')?.src || '';
+      
+      // Log the product details for debugging
+      console.log('Adding item to cart:', {
+        productId,
+        name,
+        price,
+        isSmallButton
+      });
       
       // Create item object
       const item = {
