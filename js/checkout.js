@@ -288,23 +288,64 @@ document.addEventListener('DOMContentLoaded', function() {
     },
     
     /**
-     * Create a Razorpay order
-     * In a real-world scenario, you would create the order on your server to secure the API key
-     * For demo purposes, we're using a mock implementation
+     * Create a Razorpay order via server API
+     * This creates an order on our server, which would normally interact with Razorpay's API
      */
     createRazorpayOrder: function(orderData) {
-      // In a production environment, you would call your server endpoint to create an order
-      // For this demo, we'll create a mock order ID and proceed with the payment flow
-      
       console.log('Creating Razorpay order with data:', orderData);
       
-      // Mock order ID - in production, this would come from the Razorpay API via your server
-      // We're not actually using this with the test key, so we can skip the order_id parameter
-      orderData.razorpayOrderId = "order_demo_" + Date.now();
+      // Set loading state to indicate processing
+      this.setLoadingState(true);
       
-      // Open Razorpay payment form without order_id for demo purposes
-      // In a real implementation, you would create an order on your server first
-      this.openRazorpayCheckout(orderData);
+      // Create order data for API request
+      const orderRequest = {
+        amount: orderData.total * 100, // Amount in paisa
+        currency: this.config.currencyCode,
+        receipt: 'auric_' + Date.now(),
+        notes: {
+          customerName: orderData.customerName,
+          customerEmail: orderData.customerEmail,
+          customerPhone: orderData.phone,
+          shippingAddress: orderData.address
+        }
+      };
+      
+      console.log('Sending order request to server API:', orderRequest);
+      
+      // Call our server API to create a Razorpay order
+      fetch('/api/create-razorpay-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(orderRequest)
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to create order: ' + response.statusText);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('Order created successfully:', data);
+        
+        // Store the order ID in the order data
+        orderData.razorpayOrderId = data.id;
+        
+        // If direct checkout option is enabled, open Razorpay payment form
+        // In test mode, we can open without an order_id
+        this.openRazorpayCheckout(orderData);
+      })
+      .catch(error => {
+        console.error('Error creating order:', error);
+        alert('There was an error processing your order. Please try again.');
+        this.setLoadingState(false);
+        
+        // Fallback for testing: open Razorpay without order_id
+        console.log('Using fallback method for Razorpay checkout');
+        orderData.razorpayOrderId = "order_demo_" + Date.now();
+        this.openRazorpayCheckout(orderData);
+      });
     },
     
     /**
@@ -323,7 +364,7 @@ document.addEventListener('DOMContentLoaded', function() {
       
       const self = this; // Store reference to 'this' for use in callbacks
       const options = {
-        key: "rzp_test_T8EE9FAEIYQ8dX", // Razorpay test key
+        key: "rzp_test_qZWULE2MoPHZJv", // Razorpay test key from user
         amount: orderData.total * 100, // Amount in paisa (e.g., 10000 for ₹100)
         currency: this.config.currencyCode,
         name: "Auric Jewelry",

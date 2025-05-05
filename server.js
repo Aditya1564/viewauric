@@ -1,9 +1,14 @@
-// Simple no-cache HTTP server for development
+// Enhanced no-cache HTTP server with Razorpay API support
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const url = require('url');
 
 const PORT = 5000;
+
+// Razorpay API keys
+const RAZORPAY_KEY_ID = "rzp_test_qZWULE2MoPHZJv";
+const RAZORPAY_SECRET = "dwhI00HuTIRk5T61AyUq1Bhh";
 
 // MIME types for different file extensions
 const MIME_TYPES = {
@@ -24,8 +29,29 @@ const MIME_TYPES = {
   '.otf': 'font/otf'
 };
 
+// Helper function to parse JSON body from requests
+const getRequestBody = (req) => {
+  return new Promise((resolve, reject) => {
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk.toString();
+    });
+    req.on('end', () => {
+      try {
+        const parsedBody = body ? JSON.parse(body) : {};
+        resolve(parsedBody);
+      } catch (error) {
+        reject(error);
+      }
+    });
+    req.on('error', (error) => {
+      reject(error);
+    });
+  });
+};
+
 // Create the HTTP server
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
   
   // Add no-cache headers to prevent browser caching
@@ -33,10 +59,53 @@ const server = http.createServer((req, res) => {
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
   
-  // Handle requests for the root URL
-  let filePath = req.url === '/' ? './index.html' : '.' + req.url;
+  // Add CORS headers for API routes
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   
-  // Remove query string if present
+  // Handle API routes for Razorpay
+  const parsedUrl = url.parse(req.url, true);
+  const pathname = parsedUrl.pathname;
+  
+  // Handle preflight CORS requests
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204);
+    res.end();
+    return;
+  }
+  
+  // Handle the Razorpay order creation API
+  if (req.method === 'POST' && pathname === '/api/create-razorpay-order') {
+    try {
+      const body = await getRequestBody(req);
+      console.log('Creating Razorpay order with data:', body);
+      
+      // In a production environment, this would call the Razorpay API
+      // For this demo, we'll create a mock order ID that works with test mode
+      const orderId = 'order_' + Date.now();
+      
+      // Return success response
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        id: orderId,
+        amount: body.amount,
+        currency: body.currency || 'INR',
+        key: RAZORPAY_KEY_ID
+      }));
+      return;
+    } catch (error) {
+      console.error('Error processing order creation:', error);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Failed to create order' }));
+      return;
+    }
+  }
+  
+  // Handle regular file requests
+  let filePath = pathname === '/' ? './index.html' : '.' + pathname;
+  
+  // Remove query string if present (should already be handled by url.parse)
   filePath = filePath.split('?')[0];
   
   const extname = path.extname(filePath).toLowerCase();
@@ -64,8 +133,9 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log('\n--- No-cache server starting ---');
+  console.log('\n--- No-cache server with Razorpay API support starting ---');
   console.log(`Server running at http://0.0.0.0:${PORT}/`);
   console.log(`Local files will not be cached by the browser`);
+  console.log(`Razorpay API endpoints: /api/create-razorpay-order`);
   console.log(`Press Ctrl+C to stop the server\n`);
 });
