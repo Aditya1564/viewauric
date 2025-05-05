@@ -95,7 +95,10 @@
                     <a href="#" class="icon-link"><i class="fas fa-search"></i></a>
                     <a href="#" class="icon-link"><i class="fas fa-user"></i></a>
                     <a href="#" class="icon-link"><i class="fas fa-heart"></i></a>
-                    <a href="#" class="icon-link"><i class="fas fa-shopping-cart"></i></a>
+                    <a href="#" class="icon-link cart-toggle" title="Cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count" style="display: none;">0</span>
+                    </a>
                 </div>
             </div>
         </nav>
@@ -103,8 +106,30 @@
 
     <!-- Overlay for menu background -->
     <div class="menu-overlay" id="menuOverlay"></div>
-
-
+    
+    <!-- Sliding Cart Panel -->
+    <div class="cart-panel">
+        <div class="cart-panel-header">
+            <h3>Your Cart</h3>
+            <button class="close-cart-btn">&times;</button>
+        </div>
+        <div id="sliding-cart-items" class="sliding-cart-items">
+            <!-- Cart items will be populated by JavaScript -->
+        </div>
+        <div class="cart-panel-footer">
+            <div class="cart-panel-subtotal">
+                <span>Subtotal:</span>
+                <span class="subtotal-amount">₹0.00</span>
+            </div>
+            <div class="cart-panel-buttons">
+                <a href="#" class="view-cart-btn">View Cart</a>
+                <a href="#" class="checkout-btn">Checkout</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cart Panel Overlay -->
+    <div class="cart-overlay"></div>
 
 
     <main>

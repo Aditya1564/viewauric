@@ -7,6 +7,7 @@
  * - Remove items from cart
  * - Update item quantities
  * - Sync localStorage cart to Firestore when user logs in
+ * - Sliding cart panel for easier access
  * - Display cart items and totals
  */
 
@@ -18,9 +19,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // DOM elements
     cartCountElement: document.querySelector('.cart-count'),
-    cartTotalElement: document.querySelector('.cart-total'),
-    cartItemsContainer: document.getElementById('cart-items'),
+    cartTotalElement: document.querySelector('.subtotal-amount'),
+    slidingCartItemsContainer: document.getElementById('sliding-cart-items'),
     addToCartButtons: document.querySelectorAll('.add-to-cart-btn'),
+    cartPanel: document.querySelector('.cart-panel'),
+    cartOverlay: document.querySelector('.cart-overlay'),
+    cartToggle: document.querySelector('.cart-toggle'),
+    closeCartBtn: document.querySelector('.close-cart-btn'),
     
     /**
      * Initialize the cart system
@@ -35,10 +40,63 @@ document.addEventListener('DOMContentLoaded', function() {
       // Setup event listeners
       this.setupEventListeners();
       
+      // Setup sliding cart panel
+      this.setupCartPanel();
+      
       // Setup auth state change listener for syncing
       this.setupAuthListener();
       
       console.log('Cart system initialized');
+    },
+    
+    /**
+     * Setup sliding cart panel functionality
+     */
+    setupCartPanel: function() {
+      // Toggle cart panel when clicking cart icon
+      if (this.cartToggle) {
+        this.cartToggle.addEventListener('click', (e) => {
+          e.preventDefault();
+          this.openCartPanel();
+        });
+      }
+      
+      // Close cart when clicking close button
+      if (this.closeCartBtn) {
+        this.closeCartBtn.addEventListener('click', () => {
+          this.closeCartPanel();
+        });
+      }
+      
+      // Close cart when clicking overlay
+      if (this.cartOverlay) {
+        this.cartOverlay.addEventListener('click', () => {
+          this.closeCartPanel();
+        });
+      }
+    },
+    
+    /**
+     * Open the sliding cart panel
+     */
+    openCartPanel: function() {
+      if (this.cartPanel && this.cartOverlay) {
+        this.cartPanel.classList.add('active');
+        this.cartOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Prevent scrolling
+        this.renderCartItems();
+      }
+    },
+    
+    /**
+     * Close the sliding cart panel
+     */
+    closeCartPanel: function() {
+      if (this.cartPanel && this.cartOverlay) {
+        this.cartPanel.classList.remove('active');
+        this.cartOverlay.classList.remove('active');
+        document.body.style.overflow = ''; // Re-enable scrolling
+      }
     },
     
     /**
@@ -225,22 +283,26 @@ document.addEventListener('DOMContentLoaded', function() {
     },
     
     /**
-     * Render cart items in the cart page
+     * Render cart items in the cart container (page or sliding panel)
      */
     renderCartItems: function() {
-      if (!this.cartItemsContainer) return;
+      const container = this.slidingCartItemsContainer;
+      if (!container) return;
       
       // Clear existing items
-      this.cartItemsContainer.innerHTML = '';
+      container.innerHTML = '';
       
       if (this.items.length === 0) {
         // Show empty cart message
-        this.cartItemsContainer.innerHTML = `
+        container.innerHTML = `
           <div class="empty-cart">
             <p>Your cart is empty</p>
             <a href="index.html" class="continue-shopping-btn">Continue Shopping</a>
           </div>
         `;
+        
+        // Update cart total
+        this.updateCartTotal();
         return;
       }
       
@@ -250,30 +312,33 @@ document.addEventListener('DOMContentLoaded', function() {
         itemElement.className = 'cart-item';
         itemElement.setAttribute('data-index', index);
         
+        // Different layout for sliding cart
         itemElement.innerHTML = `
           <div class="cart-item-image">
-            <img src="${item.image}" alt="${item.name}">
+            <img src="${item.image || 'images/product-category/IMG_20250504_150241.jpg'}" alt="${item.name}">
           </div>
           <div class="cart-item-details">
             <h3 class="cart-item-name">${item.name}</h3>
-            <p class="cart-item-price">₹${item.price.toLocaleString('en-IN')}</p>
+            <div class="cart-item-price-row">
+              <p class="cart-item-price">₹${item.price.toLocaleString('en-IN')}</p>
+              <div class="cart-item-quantity">
+                <button class="quantity-btn decrement" data-index="${index}">-</button>
+                <input type="text" value="${item.quantity}" class="quantity-input" readonly>
+                <button class="quantity-btn increment" data-index="${index}">+</button>
+              </div>
+            </div>
             ${item.variant ? `<p class="cart-item-variant">${item.variant}</p>` : ''}
-          </div>
-          <div class="cart-item-quantity">
-            <button class="quantity-btn decrement" data-index="${index}">-</button>
-            <input type="text" value="${item.quantity}" class="quantity-input" readonly>
-            <button class="quantity-btn increment" data-index="${index}">+</button>
-          </div>
-          <div class="cart-item-total">
-            ₹${(item.price * item.quantity).toLocaleString('en-IN')}
           </div>
           <button class="remove-item-btn" data-index="${index}">
             <i class="fas fa-trash"></i>
           </button>
         `;
         
-        this.cartItemsContainer.appendChild(itemElement);
+        container.appendChild(itemElement);
       });
+      
+      // Update cart total
+      this.updateCartTotal();
       
       // Add event listeners to the newly created elements
       this.setupCartItemEventListeners();
