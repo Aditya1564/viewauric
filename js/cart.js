@@ -74,6 +74,15 @@ document.addEventListener('DOMContentLoaded', function() {
           this.closeCartPanel();
         });
       }
+      
+      // Setup Continue Shopping button
+      const continueShopping = document.querySelector('.cart-panel-buttons .view-cart-btn');
+      if (continueShopping) {
+        continueShopping.addEventListener('click', (e) => {
+          e.preventDefault();
+          this.closeCartPanel();
+        });
+      }
     },
     
     /**
@@ -376,32 +385,15 @@ document.addEventListener('DOMContentLoaded', function() {
     },
     
     /**
-     * Update cart total in the cart page
+     * Update cart total in the sliding cart panel
      */
     updateCartTotal: function() {
       if (!this.cartTotalElement) return;
       
       const subtotal = this.calculateSubtotal();
-      const shipping = subtotal > 0 ? 299 : 0; // Free shipping for orders over ₹10,000
-      const total = subtotal + shipping;
       
-      this.cartTotalElement.innerHTML = `
-        <div class="cart-total-row">
-          <span>Subtotal:</span>
-          <span>₹${subtotal.toLocaleString('en-IN')}</span>
-        </div>
-        <div class="cart-total-row">
-          <span>Shipping:</span>
-          <span>${shipping > 0 ? `₹${shipping.toLocaleString('en-IN')}` : 'Free'}</span>
-        </div>
-        <div class="cart-total-row total">
-          <span>Total:</span>
-          <span>₹${total.toLocaleString('en-IN')}</span>
-        </div>
-        <button class="checkout-btn" ${this.items.length === 0 ? 'disabled' : ''}>
-          Proceed to Checkout
-        </button>
-      `;
+      // Simple display for sliding cart panel
+      this.cartTotalElement.textContent = `₹${subtotal.toLocaleString('en-IN')}`;
     },
     
     /**
@@ -616,7 +608,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="confirmation-content">
           <i class="fas fa-check-circle"></i>
           <p>${productName} added to cart</p>
-          <a href="cart.html" class="view-cart-btn">View Cart</a>
+          <a href="#" class="view-cart-btn">View Cart</a>
         </div>
         <button class="close-confirmation">&times;</button>
       `;
@@ -629,6 +621,16 @@ document.addEventListener('DOMContentLoaded', function() {
       if (closeButton) {
         closeButton.addEventListener('click', () => {
           confirmationElement.classList.remove('active');
+        });
+      }
+      
+      // Add view cart button functionality
+      const viewCartButton = confirmationElement.querySelector('.view-cart-btn');
+      if (viewCartButton) {
+        viewCartButton.addEventListener('click', (e) => {
+          e.preventDefault();
+          confirmationElement.classList.remove('active');
+          this.openCartPanel();
         });
       }
       
