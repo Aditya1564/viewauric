@@ -29,15 +29,23 @@ document.addEventListener('DOMContentLoaded', function() {
     if (errorMessageEl) {
       errorMessageEl.textContent = message;
       errorMessageEl.style.display = 'block';
+      errorMessageEl.className = 'error-message'; // Ensure the CSS class is applied
+      errorMessageEl.setAttribute('role', 'alert'); // Accessibility enhancement
       
       if (successMessageEl) {
         successMessageEl.style.display = 'none';
       }
       
-      // Hide error message after 5 seconds
+      // Scroll the error message into view if needed
+      if (errorMessageEl.getBoundingClientRect().top < 0 || 
+          errorMessageEl.getBoundingClientRect().bottom > window.innerHeight) {
+        errorMessageEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      
+      // Hide error message after 8 seconds to ensure users have time to read it
       setTimeout(() => {
         errorMessageEl.style.display = 'none';
-      }, 5000);
+      }, 8000);
     } else {
       console.error(message);
       alert(message);
@@ -75,28 +83,37 @@ document.addEventListener('DOMContentLoaded', function() {
     
     switch (error.code) {
       case 'auth/user-not-found':
-        message = 'No account found with this email address';
+        message = 'No account found with this email address. Please sign up first.';
         break;
       case 'auth/wrong-password':
-        message = 'Incorrect password';
+        message = 'Incorrect password. Please try again or use the forgot password option.';
+        break;
+      case 'auth/invalid-login-credentials':
+        message = 'Invalid email or password. Please check your credentials and try again.';
         break;
       case 'auth/email-already-in-use':
-        message = 'An account with this email already exists';
+        message = 'An account with this email already exists. Please login instead.';
         break;
       case 'auth/weak-password':
-        message = 'Password should be at least 6 characters';
+        message = 'Password should be at least 6 characters with a mix of letters, numbers, and symbols.';
         break;
       case 'auth/invalid-email':
-        message = 'Invalid email address';
+        message = 'Please enter a valid email address (example@domain.com).';
         break;
       case 'auth/operation-not-allowed':
-        message = 'This authentication method is not enabled. Please contact support.';
+        message = 'This login method is not enabled. Please try another method or contact support.';
         break;
       case 'auth/network-request-failed':
-        message = 'Network error. Please check your internet connection';
+        message = 'Network error. Please check your internet connection and try again.';
+        break;
+      case 'auth/too-many-requests':
+        message = 'Too many unsuccessful login attempts. Please try again later or reset your password.';
+        break;
+      case 'auth/account-exists-with-different-credential':
+        message = 'An account already exists with the same email but different sign-in credentials.';
         break;
       default:
-        message = error.message || 'Authentication failed. Please try again';
+        message = error.message || 'Authentication failed. Please try again with correct credentials.';
     }
     
     showError(message);
@@ -241,7 +258,7 @@ document.addEventListener('DOMContentLoaded', function() {
     auth.signOut()
       .then(() => {
         console.log('User signed out');
-        showSuccess('Logged out successfully');
+        showSuccess('Logged out successfully2');
         
         // Redirect to home page
         setTimeout(() => {
