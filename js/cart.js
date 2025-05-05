@@ -111,41 +111,127 @@ window.cartDebug = {
   }
 };
 
-// Additional method to force sync cart data between devices
+// Enhanced method to force sync cart data between devices with better error handling and feedback
 window.cartDebug.forceSyncWithServer = function() {
   if (firebase.auth().currentUser) {
     const userId = firebase.auth().currentUser.uid;
     console.log("Forcing synchronization with server for user:", userId);
     
-    // Force a load from Firestore first
-    db.collection('carts').doc(userId).get()
-      .then(doc => {
-        if (doc.exists && doc.data().items) {
-          console.log("Retrieved latest cart from server");
+    // Show user feedback
+    const notification = document.createElement('div');
+    notification.style.cssText = 'position: fixed; top: 20px; right: 20px; background: rgba(0,0,0,0.8); color: white; padding: 15px; border-radius: 5px; z-index: 10000; transition: opacity 0.3s;';
+    notification.textContent = 'Syncing cart with server...';
+    document.body.appendChild(notification);
+    
+    // Force a load from Firestore with retry
+    const maxRetries = 3;
+    let retryCount = 0;
+    
+    const attemptSync = () => {
+      // Force a load from Firestore first
+      db.collection('carts').doc(userId).get()
+        .then(doc => {
+          if (doc.exists && doc.data().items) {
+            console.log("Retrieved latest cart from server");
+            
+            // Display current cart for debugging
+            console.log("Server cart items:", doc.data().items.length);
+            console.log("Server cart timestamp:", doc.data().updatedAt ? doc.data().updatedAt.toDate() : "None");
+            
+            // Process each server item to ensure validity
+            const serverItems = doc.data().items.map(item => {
+              // Validate all required properties
+              if (!item.quantity || isNaN(item.quantity) || item.quantity < 1) {
+                item.quantity = 1;
+              }
+              
+              // Ensure the item has all required properties
+              return {
+                productId: item.productId || 'unknown',
+                name: item.name || 'Unknown Product',
+                price: typeof item.price === 'number' ? item.price : 0,
+                image: item.image || '',
+                quantity: item.quantity || 1
+              };
+            });
+            
+            // Force refresh AuricCart with the latest data
+            window.AuricCart.items = serverItems;
+            
+            // Add updated timestamp to localStorage
+            const serverTimestamp = doc.data().updatedAt ? doc.data().updatedAt.toMillis() : Date.now();
+            localStorage.setItem('auricCartTimestamp', serverTimestamp.toString());
+            localStorage.setItem('auricCartLastSync', Date.now().toString());
+            
+            // Save to localStorage
+            window.AuricCart.saveCartToLocalStorage();
+            
+            // Update UI
+            window.AuricCart.updateCartUI();
+            window.AuricCart.renderCartItems();
+            
+            // Update notification
+            notification.textContent = 'Cart synchronized successfully!';
+            notification.style.background = 'rgba(0,128,0,0.8)';
+            
+            // Fade out notification
+            setTimeout(() => {
+              notification.style.opacity = '0';
+              setTimeout(() => {
+                notification.remove();
+              }, 500);
+            }, 3000);
+            
+            console.log("Sync complete.");
+          } else {
+            console.log("No cart found on server. Creating empty cart.");
+            window.AuricCart.items = [];
+            window.AuricCart.saveCartToFirestore(userId);
+            
+            // Update notification
+            notification.textContent = 'No cart found on server. Created new cart.';
+            
+            // Fade out notification
+            setTimeout(() => {
+              notification.style.opacity = '0';
+              setTimeout(() => {
+                notification.remove();
+              }, 500);
+            }, 3000);
+          }
+        })
+        .catch(error => {
+          console.error("Error syncing with server:", error);
           
-          // Display current cart for debugging
-          console.log("Server cart items:", doc.data().items.length);
-          console.log("Server cart timestamp:", doc.data().updatedAt ? doc.data().updatedAt.toDate() : "None");
-          
-          // Force refresh AuricCart with the latest data
-          window.AuricCart.items = doc.data().items;
-          window.AuricCart.saveCartToLocalStorage();
-          window.AuricCart.updateCartUI();
-          window.AuricCart.renderCartItems();
-          
-          console.log("Sync complete. Page will reload in 1 second.");
-          setTimeout(() => window.location.reload(), 1000);
-        } else {
-          console.log("No cart found on server. Creating empty cart.");
-          window.AuricCart.items = [];
-          window.AuricCart.saveCartToFirestore(userId);
-          window.location.reload();
-        }
-      })
-      .catch(error => {
-        console.error("Error syncing with server:", error);
-        alert("Could not sync with server. Please try again later.");
-      });
+          // Retry logic with exponential backoff
+          if (retryCount < maxRetries) {
+            retryCount++;
+            const delay = Math.pow(2, retryCount) * 1000; // 2s, 4s, 8s
+            
+            notification.textContent = `Sync attempt ${retryCount} failed. Retrying in ${delay/1000}s...`;
+            
+            console.log(`Retrying sync in ${delay}ms (attempt ${retryCount} of ${maxRetries})`);
+            setTimeout(() => attemptSync(), delay);
+          } else {
+            console.error("Failed to sync after", maxRetries, "attempts");
+            
+            // Show error notification
+            notification.textContent = 'Could not sync with server. Please try again later.';
+            notification.style.background = 'rgba(220,0,0,0.8)';
+            
+            // Fade out notification
+            setTimeout(() => {
+              notification.style.opacity = '0';
+              setTimeout(() => {
+                notification.remove();
+              }, 500);
+            }, 5000);
+          }
+        });
+    };
+    
+    // Start the sync process
+    attemptSync();
   } else {
     console.log("User not logged in, cannot force server sync");
     alert("You must be logged in to sync your cart between devices.");
@@ -595,6 +681,9 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
       }
       
+      // Set flag to prevent our own writes from triggering a sync loop
+      this.isUpdatingFirestore = true;
+      
       // Try to save to Firestore
       db.collection('carts').doc(userId).set({
         items: this.items,
@@ -606,12 +695,23 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Cart saved to Firestore successfully');
         // Clear any pending sync flag
         this.pendingFirestoreSync = false;
+        
+        // Update the local last sync time
+        localStorage.setItem('auricCartLastSync', Date.now().toString());
+        
+        // Clear updating flag after a short delay to ensure the snapshot has time to fire
+        setTimeout(() => {
+          this.isUpdatingFirestore = false;
+        }, 500);
       })
       .catch((error) => {
         console.error('Error saving cart to Firestore:', error);
         
         // Set a flag to retry syncing later
         this.pendingFirestoreSync = true;
+        
+        // Clear updating flag
+        this.isUpdatingFirestore = false;
         
         // Check if we need to set up a listener for when we're back online
         if (error.code === 'unavailable' || error.code === 'failed-precondition') {
@@ -929,13 +1029,17 @@ document.addEventListener('DOMContentLoaded', function() {
     },
     
     /**
-     * Add item to cart
+     * Add item to cart with immediate server sync
      */
     addItem: function(productItem) {
       // Ensure quantity is valid
       if (!productItem.quantity || isNaN(productItem.quantity) || productItem.quantity < 1) {
         productItem.quantity = 1;
       }
+      
+      // Add timestamp to the item for tracking changes
+      productItem.addedAt = new Date().toISOString();
+      productItem.updatedAt = new Date().toISOString();
       
       // Check if item already exists in cart
       const existingItemIndex = this.items.findIndex(item => 
@@ -946,19 +1050,34 @@ document.addEventListener('DOMContentLoaded', function() {
       if (existingItemIndex !== -1) {
         // Item exists, update quantity
         this.items[existingItemIndex].quantity += productItem.quantity;
+        this.items[existingItemIndex].updatedAt = new Date().toISOString();
       } else {
         // Item doesn't exist, add it
         this.items.push(productItem);
       }
       
-      // Save cart
-      this.saveCart();
+      // Save cart to local storage first for immediate feedback
+      this.saveCartToLocalStorage();
       
       // Re-render the cart items to update display immediately
       this.renderCartItems();
       
       // Update full UI (count badge, etc)
       this.updateCartUI();
+      
+      // If user is logged in, sync with Firestore immediately
+      if (auth.currentUser) {
+        // Use a debounced version to prevent too many Firestore writes
+        if (this.debouncedSaveToFirestore) {
+          clearTimeout(this.debouncedSaveToFirestore);
+        }
+        
+        // Save to Firestore after a short delay to batch multiple rapid changes
+        this.debouncedSaveToFirestore = setTimeout(() => {
+          this.saveCartToFirestore(auth.currentUser.uid);
+          this.debouncedSaveToFirestore = null;
+        }, 500);
+      }
       
       return true;
     },
@@ -971,14 +1090,28 @@ document.addEventListener('DOMContentLoaded', function() {
         // Remove item at the specified index
         this.items.splice(index, 1);
         
-        // Save cart
-        this.saveCart();
+        // Save to localStorage first for immediate feedback
+        this.saveCartToLocalStorage();
         
         // Re-render the cart items to update display immediately
         this.renderCartItems();
         
         // Update full UI (count badge, etc)
         this.updateCartUI();
+        
+        // If user is logged in, sync with Firestore immediately
+        if (auth.currentUser) {
+          // Use a debounced version to prevent too many Firestore writes
+          if (this.debouncedSaveToFirestore) {
+            clearTimeout(this.debouncedSaveToFirestore);
+          }
+          
+          // Save to Firestore after a short delay to batch multiple rapid changes
+          this.debouncedSaveToFirestore = setTimeout(() => {
+            this.saveCartToFirestore(auth.currentUser.uid);
+            this.debouncedSaveToFirestore = null;
+          }, 500);
+        }
         
         return true;
       }
@@ -994,14 +1127,31 @@ document.addEventListener('DOMContentLoaded', function() {
         // Increment quantity, max 10
         this.items[index].quantity = Math.min(10, this.items[index].quantity + 1);
         
-        // Save cart
-        this.saveCart();
+        // Update the item's timestamp
+        this.items[index].updatedAt = new Date().toISOString();
+        
+        // Save to localStorage first for immediate feedback
+        this.saveCartToLocalStorage();
         
         // Re-render the cart items to update display immediately
         this.renderCartItems();
         
         // Update full UI (count badge, etc)
         this.updateCartUI();
+        
+        // If user is logged in, sync with Firestore immediately
+        if (auth.currentUser) {
+          // Use a debounced version to prevent too many Firestore writes
+          if (this.debouncedSaveToFirestore) {
+            clearTimeout(this.debouncedSaveToFirestore);
+          }
+          
+          // Save to Firestore after a short delay to batch multiple rapid changes
+          this.debouncedSaveToFirestore = setTimeout(() => {
+            this.saveCartToFirestore(auth.currentUser.uid);
+            this.debouncedSaveToFirestore = null;
+          }, 500);
+        }
         
         return true;
       }
@@ -1017,14 +1167,31 @@ document.addEventListener('DOMContentLoaded', function() {
         // Decrement quantity, min 1
         this.items[index].quantity = Math.max(1, this.items[index].quantity - 1);
         
-        // Save cart
-        this.saveCart();
+        // Update the item's timestamp
+        this.items[index].updatedAt = new Date().toISOString();
+        
+        // Save to localStorage first for immediate feedback
+        this.saveCartToLocalStorage();
         
         // Re-render the cart items to update display immediately
         this.renderCartItems();
         
         // Update full UI (count badge, etc)
         this.updateCartUI();
+        
+        // If user is logged in, sync with Firestore immediately
+        if (auth.currentUser) {
+          // Use a debounced version to prevent too many Firestore writes
+          if (this.debouncedSaveToFirestore) {
+            clearTimeout(this.debouncedSaveToFirestore);
+          }
+          
+          // Save to Firestore after a short delay to batch multiple rapid changes
+          this.debouncedSaveToFirestore = setTimeout(() => {
+            this.saveCartToFirestore(auth.currentUser.uid);
+            this.debouncedSaveToFirestore = null;
+          }, 500);
+        }
         
         return true;
       }
@@ -1227,23 +1394,140 @@ document.addEventListener('DOMContentLoaded', function() {
       // Clear any existing sync interval
       this.stopPeriodicSync();
       
-      // Set up sync every 5 minutes
+      // Set up sync every 2 minutes (reduced time for better sync)
       this.syncInterval = setInterval(() => {
-        if (auth.currentUser && navigator.onLine && this.pendingFirestoreSync) {
+        if (auth.currentUser && navigator.onLine) {
           console.log('Running periodic background sync');
-          this.saveCartToFirestore(userId);
+          
+          // Check if we have pending changes to send
+          if (this.pendingFirestoreSync) {
+            this.saveCartToFirestore(userId);
+          }
+          
+          // Check for changes from other devices
+          this.checkForRemoteChanges(userId);
         }
-      }, 5 * 60 * 1000); // Every 5 minutes
+      }, 2 * 60 * 1000); // Every 2 minutes (instead of 5)
+      
+      // Also set up a real-time Firestore listener for critical updates
+      this.setupFirestoreListener(userId);
+    },
+    
+    /**
+     * Check for remote changes from other devices
+     */
+    checkForRemoteChanges: function(userId) {
+      if (!userId || !navigator.onLine) return;
+      
+      // Get our last sync time
+      let lastSyncTime = 0;
+      try {
+        const storedSyncTime = localStorage.getItem('auricCartLastSync');
+        if (storedSyncTime) {
+          lastSyncTime = parseInt(storedSyncTime, 10);
+        }
+      } catch (e) {
+        console.error('Error parsing last sync time:', e);
+      }
+      
+      // Check Firestore for newer data
+      db.collection('carts').doc(userId).get()
+        .then(doc => {
+          if (doc.exists && doc.data().items) {
+            // Get server timestamp if available
+            const serverTimestamp = doc.data().updatedAt ? doc.data().updatedAt.toMillis() : 0;
+            const lastSyncedDevice = doc.data().lastSyncedDevice || '';
+            
+            // Only sync if the server data is newer and was updated by a different device
+            if (serverTimestamp > lastSyncTime && lastSyncedDevice !== navigator.userAgent) {
+              console.log('Found newer cart data from another device');
+              this.showSyncStatus('Syncing cart from your other device...');
+              
+              // Use the server data
+              const serverItems = doc.data().items;
+              
+              // Update our local cart with server data
+              this.items = serverItems;
+              this.saveCartToLocalStorage();
+              
+              // Update the timestamp
+              localStorage.setItem('auricCartLastSync', Date.now().toString());
+              
+              // Update UI
+              this.updateCartUI();
+              this.renderCartItems();
+              
+              console.log('Cart synced with data from another device');
+            }
+          }
+        })
+        .catch(error => {
+          console.error('Error checking for remote changes:', error);
+        });
+    },
+    
+    /**
+     * Setup a real-time Firestore listener for critical updates
+     */
+    setupFirestoreListener: function(userId) {
+      if (!userId) return;
+      
+      // Clear any existing listener
+      if (this.firestoreUnsubscribe) {
+        this.firestoreUnsubscribe();
+      }
+      
+      // Set up a new listener
+      this.firestoreUnsubscribe = db.collection('carts').doc(userId)
+        .onSnapshot(doc => {
+          // Only process if we're not in the middle of our own update
+          if (!this.isUpdatingFirestore && doc.exists && doc.data().items) {
+            const serverLastSyncedDevice = doc.data().lastSyncedDevice || '';
+            
+            // Only sync if the update came from another device
+            if (serverLastSyncedDevice !== navigator.userAgent) {
+              console.log('Real-time update detected from another device');
+              
+              // Use server data
+              const serverItems = doc.data().items;
+              
+              // Update our local cart
+              this.items = serverItems;
+              this.saveCartToLocalStorage();
+              
+              // Update the timestamp
+              localStorage.setItem('auricCartLastSync', Date.now().toString());
+              
+              // Update UI
+              this.updateCartUI();
+              this.renderCartItems();
+              
+              // Show user notification
+              this.showSyncStatus('Cart updated from your other device');
+            }
+          }
+        }, error => {
+          console.error('Error in Firestore listener:', error);
+        });
     },
     
     /**
      * Stop periodic background sync
      */
     stopPeriodicSync: function() {
+      // Clear interval timer
       if (this.syncInterval) {
         clearInterval(this.syncInterval);
         this.syncInterval = null;
       }
+      
+      // Unsubscribe from Firestore listener if exists
+      if (this.firestoreUnsubscribe) {
+        this.firestoreUnsubscribe();
+        this.firestoreUnsubscribe = null;
+      }
+      
+      console.log('Background sync stopped');
     },
     
     /**
