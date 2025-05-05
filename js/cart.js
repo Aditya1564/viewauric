@@ -34,6 +34,9 @@ document.addEventListener('DOMContentLoaded', function() {
       // Get cart from localStorage or Firebase based on authentication status
       this.loadCart();
       
+      // Ensure cart panel is closed at initialization
+      this.closeCartPanel(true); // Pass true to skip animation
+      
       // Update cart UI
       this.updateCartUI();
       
@@ -99,11 +102,19 @@ document.addEventListener('DOMContentLoaded', function() {
     
     /**
      * Close the sliding cart panel
+     * @param {boolean} isInit - Whether this is being called during initialization
      */
-    closeCartPanel: function() {
+    closeCartPanel: function(isInit) {
       if (this.cartPanel && this.cartOverlay) {
         this.cartPanel.classList.remove('active');
         this.cartOverlay.classList.remove('active');
+        
+        // Set explicit styles on initialization to ensure it's properly hidden
+        if (isInit) {
+          this.cartPanel.style.right = '-100%';
+          this.cartOverlay.style.display = 'none';
+        }
+        
         document.body.style.overflow = ''; // Re-enable scrolling
       }
     },
