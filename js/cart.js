@@ -11,8 +11,68 @@
  * - Display cart items and totals
  */
 
+// Direct minimal cart panel functionality - as a global fallback
+function setupDirectCartToggle() {
+  console.log('Setting up direct cart toggle as additional failsafe');
+  
+  // Find elements needed for basic cart panel operation
+  const cartToggle = document.querySelector('.cart-toggle');
+  const cartPanel = document.querySelector('.cart-panel');
+  const cartOverlay = document.querySelector('.cart-overlay');
+  const closeCartBtn = document.querySelector('.close-cart-btn');
+  const continueShopping = document.querySelector('.cart-panel-buttons .view-cart-btn');
+  
+  if (cartToggle && cartPanel && cartOverlay) {
+    // Handle opening the cart panel
+    cartToggle.addEventListener('click', function(e) {
+      e.preventDefault();
+      console.log('Direct cart toggle clicked');
+      
+      // Show panel and overlay
+      cartPanel.style.right = '0';
+      cartPanel.classList.add('active');
+      cartOverlay.style.display = 'block';
+      cartOverlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    });
+    
+    // Handle closing via close button
+    if (closeCartBtn) {
+      closeCartBtn.addEventListener('click', function() {
+        cartPanel.classList.remove('active');
+        cartOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+      });
+    }
+    
+    // Handle closing via overlay
+    cartOverlay.addEventListener('click', function() {
+      cartPanel.classList.remove('active');
+      cartOverlay.classList.remove('active');
+      document.body.style.overflow = '';
+    });
+    
+    // Handle continue shopping button
+    if (continueShopping) {
+      continueShopping.addEventListener('click', function(e) {
+        e.preventDefault();
+        cartPanel.classList.remove('active');
+        cartOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+      });
+    }
+  } else {
+    console.error('Direct cart toggle setup failed - missing elements');
+  }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   console.log('DOM Content Loaded - Initializing Cart System');
+  
+  // Set up direct cart toggle as a fallback
+  setTimeout(() => {
+    setupDirectCartToggle();
+  }, 500);
   
   // Cart namespace to avoid global scope pollution
   const AuricCart = {
