@@ -107,20 +107,66 @@ document.addEventListener('DOMContentLoaded', function() {
      * Load cart items from cart.js system
      */
     loadCartItems: function() {
-      // Get cart data from localStorage (temporary solution until cart.js is fully integrated)
+      console.log('Attempting to load cart items...');
+      
       try {
-        // Try to load from auricCartItems first (newer format)
-        let storedCart = localStorage.getItem('auricCartItems');
+        // Try each possible localStorage key to find cart data
+        let storedCart = null;
         
-        // If not found, try legacy format auricCart
+        // First try the most current format
+        storedCart = localStorage.getItem('auricCartItems');
+        if (storedCart) {
+          console.log('Found cart data in auricCartItems');
+        }
+        
+        // If not found, try the sync metadata format
         if (!storedCart) {
-          storedCart = localStorage.getItem('auricCart');
-          console.log('Using legacy cart format');
+          const cartData = localStorage.getItem('auricCart');
+          if (cartData) {
+            console.log('Found cart data in auricCart');
+            storedCart = cartData;
+          }
+        }
+        
+        // Last attempt - try legacy storage format
+        if (!storedCart) {
+          const cartState = localStorage.getItem('cartState');
+          if (cartState) {
+            console.log('Found cart data in cartState (legacy format)');
+            storedCart = cartState;
+          }
         }
         
         if (storedCart) {
-          this.cart.items = JSON.parse(storedCart);
-          console.log('Cart items loaded:', this.cart.items);
+          const parsedCart = JSON.parse(storedCart);
+          console.log('Parsed cart data:', parsedCart);
+          
+          // Handle different possible formats
+          if (Array.isArray(parsedCart)) {
+            // Direct array format
+            this.cart.items = parsedCart;
+            console.log('Cart items loaded (array format):', this.cart.items);
+          } else if (parsedCart.items && Array.isArray(parsedCart.items)) {
+            // Object with items array
+            this.cart.items = parsedCart.items;
+            console.log('Cart items loaded (object.items format):', this.cart.items);
+          } else {
+            // Unknown format
+            console.error('Unknown cart data format:', parsedCart);
+            this.cart.items = [];
+          }
+          
+          // For debugging - print out each item in the cart
+          this.cart.items.forEach((item, index) => {
+            console.log(`Cart item ${index}:`, item);
+          });
+          
+          // If cart is empty after parsing, show empty message
+          if (this.cart.items.length === 0) {
+            console.log('Cart is empty after parsing');
+            this.showEmptyCartMessage();
+            return;
+          }
           
           // Calculate totals
           this.calculateTotals();
@@ -128,11 +174,12 @@ document.addEventListener('DOMContentLoaded', function() {
           // Render items in order summary
           this.renderOrderItems();
         } else {
-          console.log('No cart items found in localStorage');
+          console.log('No cart data found in any storage location');
           this.showEmptyCartMessage();
         }
       } catch (error) {
         console.error('Error loading cart items:', error);
+        console.error('Error details:', error.message);
         this.showEmptyCartMessage();
       }
     },
@@ -511,22 +558,33 @@ document.addEventListener('DOMContentLoaded', function() {
         shipping_address: `${orderData.address}, ${orderData.city}, ${orderData.state}, ${orderData.postalCode}, ${orderData.country}`
       };
       
-      // Send email to customer
+      // Log the EmailJS configuration
+      console.log('EmailJS Config:', {
+        service: this.config.emailServiceId,
+        customerTemplate: this.config.customerTemplateId,
+        ownerTemplate: this.config.ownerTemplateId
+      });
+      
+      // Send email to customer with improved error handling
+      console.log('Sending customer email with params:', customerParams);
       emailjs.send(this.config.emailServiceId, this.config.customerTemplateId, customerParams)
         .then(response => {
-          console.log('Customer email sent:', response);
+          console.log('Customer email sent successfully:', response);
         })
         .catch(error => {
           console.error('Error sending customer email:', error);
+          // Continue with the checkout process even if email fails
         });
       
-      // Send email to store owner
+      // Send email to store owner with improved error handling  
+      console.log('Sending owner email with params:', ownerParams);
       emailjs.send(this.config.emailServiceId, this.config.ownerTemplateId, ownerParams)
         .then(response => {
-          console.log('Owner email sent:', response);
+          console.log('Owner email sent successfully:', response);
         })
         .catch(error => {
           console.error('Error sending owner email:', error);
+          // Continue with the checkout process even if email fails
         });
     },
     
