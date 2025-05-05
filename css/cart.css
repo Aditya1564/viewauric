@@ -454,28 +454,28 @@
 }
 
 /* Cart icon in header with count */
-.nav-icons .icon-link:nth-child(3),
-.nav-icons .icon-link[href="#cart"] {
+.nav-icons .icon-link:nth-child(4),
+.nav-icons .icon-link.cart-toggle {
   position: relative;
 }
 
 .cart-count {
   position: absolute;
-  top: -4px;
-  right: -4px;
+  top: -8px;
+  right: -8px;
   background: #D4AF37;
   color: white;
-  font-size: 11px;
-  min-width: 18px;
-  height: 18px;
+  font-size: 10px;
+  min-width: 16px;
+  height: 16px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-  padding: 0 2px;
-  border: 1px solid #fff;
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  padding: 0 1px;
+  border: 1.5px solid white;
 }
 
 /* Responsive styles */
