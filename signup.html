@@ -167,6 +167,7 @@
     <!-- Firebase SDK (compat version) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
     <script>
       // Firebase configuration
@@ -180,6 +181,21 @@
       // Initialize Firebase
       firebase.initializeApp(firebaseConfig);
       const auth = firebase.auth();
+      const db = firebase.firestore();
+      
+      // Enable offline data persistence
+      db.enablePersistence({synchronizeTabs: true})
+        .catch((err) => {
+          if (err.code === 'failed-precondition') {
+            // Multiple tabs open, persistence can only be enabled in one tab at a time
+            console.log('Firestore persistence not enabled: Multiple tabs open');
+          } else if (err.code === 'unimplemented') {
+            // The current browser does not support all of the features required for persistence
+            console.log('Firestore persistence not supported by this browser');
+          } else {
+            console.error('Error enabling Firestore persistence:', err);
+          }
+        });
     </script>
     
     <!-- Auth scripts -->
