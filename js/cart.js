@@ -12,6 +12,8 @@
  */
 
 document.addEventListener('DOMContentLoaded', function() {
+  console.log('DOM Content Loaded - Initializing Cart System');
+  
   // Cart namespace to avoid global scope pollution
   const AuricCart = {
     // Cart state
@@ -56,12 +58,23 @@ document.addEventListener('DOMContentLoaded', function() {
      * Setup sliding cart panel functionality
      */
     setupCartPanel: function() {
+      console.log('Setting up cart panel with elements:', {
+        cartToggle: this.cartToggle,
+        closeCartBtn: this.closeCartBtn,
+        cartOverlay: this.cartOverlay,
+        cartPanel: this.cartPanel
+      });
+      
       // Toggle cart panel when clicking cart icon
       if (this.cartToggle) {
+        console.log('Adding click event listener to cart toggle');
         this.cartToggle.addEventListener('click', (e) => {
           e.preventDefault();
+          console.log('Cart toggle clicked, opening panel');
           this.openCartPanel();
         });
+      } else {
+        console.error('Cart toggle element not found');
       }
       
       // Close cart when clicking close button
