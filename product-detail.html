@@ -108,7 +108,7 @@
 
 
     <main>
-        <div class="product-detail-container">
+        <div class="product-detail-container" data-product-id="EM-ST-2025">
             <!-- Left side: Image gallery -->
             <div class="product-detail-left">
                 <div class="main-image-container" style="height: 650px !important; min-height: 450px !important;">
@@ -412,6 +412,28 @@
         </div>
     </footer>
 
+    <!-- Firebase SDK (compat version) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <script>
+      // Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
+        authDomain: "auric-a0c92.firebaseapp.com",
+        projectId: "auric-a0c92",
+        appId: "1:878979958342:web:e6092f7522488d21eaec47"
+      };
+      
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+    </script>
+
+    <script src="js/direct-auth.js"></script>
+    <script src="js/cart.js"></script>
     <script src="js/navigation.js?v=1.0.3"></script>
     <script src="js/banner-rotator.js?v=1.0.0"></script>
     <script src="js/product-gallery.js?v=1.0.0"></script>

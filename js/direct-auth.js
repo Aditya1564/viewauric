@@ -147,6 +147,11 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Logged in user:', user.email);
         showSuccess('Login successful!');
         
+        // Sync cart if AuricCart exists
+        if (window.AuricCart) {
+          window.AuricCart.syncCartOnLogin(user.uid);
+        }
+        
         // Redirect to profile page
         setTimeout(() => {
           window.location.href = 'profile.html';
@@ -229,6 +234,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const user = result.user;
         console.log('Google sign in successful:', user.email);
         showSuccess('Google sign in successful!');
+        
+        // Sync cart if AuricCart exists
+        if (window.AuricCart) {
+          window.AuricCart.syncCartOnLogin(user.uid);
+        }
         
         // Redirect to profile page
         setTimeout(() => {

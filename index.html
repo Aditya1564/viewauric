@@ -263,7 +263,7 @@
             <h2 class="section-title">Golden Brass</h2>
         </div>
         <div class="product-scroll-container">
-                <div class="product-item">
+                <div class="product-item" data-product-id="DAISY-SET-01">
                     <a href="product-detail.html" style="text-decoration: none; color: inherit;">
                         <div class="product-image">
                             <img src="images/product-category/IMG_20250504_150241.jpg" alt="Daisy Combo Set">
@@ -621,6 +621,7 @@
     <!-- Firebase SDK (compat version) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
     <script>
       // Firebase configuration
@@ -634,10 +635,14 @@
       // Initialize Firebase
       firebase.initializeApp(firebaseConfig);
       const auth = firebase.auth();
+      const db = firebase.firestore();
     </script>
     
     <!-- Auth scripts -->
     <script src="js/direct-auth.js"></script>
+    
+    <!-- Cart scripts -->
+    <script src="js/cart.js"></script>
     
     <!-- Navigation scripts -->
     <script src="js/navigation.js?v=1.0.3"></script>
