@@ -11,6 +11,109 @@
  * - Display cart items and totals
  */
 
+// For development/testing - Debug function to reset the cart completely
+// Cart debugging functions
+window.cartDebug = {
+  // Reset the cart completely
+  resetCart: function() {
+    localStorage.removeItem('auricCart');
+    console.log('Cart has been reset in localStorage.');
+    
+    // If user is logged in, also clear Firestore cart
+    if (firebase.auth().currentUser) {
+      const userId = firebase.auth().currentUser.uid;
+      firebase.firestore().collection('carts').doc(userId).set({
+        items: [],
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      })
+      .then(() => {
+        console.log('Cart has been reset in Firestore.');
+        console.log('Page will reload now.');
+        setTimeout(() => window.location.reload(), 500);
+      })
+      .catch(error => {
+        console.error('Error resetting Firestore cart:', error);
+        window.location.reload();
+      });
+    } else {
+      setTimeout(() => window.location.reload(), 500);
+    }
+  },
+  
+  // Add a test item to the cart manually
+  addTestItem: function() {
+    const testItem = {
+      productId: "TEST-ITEM",
+      name: "Test Product",
+      price: 1999,
+      image: "/images/product-category/IMG_20250504_150241.jpg",
+      quantity: 1
+    };
+    
+    // Get current cart
+    let cart = [];
+    const savedCart = localStorage.getItem('auricCart');
+    if (savedCart) {
+      try {
+        cart = JSON.parse(savedCart);
+      } catch (e) {
+        console.error("Error parsing cart:", e);
+        cart = [];
+      }
+    }
+    
+    // Add the test item
+    cart.push(testItem);
+    
+    // Save back to localStorage
+    localStorage.setItem('auricCart', JSON.stringify(cart));
+    
+    console.log("Test item added to cart. Page will reload.");
+    setTimeout(() => window.location.reload(), 500);
+  },
+  
+  // Show the current cart in console
+  showCart: function() {
+    console.group("Current Cart Contents");
+    
+    // Show localStorage cart
+    const savedCart = localStorage.getItem('auricCart');
+    if (savedCart) {
+      try {
+        const localCart = JSON.parse(savedCart);
+        console.log("LocalStorage Cart:", localCart);
+      } catch (e) {
+        console.error("Error parsing localStorage cart:", e);
+      }
+    } else {
+      console.log("LocalStorage cart is empty.");
+    }
+    
+    // Show Firestore cart if logged in
+    if (firebase.auth().currentUser) {
+      const userId = firebase.auth().currentUser.uid;
+      firebase.firestore().collection('carts').doc(userId).get()
+        .then(doc => {
+          if (doc.exists && doc.data().items) {
+            console.log("Firestore Cart:", doc.data().items);
+          } else {
+            console.log("Firestore cart is empty.");
+          }
+        })
+        .catch(error => {
+          console.error("Error getting Firestore cart:", error);
+        });
+    } else {
+      console.log("User not logged in - no Firestore cart.");
+    }
+    
+    console.groupEnd();
+  }
+};
+
+// Legacy function for backward compatibility
+window.resetCart = window.cartDebug.resetCart;
+
 // Direct minimal cart panel functionality - as a global fallback
 function setupDirectCartToggle() {
   console.log('Setting up direct cart toggle as additional failsafe');
@@ -291,7 +394,18 @@ document.addEventListener('DOMContentLoaded', function() {
       const savedCart = localStorage.getItem('auricCart');
       if (savedCart) {
         try {
-          this.items = JSON.parse(savedCart);
+          let loadedItems = JSON.parse(savedCart);
+          
+          // Ensure all items have valid quantity values
+          loadedItems = loadedItems.map(item => {
+            // Force quantity to be 1 if it's invalid or not provided
+            if (!item.quantity || isNaN(item.quantity) || item.quantity < 1) {
+              item.quantity = 1;
+            }
+            return item;
+          });
+          
+          this.items = loadedItems;
           console.log('Cart loaded from localStorage:', this.items);
         } catch (error) {
           console.error('Error parsing cart from localStorage:', error);
@@ -299,6 +413,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       } else {
         this.items = [];
+        
+        // For testing, remove this in production
+        // localStorage.setItem('auricCart', JSON.stringify([]));
       }
     },
     
@@ -309,7 +426,20 @@ document.addEventListener('DOMContentLoaded', function() {
       db.collection('carts').doc(userId).get()
         .then((doc) => {
           if (doc.exists && doc.data().items) {
-            this.items = doc.data().items;
+            // Get items from Firestore
+            let firestoreItems = doc.data().items;
+            
+            // Ensure all items have valid quantity values
+            firestoreItems = firestoreItems.map(item => {
+              // Force quantity to be 1 if it's invalid or not provided
+              if (!item.quantity || isNaN(item.quantity) || item.quantity < 1) {
+                console.log('Fixed invalid quantity for item:', item.name);
+                item.quantity = 1;
+              }
+              return item;
+            });
+            
+            this.items = firestoreItems;
             console.log('Cart loaded from Firestore:', this.items);
             this.updateCartUI();
           } else {
@@ -476,12 +606,27 @@ document.addEventListener('DOMContentLoaded', function() {
     
     /**
      * Merge two carts, giving priority to the second cart for duplicates
+     * With validation to ensure quantity is always at least 1
      */
     mergeCarts: function(cart1, cart2) {
       const mergedCart = [...cart1];
       
+      // Fix quantities in cart1 items
+      for (let i = 0; i < mergedCart.length; i++) {
+        if (!mergedCart[i].quantity || mergedCart[i].quantity < 1) {
+          console.log('Fixed invalid quantity in merged cart item:', mergedCart[i].name);
+          mergedCart[i].quantity = 1;
+        }
+      }
+      
       // Add items from cart2 that aren't in cart1
       cart2.forEach(item2 => {
+        // Ensure item2 has valid quantity
+        if (!item2.quantity || item2.quantity < 1) {
+          console.log('Fixed invalid quantity in item from Firestore:', item2.name);
+          item2.quantity = 1;
+        }
+        
         const existingItemIndex = mergedCart.findIndex(item1 => 
           item1.productId === item2.productId &&
           item1.variant === item2.variant
@@ -597,41 +742,62 @@ document.addEventListener('DOMContentLoaded', function() {
     },
     
     /**
-     * Setup event listeners for cart item buttons using event delegation
+     * Setup event listeners for cart item buttons using direct binding
+     * with better error handling
      */
     setupCartItemEventListeners: function() {
-      const container = this.slidingCartItemsContainer;
-      if (!container) return;
-      
-      // Use event delegation for better reliability
-      container.addEventListener('click', (e) => {
-        // Handle decrement button click
-        if (e.target.classList.contains('decrement')) {
-          const index = parseInt(e.target.getAttribute('data-index'));
-          console.log('Decrement clicked for index:', index);
-          this.decrementQuantity(index);
-          return;
-        }
+      try {
+        // Get all the buttons in the container
+        const decrementButtons = document.querySelectorAll('.quantity-btn.decrement');
+        const incrementButtons = document.querySelectorAll('.quantity-btn.increment');
+        const removeButtons = document.querySelectorAll('.remove-item-btn');
         
-        // Handle increment button click
-        if (e.target.classList.contains('increment')) {
-          const index = parseInt(e.target.getAttribute('data-index'));
-          console.log('Increment clicked for index:', index);
-          this.incrementQuantity(index);
-          return;
-        }
+        console.log('Setting up cart event listeners for:',
+          decrementButtons.length, 'decrement buttons,',
+          incrementButtons.length, 'increment buttons,',
+          removeButtons.length, 'remove buttons');
         
-        // Handle remove button click
-        if (e.target.classList.contains('fa-trash') || e.target.classList.contains('remove-item-btn')) {
-          const button = e.target.classList.contains('remove-item-btn') ? 
-                         e.target : 
-                         e.target.closest('.remove-item-btn');
-          const index = parseInt(button.getAttribute('data-index'));
-          console.log('Remove clicked for index:', index);
-          this.removeItem(index);
-          return;
-        }
-      });
+        // Add event listeners to decrement buttons
+        decrementButtons.forEach(button => {
+          button.addEventListener('click', (e) => {
+            try {
+              const index = parseInt(button.getAttribute('data-index'));
+              console.log('Decrement clicked for index:', index);
+              this.decrementQuantity(index);
+            } catch (error) {
+              console.error('Error in decrement button handler:', error);
+            }
+          });
+        });
+        
+        // Add event listeners to increment buttons
+        incrementButtons.forEach(button => {
+          button.addEventListener('click', (e) => {
+            try {
+              const index = parseInt(button.getAttribute('data-index'));
+              console.log('Increment clicked for index:', index);
+              this.incrementQuantity(index);
+            } catch (error) {
+              console.error('Error in increment button handler:', error);
+            }
+          });
+        });
+        
+        // Add event listeners to remove buttons
+        removeButtons.forEach(button => {
+          button.addEventListener('click', (e) => {
+            try {
+              const index = parseInt(button.getAttribute('data-index'));
+              console.log('Remove clicked for index:', index);
+              this.removeItem(index);
+            } catch (error) {
+              console.error('Error in remove button handler:', error);
+            }
+          });
+        });
+      } catch (error) {
+        console.error('Error setting up cart item event listeners:', error);
+      }
     },
     
     /**
