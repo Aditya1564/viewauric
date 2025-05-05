@@ -240,15 +240,23 @@ document.addEventListener('DOMContentLoaded', function() {
       const overlay = this.cartOverlay || document.querySelector('.cart-overlay');
       
       if (panel && overlay) {
-        // Remove active classes
+        // First remove active classes to trigger CSS transitions
         panel.classList.remove('active');
         overlay.classList.remove('active');
         
-        // Set explicit styles on initialization to ensure it's properly hidden
+        // Set explicit styles - always set these for better reliability
         if (isInit) {
           console.log('Setting initial cart panel styles (hidden state)');
           panel.style.right = '-100%';
           overlay.style.display = 'none';
+        } else {
+          // For normal closing, add inline styles to ensure proper closing
+          panel.style.right = '-100%';
+          
+          // Hide overlay after transition finishes
+          setTimeout(() => {
+            overlay.style.display = 'none';
+          }, 300); // Match this time to CSS transition duration
         }
         
         // Re-enable scrolling

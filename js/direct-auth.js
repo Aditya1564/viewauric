@@ -76,12 +76,44 @@ document.addEventListener('DOMContentLoaded', function() {
   
   /**
    * Handle errors from Firebase Auth
+   * Enhanced with better network error handling
    */
   function handleFirebaseAuthError(error) {
     console.error('Firebase Auth Error:', error);
     let message = 'Authentication failed';
     
+    // First check for network connectivity issues
+    if (!navigator.onLine) {
+      message = 'Network connection unavailable. Please check your internet connection and try again.';
+      showError(message);
+      
+      // Listen for when connection is restored
+      window.addEventListener('online', function onlineHandler() {
+        showSuccess('Internet connection restored. You can try logging in again.');
+        window.removeEventListener('online', onlineHandler);
+      }, { once: true });
+      
+      return false;
+    }
+    
     switch (error.code) {
+      // Network related errors
+      case 'auth/network-request-failed':
+      case 'unavailable':
+        message = 'Network error. Unable to connect to authentication server. Please check your internet connection and try again.';
+        
+        // Listen for when connection is restored
+        window.addEventListener('online', function onlineHandler() {
+          showSuccess('Internet connection restored. You can try logging in again.');
+          window.removeEventListener('online', onlineHandler);
+        }, { once: true });
+        break;
+        
+      case 'auth/timeout':
+        message = 'Request timeout. The server took too long to respond. Please try again later.';
+        break;
+        
+      // Authentication errors
       case 'auth/user-not-found':
         message = 'No account found with this email address. Please sign up first.';
         break;
@@ -103,9 +135,6 @@ document.addEventListener('DOMContentLoaded', function() {
       case 'auth/operation-not-allowed':
         message = 'This login method is not enabled. Please try another method or contact support.';
         break;
-      case 'auth/network-request-failed':
-        message = 'Network error. Please check your internet connection and try again.';
-        break;
       case 'auth/too-many-requests':
         message = 'Too many unsuccessful login attempts. Please try again later or reset your password.';
         break;
@@ -117,6 +146,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     showError(message);
+    
+    // Show debug instructions if available
+    const debugInstructions = document.getElementById('debug-instructions');
+    if (debugInstructions) {
+      debugInstructions.style.display = 'block';
+    }
+    
     return false;
   }
   

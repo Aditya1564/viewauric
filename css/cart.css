@@ -8,15 +8,17 @@
   position: fixed;
   top: 0;
   right: -100%;
-  width: 75%; /* 75% width of the screen */
+  width: 400px; /* Fixed width for larger screens */
+  max-width: 90%; /* But not more than 90% on smaller screens */
   height: 100vh;
   background: #ffffff;
-  box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+  box-shadow: -2px 0 10px rgba(0,0,0,0.3);
   z-index: 1000;
   transition: right 0.3s ease-in-out;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  padding-bottom: env(safe-area-inset-bottom); /* For iOS notched devices */
 }
 
 /* Sliding cart item styling */
@@ -80,11 +82,25 @@
 }
 
 .close-cart-btn {
-  background: none;
+  background: #f5f5f5;
   border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
   font-size: 24px;
   cursor: pointer;
-  color: #888;
+  color: #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  z-index: 2; /* Ensure it's above other content */
+}
+
+.close-cart-btn:hover {
+  background: #e0e0e0;
+  color: #333;
 }
 
 .sliding-cart-items {
@@ -440,6 +456,7 @@
 
 /* Responsive styles */
 @media (max-width: 768px) {
+  /* Cart page styles */
   .cart-content {
     grid-template-columns: 1fr;
   }
@@ -477,5 +494,58 @@
     position: absolute;
     top: 10px;
     right: 10px;
+  }
+  
+  /* Sliding cart panel styles */
+  .cart-panel {
+    max-width: 85%; /* Wider on mobile screens */
+  }
+  
+  .sliding-cart-items .cart-item {
+    grid-template-columns: 60px 1fr; /* Smaller image column */
+    position: relative;
+  }
+  
+  .sliding-cart-items .cart-item-image {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .cart-panel-buttons {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .cart-panel-header {
+    padding: 15px;
+  }
+  
+  .cart-panel-header h3 {
+    font-size: 18px;
+  }
+  
+  .sliding-cart-items {
+    padding: 15px;
+  }
+  
+  .cart-panel-footer {
+    padding: 15px;
+  }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+  .cart-panel {
+    max-width: 95%; /* Almost full width on very small screens */
+  }
+  
+  .sliding-cart-items .cart-item-price-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .sliding-cart-items .cart-item-quantity {
+    margin-top: 5px;
   }
 }

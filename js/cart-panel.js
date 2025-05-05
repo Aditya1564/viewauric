@@ -34,26 +34,41 @@ document.addEventListener('DOMContentLoaded', function() {
       document.body.style.overflow = 'hidden'; // Prevent scrolling
     });
     
+    // Define a reusable close function to ensure consistent behavior
+    function closeCartPanelHandler() {
+      console.log('Closing cart panel from standalone handler');
+      
+      // First remove active classes to trigger CSS transitions
+      cartPanel.classList.remove('active');
+      cartOverlay.classList.remove('active');
+      
+      // Apply inline style for right
+      cartPanel.style.right = '-100%';
+      
+      // Hide overlay after transition completes
+      setTimeout(() => {
+        cartOverlay.style.display = 'none';
+      }, 300); // Match this time to CSS transition duration
+      
+      // Re-enable scrolling
+      document.body.style.overflow = '';
+      
+      // Return focus to the page for accessibility
+      document.body.focus();
+    }
+    
     // Close cart panel when X button is clicked
     if (closeCartBtn) {
       closeCartBtn.addEventListener('click', function() {
         console.log('Close button clicked - closing panel');
-        cartPanel.classList.remove('active');
-        cartOverlay.classList.remove('active');
-        cartPanel.style.right = '-100%';
-        cartOverlay.style.display = 'none';
-        document.body.style.overflow = ''; // Re-enable scrolling
+        closeCartPanelHandler();
       });
     }
     
     // Close cart panel when clicking overlay
     cartOverlay.addEventListener('click', function() {
       console.log('Overlay clicked - closing panel');
-      cartPanel.classList.remove('active');
-      cartOverlay.classList.remove('active');
-      cartPanel.style.right = '-100%';
-      cartOverlay.style.display = 'none';
-      document.body.style.overflow = ''; // Re-enable scrolling
+      closeCartPanelHandler();
     });
     
     // Close cart panel when Continue Shopping button is clicked
@@ -61,11 +76,7 @@ document.addEventListener('DOMContentLoaded', function() {
       continueShopping.addEventListener('click', function(e) {
         e.preventDefault();
         console.log('Continue shopping clicked - closing panel');
-        cartPanel.classList.remove('active');
-        cartOverlay.classList.remove('active');
-        cartPanel.style.right = '-100%';
-        cartOverlay.style.display = 'none';
-        document.body.style.overflow = ''; // Re-enable scrolling
+        closeCartPanelHandler();
       });
     }
   } else {
