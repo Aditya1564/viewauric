@@ -95,7 +95,7 @@
                 <!-- Navigation Icons -->
                 <div class="nav-icons">
                     <a href="#" class="icon-link"><i class="fas fa-search"></i></a>
-                    <a href="#" class="icon-link"><i class="fas fa-user"></i></a>
+                    <a href="login.html" class="icon-link"><i class="fas fa-user"></i></a>
                     <a href="#" class="icon-link"><i class="fas fa-heart"></i></a>
                     <a href="#" class="icon-link"><i class="fas fa-shopping-cart"></i></a>
                 </div>
@@ -618,8 +618,28 @@
         <i class="fab fa-whatsapp"></i>
     </a>
 
-    <!-- Navigation scripts -->
+    <!-- Firebase SDK (compat version) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     
+    <script>
+      // Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
+        authDomain: "auric-a0c92.firebaseapp.com",
+        projectId: "auric-a0c92",
+        appId: "1:878979958342:web:e6092f7522488d21eaec47"
+      };
+      
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+    </script>
+    
+    <!-- Auth scripts -->
+    <script src="js/direct-auth.js"></script>
+    
+    <!-- Navigation scripts -->
     <script src="js/navigation.js?v=1.0.3"></script>
     <script src="js/auto-slider.js?v=1.0.0"></script>
     <script src="js/banner-rotator.js?v=1.0.0"></script>
