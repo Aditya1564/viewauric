@@ -111,7 +111,7 @@ window.cartDebug = {
   }
 };
 
-// Enhanced method to force sync cart data between devices with better error handling and feedback
+// COMPLETELY REWRITTEN to properly handle deletions and provide better feedback
 window.cartDebug.forceSyncWithServer = function() {
   if (firebase.auth().currentUser) {
     const userId = firebase.auth().currentUser.uid;
@@ -128,49 +128,43 @@ window.cartDebug.forceSyncWithServer = function() {
     let retryCount = 0;
     
     const attemptSync = () => {
-      // Force a load from Firestore first
-      db.collection('carts').doc(userId).get()
-        .then(doc => {
-          if (doc.exists && doc.data().items) {
-            console.log("Retrieved latest cart from server");
-            
-            // Display current cart for debugging
-            console.log("Server cart items:", doc.data().items.length);
-            console.log("Server cart timestamp:", doc.data().updatedAt ? doc.data().updatedAt.toDate() : "None");
-            
-            // Process each server item to ensure validity
-            const serverItems = doc.data().items.map(item => {
-              // Validate all required properties
-              if (!item.quantity || isNaN(item.quantity) || item.quantity < 1) {
-                item.quantity = 1;
-              }
-              
-              // Ensure the item has all required properties
-              return {
-                productId: item.productId || 'unknown',
-                name: item.name || 'Unknown Product',
-                price: typeof item.price === 'number' ? item.price : 0,
-                image: item.image || '',
-                quantity: item.quantity || 1
-              };
-            });
-            
-            // Force refresh AuricCart with the latest data
-            window.AuricCart.items = serverItems;
-            
-            // Add updated timestamp to localStorage
-            const serverTimestamp = doc.data().updatedAt ? doc.data().updatedAt.toMillis() : Date.now();
-            localStorage.setItem('auricCartTimestamp', serverTimestamp.toString());
-            localStorage.setItem('auricCartLastSync', Date.now().toString());
-            
-            // Save to localStorage
-            window.AuricCart.saveCartToLocalStorage();
-            
-            // Update UI
-            window.AuricCart.updateCartUI();
-            window.AuricCart.renderCartItems();
-            
-            // Update notification
+      // Choose the sync direction based on what has happened recently
+      let syncChoice = '';
+      
+      // First, check if we've deleted items
+      const storedDeletedItems = localStorage.getItem('auricCartDeletedItems');
+      let hasRecentDeletions = false;
+      
+      if (storedDeletedItems) {
+        try {
+          const deletedItems = JSON.parse(storedDeletedItems);
+          // Check if any deletions have happened in the last 10 minutes
+          const tenMinutesAgo = Date.now() - (10 * 60 * 1000);
+          hasRecentDeletions = deletedItems.some(item => item.timestamp > tenMinutesAgo);
+          
+          if (hasRecentDeletions) {
+            console.log("Recent deletions detected, will prioritize pushing local changes to server");
+            syncChoice = 'push-to-server';
+          }
+        } catch (e) {
+          console.error('Error parsing deleted items:', e);
+        }
+      }
+      
+      // If we haven't decided to push, check the last operation type
+      if (!syncChoice) {
+        syncChoice = 'pull-from-server'; // Default to pulling from server
+      }
+      
+      if (syncChoice === 'push-to-server') {
+        // If we've recently deleted items, push our cart to the server
+        console.log("Pushing local cart to server (replaces server cart)");
+        
+        // Use the current AuricCart items
+        window.AuricCart.lastOperation = 'delete';
+        window.AuricCart.saveCartToFirestore(userId)
+          .then(() => {
+            console.log("Successfully pushed local cart to server");
             notification.textContent = 'Cart synchronized successfully!';
             notification.style.background = 'rgba(0,128,0,0.8)';
             
@@ -181,42 +175,10 @@ window.cartDebug.forceSyncWithServer = function() {
                 notification.remove();
               }, 500);
             }, 3000);
-            
-            console.log("Sync complete.");
-          } else {
-            console.log("No cart found on server. Creating empty cart.");
-            window.AuricCart.items = [];
-            window.AuricCart.saveCartToFirestore(userId);
-            
-            // Update notification
-            notification.textContent = 'No cart found on server. Created new cart.';
-            
-            // Fade out notification
-            setTimeout(() => {
-              notification.style.opacity = '0';
-              setTimeout(() => {
-                notification.remove();
-              }, 500);
-            }, 3000);
-          }
-        })
-        .catch(error => {
-          console.error("Error syncing with server:", error);
-          
-          // Retry logic with exponential backoff
-          if (retryCount < maxRetries) {
-            retryCount++;
-            const delay = Math.pow(2, retryCount) * 1000; // 2s, 4s, 8s
-            
-            notification.textContent = `Sync attempt ${retryCount} failed. Retrying in ${delay/1000}s...`;
-            
-            console.log(`Retrying sync in ${delay}ms (attempt ${retryCount} of ${maxRetries})`);
-            setTimeout(() => attemptSync(), delay);
-          } else {
-            console.error("Failed to sync after", maxRetries, "attempts");
-            
-            // Show error notification
-            notification.textContent = 'Could not sync with server. Please try again later.';
+          })
+          .catch(error => {
+            console.error("Error pushing cart to server:", error);
+            notification.textContent = 'Error syncing cart. Please try again.';
             notification.style.background = 'rgba(220,0,0,0.8)';
             
             // Fade out notification
@@ -225,9 +187,117 @@ window.cartDebug.forceSyncWithServer = function() {
               setTimeout(() => {
                 notification.remove();
               }, 500);
-            }, 5000);
-          }
-        });
+            }, 3000);
+          });
+      } else {
+        // Pull from server approach - get the latest cart from server
+        console.log("Pulling cart from server");
+        
+        // Force a load from Firestore first
+        db.collection('carts').doc(userId).get()
+          .then(doc => {
+            if (doc.exists && doc.data().items) {
+              console.log("Retrieved latest cart from server");
+              
+              // Display current cart for debugging
+              console.log("Server cart items:", doc.data().items.length);
+              console.log("Server timestamp:", doc.data().updatedAt ? doc.data().updatedAt.toDate() : "None");
+              
+              // Process each server item to ensure validity
+              const serverItems = doc.data().items.map(item => {
+                // Validate all required properties
+                if (!item.quantity || isNaN(item.quantity) || item.quantity < 1) {
+                  item.quantity = 1;
+                }
+                
+                // Ensure the item has all required properties
+                return {
+                  productId: item.productId || 'unknown',
+                  name: item.name || 'Unknown Product',
+                  price: typeof item.price === 'number' ? item.price : 0,
+                  image: item.image || '',
+                  quantity: item.quantity || 1
+                };
+              });
+              
+              // Clear deleted items tracking to avoid conflict
+              localStorage.removeItem('auricCartDeletedItems');
+              
+              // Force refresh AuricCart with the latest data
+              window.AuricCart.items = serverItems;
+              
+              // Add updated timestamp to localStorage
+              const serverTimestamp = doc.data().updatedAt ? doc.data().updatedAt.toMillis() : Date.now();
+              localStorage.setItem('auricCartTimestamp', serverTimestamp.toString());
+              localStorage.setItem('auricCartLastSync', Date.now().toString());
+              localStorage.setItem('auricCartVersion', doc.data().cartVersion || Date.now().toString());
+              
+              // Save to localStorage
+              window.AuricCart.saveCartToLocalStorage();
+              
+              // Update UI
+              window.AuricCart.updateCartUI();
+              window.AuricCart.renderCartItems();
+              
+              // Update notification
+              notification.textContent = 'Cart synchronized successfully!';
+              notification.style.background = 'rgba(0,128,0,0.8)';
+              
+              // Fade out notification
+              setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                  notification.remove();
+                }, 500);
+              }, 3000);
+              
+              console.log("Sync complete.");
+            } else {
+              console.log("No cart found on server. Creating empty cart.");
+              window.AuricCart.items = [];
+              window.AuricCart.saveCartToFirestore(userId);
+              
+              // Update notification
+              notification.textContent = 'No cart found on server. Created new cart.';
+              
+              // Fade out notification
+              setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                  notification.remove();
+                }, 500);
+              }, 3000);
+            }
+          })
+          .catch(error => {
+            console.error("Error syncing with server:", error);
+            
+            // Retry logic with exponential backoff
+            if (retryCount < maxRetries) {
+              retryCount++;
+              const delay = Math.pow(2, retryCount) * 1000; // 2s, 4s, 8s
+              
+              notification.textContent = `Sync attempt ${retryCount} failed. Retrying in ${delay/1000}s...`;
+              
+              console.log(`Retrying sync in ${delay}ms (attempt ${retryCount} of ${maxRetries})`);
+              setTimeout(() => attemptSync(), delay);
+            } else {
+              console.error("Failed to sync after", maxRetries, "attempts");
+              
+              // Show error notification
+              notification.textContent = 'Could not sync with server. Please try again later.';
+              notification.style.background = 'rgba(220,0,0,0.8)';
+              
+              // Fade out notification
+              setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                  notification.remove();
+                }, 500);
+              }, 5000);
+            }
+          });
+      }
     };
     
     // Start the sync process
@@ -661,6 +731,7 @@ document.addEventListener('DOMContentLoaded', function() {
     /**
      * Save cart to Firestore for authenticated users
      * Enhanced with better error handling and offline support
+     * COMPLETELY REVISED: Now using reset & replace approach for more reliable sync
      */
     saveCartToFirestore: function(userId) {
       if (!userId) {
@@ -684,24 +755,30 @@ document.addEventListener('DOMContentLoaded', function() {
       // Set flag to prevent our own writes from triggering a sync loop
       this.isUpdatingFirestore = true;
       
-      // Try to save to Firestore
+      // Instead of updating the Firestore document, we'll COMPLETELY REPLACE it
+      // This ensures deletion operations are properly synced across devices
       db.collection('carts').doc(userId).set({
         items: this.items,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        lastOperation: this.lastOperation || 'update', // Track what kind of operation was last performed
+        operationTimestamp: Date.now(),
         lastSyncedDevice: navigator.userAgent, // Track which device made the last update
-        lastSyncedAt: new Date().toISOString()
-      })
+        lastSyncedAt: new Date().toISOString(),
+        cartVersion: (Date.now()).toString() // Use a simple timestamp as version
+      }, { merge: false }) // Don't merge, completely replace
       .then(() => {
-        console.log('Cart saved to Firestore successfully');
+        console.log('Cart saved to Firestore successfully (complete replacement)');
         // Clear any pending sync flag
         this.pendingFirestoreSync = false;
         
         // Update the local last sync time
         localStorage.setItem('auricCartLastSync', Date.now().toString());
+        localStorage.setItem('auricCartVersion', Date.now().toString());
         
         // Clear updating flag after a short delay to ensure the snapshot has time to fire
         setTimeout(() => {
           this.isUpdatingFirestore = false;
+          this.lastOperation = null; // Reset the operation tracker
         }, 500);
       })
       .catch((error) => {
@@ -1083,10 +1160,46 @@ document.addEventListener('DOMContentLoaded', function() {
     },
     
     /**
-     * Remove item from cart
+     * Remove item from cart - COMPLETELY REVISED
+     * Now with proper tracking for synchronization
      */
     removeItem: function(index) {
       if (index >= 0 && index < this.items.length) {
+        // Track the removed item for debugging
+        const removedItem = this.items[index];
+        console.log('Removing item from cart:', removedItem.name);
+        
+        // Track this as a delete operation
+        this.lastOperation = 'delete';
+        this.lastDeletedItem = {
+          productId: removedItem.productId,
+          timestamp: Date.now()
+        };
+        
+        // Store delete operation in localStorage for sync conflicts
+        let deletedItems = [];
+        try {
+          const storedDeletedItems = localStorage.getItem('auricCartDeletedItems');
+          if (storedDeletedItems) {
+            deletedItems = JSON.parse(storedDeletedItems);
+          }
+        } catch (e) {
+          console.error('Error parsing deleted items:', e);
+        }
+        
+        // Add to deleted items list with timestamp
+        deletedItems.push({
+          productId: removedItem.productId, 
+          timestamp: Date.now(),
+          name: removedItem.name
+        });
+        
+        // Save deleted items list (keep last 10 only)
+        if (deletedItems.length > 10) {
+          deletedItems = deletedItems.slice(-10);
+        }
+        localStorage.setItem('auricCartDeletedItems', JSON.stringify(deletedItems));
+        
         // Remove item at the specified index
         this.items.splice(index, 1);
         
@@ -1099,18 +1212,21 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update full UI (count badge, etc)
         this.updateCartUI();
         
-        // If user is logged in, sync with Firestore immediately
+        // If user is logged in, sync with Firestore IMMEDIATELY 
+        // For deletions, we prioritize immediate sync without debouncing
         if (auth.currentUser) {
-          // Use a debounced version to prevent too many Firestore writes
+          // Cancel any pending debounced saves
           if (this.debouncedSaveToFirestore) {
             clearTimeout(this.debouncedSaveToFirestore);
+            this.debouncedSaveToFirestore = null;
           }
           
-          // Save to Firestore after a short delay to batch multiple rapid changes
-          this.debouncedSaveToFirestore = setTimeout(() => {
-            this.saveCartToFirestore(auth.currentUser.uid);
-            this.debouncedSaveToFirestore = null;
-          }, 500);
+          // Save immediately to Firestore, overwriting the entire cart
+          this.saveCartToFirestore(auth.currentUser.uid);
+          
+          console.log('Item deletion synced to Firestore immediately');
+        } else {
+          console.log('User not logged in, item deletion saved only to localStorage');
         }
         
         return true;
