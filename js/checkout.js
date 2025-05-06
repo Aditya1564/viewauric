@@ -8,9 +8,9 @@
 document.addEventListener('DOMContentLoaded', function() {
   console.log('Checkout.js initialized at:', new Date().toISOString());
   
-  // Initialize EmailJS with your public key
+  // Initialize EmailJS with your public key . 2AaCWAbz3R8lsB8qA
   try {
-    emailjs.init("2AaCWAbz3R8lsB8qA");
+    emailjs.init("kgPufTcnaqYTFmAYI");
     console.log('EmailJS initialized successfully');
   } catch (error) {
     console.error('Error initializing EmailJS:', error);
@@ -24,9 +24,9 @@ document.addEventListener('DOMContentLoaded', function() {
       shippingFee: 99, // Standard shipping fee
       currencyCode: 'INR',
       currencySymbol: '₹',
-      emailServiceId: 'service_7r4edum',
-      ownerTemplateId: 'template_y28nbjk',
-      customerTemplateId: 'template_guvarr1',
+      emailServiceId: 'service_ymsufda',
+      ownerTemplateId: 'template_a8trd51',
+      customerTemplateId: 'template_2m2rpzr',
     },
     
     // Cart data
