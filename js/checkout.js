@@ -597,11 +597,14 @@ document.addEventListener('DOMContentLoaded', function() {
         return `${item.name} x ${item.quantity} - ₹${(item.price * item.quantity).toLocaleString('en-IN')}`;
       }).join('<br>');
       
-      // Create customer email parameters
+      // Create customer email parameters with multiple recipient fields to ensure delivery
       const customerEmail = {
         to_name: orderData.customerName,
         to_email: orderData.customerEmail,
-        reply_to: orderData.customerEmail, // Add this to ensure the email goes to the customer
+        reply_to: orderData.customerEmail,
+        from_name: "Auric Jewelry",
+        from_email: orderData.customerEmail, // Add customer email as from_email to ensure delivery
+        recipient: orderData.customerEmail,  // Additional recipient parameter
         order_id: orderData.orderId,
         order_date: new Date().toLocaleDateString('en-IN'),
         payment_id: orderData.paymentId,

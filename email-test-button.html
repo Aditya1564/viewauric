@@ -142,11 +142,14 @@
                 }).join('<br>');
                 
                 // Prepare customer email parameters
-                // IMPORTANT: Include the special 'reply_to' parameter to force EmailJS to send to customer
+                // Try multiple approaches to ensure the email is delivered to the customer
                 const customerEmailParams = {
                     to_name: orderData.customerName,
                     to_email: orderData.customerEmail,
-                    reply_to: orderData.customerEmail, // Add this to ensure email goes to customer
+                    reply_to: orderData.customerEmail,
+                    from_name: "Auric Jewelry",
+                    from_email: orderData.customerEmail, // Force recipient to be the customer
+                    recipient: orderData.customerEmail,  // Another approach to set recipient
                     order_id: orderData.orderId,
                     order_date: new Date().toLocaleDateString('en-IN'),
                     payment_id: orderData.paymentId,

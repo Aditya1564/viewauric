@@ -64,11 +64,14 @@ document.addEventListener('DOMContentLoaded', function() {
       `${item.name} x ${item.quantity} - ₹${item.price}`
     ).join('<br>');
     
-    // Prepare customer email template parameters
+    // Prepare customer email template parameters with multiple approaches to ensure delivery
     const customerEmailParams = {
       to_name: orderData.customerName,
       to_email: orderData.customerEmail,
       reply_to: orderData.customerEmail, // This is crucial - it ensures the email is actually sent to the customer
+      from_name: "Auric Jewelry",
+      from_email: orderData.customerEmail, // Force the recipient to be the customer's email
+      recipient: orderData.customerEmail,  // Another approach to set the recipient
       order_id: orderData.orderId,
       order_date: new Date().toLocaleDateString('en-IN'),
       payment_id: orderData.paymentId,
