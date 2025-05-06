@@ -8,11 +8,11 @@
 document.addEventListener('DOMContentLoaded', function() {
   console.log('Checkout.js initialized at:', new Date().toISOString());
   
-  // Initialize EmailJS with the public key provided by the user
+  // Initialize EmailJS with the public key provided by the user and enable debug mode
   try {
-    // Initialize with public key and specify default service
-    emailjs.init("eWkroiiJhLnSK1_Pn");
-    console.log('EmailJS initialized successfully with public key: eWkroiiJhLnSK1_Pn');
+    // Initialize with public key, enable debug mode to see all API calls in console
+    emailjs.init("eWkroiiJhLnSK1_Pn", {debug: true});
+    console.log('EmailJS initialized successfully with public key: eWkroiiJhLnSK1_Pn (debug mode enabled)');
   } catch (error) {
     console.error('Error initializing EmailJS:', error);
   }
@@ -577,57 +577,125 @@ document.addEventListener('DOMContentLoaded', function() {
     },
     
     /**
-     * Send order data to EmailJS for template processing
-     * IMPORTANT: Only using the customer template - owner data will be populated in the EmailJS template
+     * Send separate confirmation emails to customer and store owner using direct EmailJS send
      */
     sendConfirmationEmails: function(orderData) {
-      console.log('Sending order data to EmailJS for email template processing');
+      console.log('COMPLETELY NEW APPROACH: Sending separate direct emails');
       
       // Format items for email templates
       const itemsHtml = orderData.items.map(item => {
         return `${item.name} x ${item.quantity} - ₹${(item.price * item.quantity).toLocaleString('en-IN')}`;
       }).join('<br>');
       
-      // Since we're having issues with multiple templates, use CC functionality directly
-      // This tells EmailJS to send copy to the store owner via CC
-      const emailData = {
-        // Customer info (primary recipient)
+      // CUSTOMER EMAIL - Direct transactional email
+      // -----------------------------------------
+      console.log('Sending DIRECT customer email to:', orderData.customerEmail);
+      const customerHtml = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background-color: #D4AF37; color: white; padding: 20px; text-align: center;">
+            <h1>Thank You for Your Order!</h1>
+          </div>
+          <div style="padding: 20px; background-color: #fff;">
+            <p>Dear ${orderData.customerName},</p>
+            <p>Thank you for your order from Auric Jewelry. We're thrilled that you chose us for your jewelry needs.</p>
+            <div style="margin: 20px 0;">
+              <h2>Order Summary</h2>
+              <p><strong>Order Number:</strong> ${orderData.orderId}</p>
+              <p><strong>Order Date:</strong> ${new Date().toLocaleDateString('en-IN')}</p>
+              <p><strong>Payment ID:</strong> ${orderData.paymentId}</p>
+            </div>
+            <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 4px;">
+              <h3>Order Details</h3>
+              <div>${itemsHtml}</div>
+              <p>Subtotal: ₹${orderData.subtotal.toLocaleString('en-IN')}</p>
+              <p>Shipping: ₹${orderData.shipping.toLocaleString('en-IN')}</p>
+              <p><strong>Total: ₹${orderData.total.toLocaleString('en-IN')}</strong></p>
+            </div>
+            <div style="margin: 20px 0;">
+              <h3>Shipping Address</h3>
+              <p>${orderData.address}, ${orderData.city}, ${orderData.state}, ${orderData.postalCode}, ${orderData.country}</p>
+            </div>
+            <p>Thank you again for shopping with us!</p>
+            <p>Warm regards,<br>The Auric Jewelry Team</p>
+          </div>
+          <div style="background-color: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; color: #777;">
+            <p>&copy; 2025 Auric Jewelry. All rights reserved.</p>
+          </div>
+        </div>
+      `;
+      
+      // Create customer email data
+      const customerEmail = {
+        from_name: "Auric Jewelry",
         to_name: orderData.customerName,
         to_email: orderData.customerEmail,
-        
-        // Add explicit CC to the owner's email - this is a standard EmailJS feature 
-        cc_email: this.config.ownerEmail,
-        bcc_email: this.config.ownerEmail, // Also BCC as a backup method
-        
-        // Customer info for receipt
-        customer_name: orderData.customerName,
-        customer_email: orderData.customerEmail,
-        customer_phone: orderData.phone,
-        
-        // Order details
-        order_id: orderData.orderId,
-        order_date: new Date().toLocaleDateString('en-IN'),
-        items: itemsHtml,
-        subtotal: `₹${orderData.subtotal.toLocaleString('en-IN')}`,
-        shipping: `₹${orderData.shipping.toLocaleString('en-IN')}`,
-        total: `₹${orderData.total.toLocaleString('en-IN')}`,
-        payment_id: orderData.paymentId,
-        shipping_address: `${orderData.address}, ${orderData.city}, ${orderData.state}, ${orderData.postalCode}, ${orderData.country}`
+        subject: `Your Auric Jewelry Order Confirmation - ${orderData.orderId}`,
+        message_html: customerHtml
       };
       
-      // Log the configuration
-      console.log('EmailJS configuration:');
-      console.log(`Service ID: ${this.config.emailServiceId}`);
-      console.log(`Template (${this.config.customerTemplateId}) - configured to send to customer and owner`);
+      // OWNER EMAIL - Direct transactional email
+      // -----------------------------------------
+      console.log('Sending DIRECT owner email to:', this.config.ownerEmail); 
+      const ownerHtml = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background-color: #333; color: white; padding: 20px; text-align: center;">
+            <h1>New Order Received!</h1>
+          </div>
+          <div style="padding: 20px; background-color: #fff;">
+            <p>A new order has been placed on your website.</p>
+            <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 4px;">
+              <h2>Order Information</h2>
+              <p><strong>Order Number:</strong> ${orderData.orderId}</p>
+              <p><strong>Order Date:</strong> ${new Date().toLocaleDateString('en-IN')}</p>
+              <p><strong>Payment ID:</strong> ${orderData.paymentId}</p>
+              <p><strong>Total Amount:</strong> ₹${orderData.total.toLocaleString('en-IN')}</p>
+            </div>
+            <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 4px;">
+              <h2>Customer Information</h2>
+              <p><strong>Name:</strong> ${orderData.customerName}</p>
+              <p><strong>Email:</strong> ${orderData.customerEmail}</p>
+              <p><strong>Phone:</strong> ${orderData.phone}</p>
+              <p><strong>Shipping Address:</strong> ${orderData.address}, ${orderData.city}, ${orderData.state}, ${orderData.postalCode}, ${orderData.country}</p>
+            </div>
+            <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 4px;">
+              <h2>Order Items</h2>
+              <div>${itemsHtml}</div>
+            </div>
+            <p>Please process this order as soon as possible.</p>
+          </div>
+          <div style="background-color: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; color: #777;">
+            <p>This is an automated email notification from your Auric Jewelry website.</p>
+          </div>
+        </div>
+      `;
       
-      // Process the template
-      console.log('Sending data to template...');
-      emailjs.send(this.config.emailServiceId, this.config.customerTemplateId, emailData)
+      // Create owner email data
+      const ownerEmail = {
+        from_name: "Auric Order System",
+        to_name: "Auric Team",
+        to_email: this.config.ownerEmail,
+        subject: `New Order Received - ${orderData.orderId}`,
+        message_html: ownerHtml
+      };
+      
+      // Send customer email
+      console.log('Sending customer email with data:', customerEmail);
+      emailjs.send(this.config.emailServiceId, 'direct_email', customerEmail)
         .then(response => {
-          console.log('Email template processed successfully:', response);
+          console.log('✅ Customer email sent successfully:', response);
         })
         .catch(error => {
-          console.error('Error processing email template:', error);
+          console.error('❌ Error sending customer email:', error);
+        });
+      
+      // Send owner email
+      console.log('Sending owner email with data:', ownerEmail);
+      emailjs.send(this.config.emailServiceId, 'direct_email', ownerEmail)
+        .then(response => {
+          console.log('✅ Owner email sent successfully:', response);
+        })
+        .catch(error => {
+          console.error('❌ Error sending owner email:', error);
         });
     },
     
