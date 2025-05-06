@@ -1,4 +1,5 @@
-// Enhanced no-cache HTTP server with Razorpay API support and EmailJS proxy
+// Enhanced no-cache HTTP server with Razorpay API support
+// Email functionality completely removed
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -10,10 +11,6 @@ const PORT = 5000;
 // Razorpay API keys
 const RAZORPAY_KEY_ID = "rzp_test_qZWULE2MoPHZJv";
 const RAZORPAY_SECRET = "dwhI00HuTIRk5T61AyUq1Bhh";
-
-// EmailJS Configuration
-const EMAILJS_PUBLIC_KEY = "eWkroiiJhLnSK1_Pn";
-const EMAILJS_API_URL = "api.emailjs.com";
 
 // MIME types for different file extensions
 const MIME_TYPES = {
@@ -107,103 +104,12 @@ const server = http.createServer(async (req, res) => {
     }
   }
   
-  // EmailJS proxy endpoint - MODIFIED WITH DIRECT EMAIL SENDING
+  // Email functionality completely removed
   if (req.method === 'POST' && pathname === '/api/send-email') {
-    try {
-      // Get the body from the client request
-      const body = await getRequestBody(req);
-      
-      console.log('Received email request. Details:', {
-        serviceId: body.service_id,
-        templateId: body.template_id,
-        userId: body.user_id,
-        recipient: body.template_params?.to_email || body.template_params?.customer_email || 'no recipient specified'
-      });
-      
-      console.log('Attempting to directly send email using EmailJS API...');
-      
-      // Create the proper EmailJS request payload
-      const emailJSPayload = {
-        service_id: body.service_id,
-        template_id: body.template_id,
-        user_id: body.user_id,
-        template_params: body.template_params
-      };
-      
-      console.log('EmailJS payload:', JSON.stringify(emailJSPayload, null, 2));
-      
-      // Create options for the HTTPS request to EmailJS
-      const options = {
-        hostname: EMAILJS_API_URL,
-        port: 443,
-        path: '/api/v1.0/email/send',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Origin': 'https://6ab3d2e8-f62b-422b-a50a-10b8d23c752f-00-1gp27mnom6erz.sisko.replit.dev' // Add Origin header
-        }
-      };
-      
-      console.log('Making EmailJS API request to:', `https://${EMAILJS_API_URL}${options.path}`);
-      
-      // Create a new promise for the HTTPS request
-      const emailPromise = new Promise((resolve, reject) => {
-        const emailReq = https.request(options, (emailRes) => {
-          console.log('Received status code:', emailRes.statusCode);
-          console.log('Response headers:', emailRes.headers);
-          
-          let data = '';
-          
-          emailRes.on('data', (chunk) => {
-            data += chunk;
-            console.log('Received data chunk:', chunk.toString());
-          });
-          
-          emailRes.on('end', () => {
-            console.log('EmailJS response received:', data);
-            resolve({
-              status: emailRes.statusCode,
-              data: data
-            });
-          });
-        });
-        
-        emailReq.on('error', (error) => {
-          console.error('Error sending email via proxy:', error);
-          reject(error);
-        });
-        
-        // Write JSON data to request body
-        const jsonPayload = JSON.stringify(emailJSPayload);
-        console.log('Sending JSON payload:', jsonPayload);
-        emailReq.write(jsonPayload);
-        emailReq.end();
-        console.log('Request sent to EmailJS');
-      });
-      
-      // Wait for the EmailJS response
-      console.log('Waiting for EmailJS response...');
-      const emailResponse = await emailPromise;
-      console.log('EmailJS request completed with status:', emailResponse.status);
-      
-      // Return the EmailJS response to the client
-      res.writeHead(emailResponse.status, { 'Content-Type': 'application/json' });
-      res.end(emailResponse.data || JSON.stringify({ message: 'Email sent successfully' }));
-      return;
-    } catch (error) {
-      console.error('Error in email proxy:', error);
-      console.error('Error details:', error.message);
-      if (error.stack) {
-        console.error('Stack trace:', error.stack);
-      }
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ 
-        error: 'Failed to send email',
-        message: error.message,
-        details: error.toString()
-      }));
-      return;
-    }
+    console.log('Email functionality has been removed');
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ message: 'Email functionality has been removed' }));
+    return;
   }
   
   // Handle regular file requests
@@ -237,11 +143,10 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log('\n--- No-cache server with Razorpay and EmailJS support starting ---');
+  console.log('\n--- No-cache server with Razorpay support starting ---');
   console.log(`Server running at http://0.0.0.0:${PORT}/`);
   console.log(`Local files will not be cached by the browser`);
   console.log(`API endpoints:`);
   console.log(`  - Razorpay: /api/create-razorpay-order`);
-  console.log(`  - EmailJS proxy: /api/send-email`);
   console.log(`Press Ctrl+C to stop the server\n`);
 });
