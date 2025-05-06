@@ -678,8 +678,40 @@ document.addEventListener('DOMContentLoaded', function() {
     /**
      * Load cart from Firestore for authenticated users - COMPLETELY REVISED
      * Always treats Firestore as the source of truth
+     * Now with emergency cart clearing protection
      */
     loadCartFromFirestore: function(userId) {
+      // EMERGENCY CART CLEAR CHECK - Skip loading if emergency clear was triggered
+      const emergencyFlags = [
+        window.FORCE_CART_CLEAR_NEEDED,
+        localStorage.getItem('orderCompleted') === 'true',
+        localStorage.getItem('cartEmergencyCleared') === 'true',
+        localStorage.getItem('pendingCartClear') === 'true',
+        localStorage.getItem('razorpaySuccessfulPayment') === 'true'
+      ];
+      
+      if (emergencyFlags.some(flag => flag === true)) {
+        console.log('Ignoring Firestore update - emergency clear is active');
+        
+        // Clear our cart
+        this.items = [];
+        
+        // Force clear localStorage as well (redundancy)
+        localStorage.removeItem('auricCart');
+        localStorage.removeItem('auricCartItems');
+        localStorage.setItem('auricCart', JSON.stringify([]));
+        localStorage.setItem('auricCartItems', JSON.stringify([]));
+        
+        // Cancel the loading process
+        this.isLoadingFromFirestore = false;
+        
+        // Update the UI to show empty cart
+        this.updateCartUI();
+        this.renderCartItems();
+        
+        return false;
+      }
+      
       console.log('Loading cart from Firestore - server is source of truth');
       
       // Set a loading flag to prevent race conditions
@@ -688,10 +720,22 @@ document.addEventListener('DOMContentLoaded', function() {
       // Always use Firestore as the source of truth when user is logged in
       db.collection('carts').doc(userId).get()
         .then((doc) => {
+          // Check emergency flags again, in case they were set during the async call
+          if (localStorage.getItem('orderCompleted') === 'true' || 
+              localStorage.getItem('cartEmergencyCleared') === 'true' ||
+              localStorage.getItem('pendingCartClear') === 'true') {
+            console.log('Emergency cart clear flag detected during Firestore load - aborting');
+            this.items = [];
+            this.isLoadingFromFirestore = false;
+            this.updateCartUI();
+            this.renderCartItems();
+            return;
+          }
+          
           if (doc.exists && doc.data().items) {
             // Get items from Firestore
             const firestoreItems = doc.data().items;
-            console.log('Found cart items in Firestore:', firestoreItems.length);
+            console.log('Firestore cart items loaded:', firestoreItems.length);
             
             // Ensure all items have valid quantity values
             const validatedItems = firestoreItems.map(item => {
@@ -1706,14 +1750,33 @@ document.addEventListener('DOMContentLoaded', function() {
         this.firestoreUnsubscribe = null;
       }
       
-      // Check if we have an emergency clear flag active
-      const emergencyCleared = localStorage.getItem('cartEmergencyCleared') === 'true';
-      const emergencyClearTime = parseInt(localStorage.getItem('cartEmergencyClearTime') || '0');
+      // Check emergency cart clear flags - expanded version for more reliable detection
+      const emergencyFlags = [
+        window.FORCE_CART_CLEAR_NEEDED === true,
+        localStorage.getItem('orderCompleted') === 'true',
+        localStorage.getItem('cartEmergencyCleared') === 'true',
+        localStorage.getItem('pendingCartClear') === 'true',
+        localStorage.getItem('razorpaySuccessfulPayment') === 'true'
+      ];
+      
+      const emergencyClearTime = parseInt(localStorage.getItem('cartEmergencyClearTime') || 
+                                           localStorage.getItem('cartClearTime') || '0');
       const timeSinceClear = Date.now() - emergencyClearTime;
       
-      // If we've emergency cleared in the last 5 minutes, don't reestablish the listener
-      if (emergencyCleared && timeSinceClear < 5 * 60 * 1000) {
+      // If any emergency flag is active and it's recent (within 10 minutes), skip listener setup
+      if (emergencyFlags.some(flag => flag === true) && timeSinceClear < 10 * 60 * 1000) {
         console.log('Skipping Firestore listener setup - emergency clear active');
+        
+        // Create a device ID with emergency flag for special identification
+        const emergencyDeviceId = 'emergency_clear_' + Date.now() + '_' + 
+                                 Math.random().toString(36).substring(2, 15);
+        this.deviceId = emergencyDeviceId;
+        localStorage.setItem('auricCartDeviceId', emergencyDeviceId);
+        
+        // Ensure the cart is cleared in memory
+        this.items = [];
+        this.updateCartUI();
+        
         return;
       }
       
@@ -1739,8 +1802,16 @@ document.addEventListener('DOMContentLoaded', function() {
             // Check if this is from cache or server
             const source = doc.metadata.hasPendingWrites ? 'local' : 'server';
             
-            // Check for emergency clear flag
-            if (localStorage.getItem('cartEmergencyCleared') === 'true') {
+            // Comprehensive emergency clear flag check
+            const emergencyFlags = [
+              window.FORCE_CART_CLEAR_NEEDED === true,
+              localStorage.getItem('orderCompleted') === 'true',
+              localStorage.getItem('cartEmergencyCleared') === 'true',
+              localStorage.getItem('pendingCartClear') === 'true',
+              localStorage.getItem('razorpaySuccessfulPayment') === 'true'
+            ];
+            
+            if (emergencyFlags.some(flag => flag === true)) {
               console.log('Ignoring Firestore update - emergency clear is active');
               return;
             }
@@ -1948,6 +2019,15 @@ document.addEventListener('DOMContentLoaded', function() {
   // Create a global clearCart function for use by checkout page
   window.clearCart = function() {
     console.log('!!! EMERGENCY CART CLEARING FUNCTION CALLED !!!');
+    
+    // Set all possible emergency flags
+    window.FORCE_CART_CLEAR_NEEDED = true;
+    localStorage.setItem('orderCompleted', 'true');
+    localStorage.setItem('orderCompletedTime', Date.now().toString());
+    localStorage.setItem('cartEmergencyCleared', 'true');
+    localStorage.setItem('cartEmergencyClearTime', Date.now().toString());
+    localStorage.setItem('pendingCartClear', 'true');
+    localStorage.setItem('cartClearTime', Date.now().toString());
     
     // NUCLEAR CART CLEARING STRATEGY
     
