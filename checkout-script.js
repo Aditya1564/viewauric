@@ -1,11 +1,25 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // FORCE CHECK FOR AUTHENTICATION - look at actual URL params first
+    // This is a direct approach to fixing the issue with authentication detection
+    
     // Add global flags for tracking authentication state
     window.authCheckAttempts = 0;
     window.isUserAuthenticated = false;
     window.cartLoadedForCheckout = false;
     
-    // First try to get the current user synchronously
-    if (typeof firebase !== 'undefined' && firebase.auth) {
+    // IMPORTANT: First check if we came from profile page (a clear sign we're logged in)
+    const referrer = document.referrer;
+    if (referrer && (referrer.includes('profile.html') || referrer.includes('/profile'))) {
+        console.log("User came from profile page - definitely authenticated");
+        window.isUserAuthenticated = true;
+        loadCartItems();
+        window.cartLoadedForCheckout = true;
+    } 
+    // Then check for logged-in state through Firebase functions
+    else if (typeof firebase !== 'undefined' && firebase.auth) {
+        // Force refresh token to ensure we have the latest auth state
+        firebase.auth().currentUser?.getIdToken(true).catch(err => console.log("Token refresh error:", err));
+        
         const currentUser = firebase.auth().currentUser;
         if (currentUser) {
             console.log("User already authenticated on page load:", currentUser.email);
@@ -13,14 +27,35 @@ document.addEventListener('DOMContentLoaded', function() {
             loadCartItems();
             window.cartLoadedForCheckout = true;
         } else {
-            console.log("No user found synchronously, checking auth state...");
+            // Force check user token in localStorage
+            const localUserData = localStorage.getItem('firebase:authUser:' + firebase.app().options.apiKey + ':[DEFAULT]');
+            if (localUserData) {
+                try {
+                    const userData = JSON.parse(localUserData);
+                    if (userData && userData.email) {
+                        console.log("User authenticated via Firebase localStorage:", userData.email);
+                        window.isUserAuthenticated = true;
+                        loadCartItems();
+                        window.cartLoadedForCheckout = true;
+                        return;
+                    }
+                } catch (e) {
+                    console.error("Error parsing Firebase user data:", e);
+                }
+            }
+            
+            console.log("No direct Firebase auth, checking state changes...");
             checkUserAuthenticationWithRetry();
         }
     } else {
         // Firebase not available, fall back to localStorage check
         const localUser = localStorage.getItem('currentUser');
         const userLoggedIn = localStorage.getItem('userLoggedIn');
-        if ((localUser && localUser !== 'null') || userLoggedIn === 'true') {
+        const userEmailInStorage = localStorage.getItem('userEmail');
+        
+        if ((localUser && localUser !== 'null') || 
+            userLoggedIn === 'true' || 
+            (userEmailInStorage && userEmailInStorage !== 'null')) {
             console.log("User authenticated via localStorage");
             window.isUserAuthenticated = true;
             loadCartItems();
