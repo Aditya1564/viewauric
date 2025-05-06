@@ -28,31 +28,9 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = 'index.html';
     });
     
-    // Initialize EmailJS with credentials from environment variables
+    // Initialize email functionality
     function initEmailJS() {
-        // These values come from environment variables set in the server
-        const serviceId = 'service_prdjwt4'; 
-        const customerTemplateId = 'template_guvarr1';
-        const ownerTemplateId = 'template_zzlllxm';
-        const publicKey = 'eWkroiiJhLnSK1_Pn';
-        
-        console.log("EmailJS environment credentials loaded:", {
-            serviceId,
-            customerTemplateId,
-            ownerTemplateId,
-            publicKey
-        });
-        
-        console.log("Using environment EmailJS credentials");
-        
-        // Initialize EmailJS with the public key
-        emailjs.init(publicKey);
-        
-        // Store the credentials for later use
-        localStorage.setItem('emailjs_serviceId', serviceId);
-        localStorage.setItem('emailjs_customerTemplateId', customerTemplateId);
-        localStorage.setItem('emailjs_ownerTemplateId', ownerTemplateId);
-        localStorage.setItem('emailjs_publicKey', publicKey);
+        console.log("Email service initialized (now using Nodemailer on backend)");
         
         // Setup confirmation modal close button
         const closeConfirmationBtn = document.getElementById('closeConfirmationBtn');
@@ -461,11 +439,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Get the EmailJS credentials
-        const serviceId = localStorage.getItem('emailjs_serviceId');
-        const customerTemplateId = localStorage.getItem('emailjs_customerTemplateId');
-        const ownerTemplateId = localStorage.getItem('emailjs_ownerTemplateId');
-        const publicKey = localStorage.getItem('emailjs_publicKey');
+        // No need for EmailJS credentials anymore - using Nodemailer on backend
         
         // Generate a unique order reference
         const orderReference = generateOrderReference();
@@ -509,17 +483,49 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             try {
-                console.log("Sending customer email with:", {serviceId, customerTemplateId, publicKey});
-                // Send email to customer
-                const customerResult = await emailjs.send(serviceId, customerTemplateId, templateParams);
+                console.log("Sending customer email via server endpoint");
+                // Send email to customer using our Node.js backend
+                const customerResponse = await fetch('/api/send-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        emailType: 'customerConfirmation',
+                        templateParams: templateParams
+                    })
+                });
+                
+                if (!customerResponse.ok) {
+                    const errorData = await customerResponse.json();
+                    throw new Error(`Server responded with status: ${customerResponse.status}, message: ${errorData.error || 'Unknown error'}`);
+                }
+                
+                const customerResult = await customerResponse.json();
                 console.log("Customer email result:", customerResult);
                 
-                console.log("Sending owner email with:", {serviceId, ownerTemplateId, publicKey});
-                // Send email to owner
-                const ownerResult = await emailjs.send(serviceId, ownerTemplateId, templateParams);
+                console.log("Sending owner email via server endpoint");
+                // Send email to owner using our Node.js backend
+                const ownerResponse = await fetch('/api/send-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        emailType: 'ownerNotification',
+                        templateParams: templateParams
+                    })
+                });
+                
+                if (!ownerResponse.ok) {
+                    const errorData = await ownerResponse.json();
+                    throw new Error(`Server responded with status: ${ownerResponse.status}, message: ${errorData.error || 'Unknown error'}`);
+                }
+                
+                const ownerResult = await ownerResponse.json();
                 console.log("Owner email result:", ownerResult);
             } catch (error) {
-                console.error("EmailJS error details:", error);
+                console.error("Email sending error details:", error);
                 throw error;
             }
             
