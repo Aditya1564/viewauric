@@ -1858,4 +1858,48 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Make the cart available globally (for debugging and external access)
   window.AuricCart = AuricCart;
+  
+  // Create a global clearCart function for use by checkout page
+  window.clearCart = function() {
+    console.log('Global clearCart function called');
+    
+    // Clear localStorage cart
+    localStorage.removeItem('auricCart');
+    localStorage.removeItem('auricCartItems');
+    localStorage.removeItem('cartItems');
+    
+    // If Firebase and auth are available, clear Firestore cart
+    if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+      try {
+        const db = firebase.firestore();
+        const userId = firebase.auth().currentUser.uid;
+        
+        // Use a timestamp-based deviceId to ensure other devices recognize this as newer
+        const deviceId = `device_${Date.now()}_${Math.random().toString(36).substr(2, 10)}`;
+        
+        // Set an empty cart with clear operation flag
+        db.collection('carts').doc(userId).set({
+          items: [],
+          updatedAt: new Date().toISOString(),
+          device: deviceId,
+          operation: 'clear',
+          version: Date.now().toString()
+        }).then(() => {
+          console.log('Firestore cart cleared successfully');
+        }).catch(err => {
+          console.error('Error clearing Firestore cart:', err);
+        });
+      } catch (err) {
+        console.error('Error accessing Firestore during cart clear:', err);
+      }
+    }
+    
+    // Reset cart items array and update UI
+    if (AuricCart) {
+      AuricCart.items = [];
+      AuricCart.updateCartUI();
+    }
+    
+    console.log('Cart cleared successfully');
+  };
 });
