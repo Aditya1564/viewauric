@@ -68,6 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const customerEmailParams = {
       to_name: orderData.customerName,
       to_email: orderData.customerEmail,
+      reply_to: orderData.customerEmail, // This is crucial - it ensures the email is actually sent to the customer
       order_id: orderData.orderId,
       order_date: new Date().toLocaleDateString('en-IN'),
       payment_id: orderData.paymentId,

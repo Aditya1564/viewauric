@@ -601,6 +601,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const customerEmail = {
         to_name: orderData.customerName,
         to_email: orderData.customerEmail,
+        reply_to: orderData.customerEmail, // Add this to ensure the email goes to the customer
         order_id: orderData.orderId,
         order_date: new Date().toLocaleDateString('en-IN'),
         payment_id: orderData.paymentId,
