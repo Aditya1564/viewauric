@@ -53,6 +53,31 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('emailjs_customerTemplateId', customerTemplateId);
         localStorage.setItem('emailjs_ownerTemplateId', ownerTemplateId);
         localStorage.setItem('emailjs_publicKey', publicKey);
+        
+        // Setup confirmation modal close button
+        const closeConfirmationBtn = document.getElementById('closeConfirmationBtn');
+        if (closeConfirmationBtn) {
+            closeConfirmationBtn.addEventListener('click', () => {
+                // Clear any Razorpay payment details
+                localStorage.removeItem('razorpay_payment_id');
+                localStorage.removeItem('razorpay_order_id');
+                localStorage.removeItem('razorpay_signature');
+                
+                // Redirect to homepage
+                window.location.href = 'index.html';
+            });
+        }
+        
+        // Setup event for when confirmation modal is hidden
+        const confirmationModal = document.getElementById('confirmationModal');
+        if (confirmationModal) {
+            confirmationModal.addEventListener('hidden.bs.modal', () => {
+                // Clear any Razorpay payment details
+                localStorage.removeItem('razorpay_payment_id');
+                localStorage.removeItem('razorpay_order_id');
+                localStorage.removeItem('razorpay_signature');
+            });
+        }
     }
     
     // Load cart items from localStorage - works with Auric cart system
@@ -549,6 +574,14 @@ document.addEventListener('DOMContentLoaded', function() {
             // Show confirmation modal
             document.getElementById('orderReference').textContent = orderReference;
             document.getElementById('orderDetails').innerHTML = orderDetails.modalSummaryHTML;
+            
+            // Check if Razorpay payment was made and display payment info
+            if (isRazorpaySelected && localStorage.getItem('razorpay_payment_id')) {
+                const paymentId = localStorage.getItem('razorpay_payment_id');
+                document.getElementById('paymentId').textContent = paymentId;
+                document.getElementById('paymentMethod').textContent = 'Razorpay (Online)';
+                document.getElementById('paymentDetails').style.display = 'block';
+            }
             
             const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
             confirmationModal.show();

@@ -83,18 +83,84 @@ const server = http.createServer(async (req, res) => {
       const body = await getRequestBody(req);
       console.log('Creating Razorpay order with data:', body);
       
-      // In a production environment, this would call the Razorpay API
-      // For this demo, we'll create a mock order ID that works with test mode
-      const orderId = 'order_' + Date.now();
-      
-      // Return success response
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({
-        id: orderId,
+      // Make an actual request to Razorpay API
+      const razorpayData = {
         amount: body.amount,
         currency: body.currency || 'INR',
-        key: RAZORPAY_KEY_ID
-      }));
+        receipt: body.receipt || 'receipt_' + Date.now(),
+        notes: {
+          orderSource: 'Auric Jewelry Website',
+          customerName: body.name || 'Customer',
+          customerEmail: body.email || '',
+          customerPhone: body.phone || ''
+        }
+      };
+      
+      // Create the auth header for Basic Auth with API key and secret
+      const auth = Buffer.from(`${RAZORPAY_KEY_ID}:${RAZORPAY_SECRET}`).toString('base64');
+      
+      // Define options for the API request
+      const options = {
+        hostname: 'api.razorpay.com',
+        port: 443,
+        path: '/v1/orders',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Basic ${auth}`
+        }
+      };
+      
+      // Make the request to Razorpay API
+      const razorpayResponse = await new Promise((resolve, reject) => {
+        const apiReq = https.request(options, (apiRes) => {
+          let data = '';
+          
+          apiRes.on('data', (chunk) => {
+            data += chunk;
+          });
+          
+          apiRes.on('end', () => {
+            try {
+              const parsedData = JSON.parse(data);
+              resolve({
+                statusCode: apiRes.statusCode,
+                data: parsedData
+              });
+            } catch (error) {
+              reject(error);
+            }
+          });
+        });
+        
+        apiReq.on('error', (error) => {
+          reject(error);
+        });
+        
+        apiReq.write(JSON.stringify(razorpayData));
+        apiReq.end();
+      });
+      
+      console.log('Razorpay API response:', razorpayResponse);
+      
+      if (razorpayResponse.statusCode === 200 || razorpayResponse.statusCode === 201) {
+        // Return the Razorpay order details along with our key ID
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          id: razorpayResponse.data.id,
+          amount: razorpayResponse.data.amount,
+          currency: razorpayResponse.data.currency,
+          key: RAZORPAY_KEY_ID
+        }));
+      } else {
+        // Handle error responses from Razorpay
+        console.error('Razorpay API error:', razorpayResponse.data);
+        res.writeHead(razorpayResponse.statusCode, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ 
+          error: 'Failed to create Razorpay order',
+          details: razorpayResponse.data
+        }));
+      }
       return;
     } catch (error) {
       console.error('Error processing order creation:', error);
