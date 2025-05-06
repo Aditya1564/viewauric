@@ -12,6 +12,10 @@ document.addEventListener('DOMContentLoaded', function() {
   try {
     // Initialize with public key, enable debug mode to see all API calls in console
     emailjs.init("eWkroiiJhLnSK1_Pn", {debug: true});
+    // Explicitly set the EmailJS URL to avoid issues with relative paths
+    (function(){
+      emailjs._origin = 'https://api.emailjs.com';
+    })();
     console.log('EmailJS initialized successfully with public key: eWkroiiJhLnSK1_Pn (debug mode enabled)');
   } catch (error) {
     console.error('Error initializing EmailJS:', error);
