@@ -446,72 +446,230 @@ document.addEventListener('DOMContentLoaded', function() {
         return quantity * price;
     }
     
-    // Update order summary
+    // Update order summary with robust error handling
     function updateOrderSummary() {
-        // Get cart items directly from localStorage
-        let cartItems = [];
         try {
-            const auricCartItems = localStorage.getItem('auricCartItems');
-            if (auricCartItems) {
-                cartItems = JSON.parse(auricCartItems);
+            // Get cart items from multiple possible localStorage sources
+            let cartItems = [];
+            let cartSource = '';
+            
+            try {
+                // Try auricCartItems first (primary)
+                const auricCartItems = localStorage.getItem('auricCartItems');
+                if (auricCartItems) {
+                    const parsed = JSON.parse(auricCartItems);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        cartItems = parsed;
+                        cartSource = 'auricCartItems';
+                    }
+                }
+                
+                // Then try auricCart if nothing found
+                if (cartItems.length === 0) {
+                    const auricCart = localStorage.getItem('auricCart');
+                    if (auricCart) {
+                        const parsed = JSON.parse(auricCart);
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            cartItems = parsed;
+                            cartSource = 'auricCart';
+                        } else if (parsed && parsed.items && Array.isArray(parsed.items) && parsed.items.length > 0) {
+                            cartItems = parsed.items;
+                            cartSource = 'auricCart.items';
+                        }
+                    }
+                }
+                
+                // Finally try legacy cartItems
+                if (cartItems.length === 0) {
+                    const legacyCartItems = localStorage.getItem('cartItems');
+                    if (legacyCartItems) {
+                        const parsed = JSON.parse(legacyCartItems);
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            cartItems = parsed;
+                            cartSource = 'legacy cartItems';
+                        }
+                    }
+                }
+                
+                if (cartItems.length > 0) {
+                    console.log(`Found ${cartItems.length} items in ${cartSource}`);
+                }
+            } catch (error) {
+                console.error('Error parsing cart items:', error);
+                // Continue with empty cart items array
             }
-        } catch (error) {
-            console.error('Error parsing cart items:', error);
-        }
-        
-        const orderSummary = document.getElementById('orderSummary');
-        let summaryHTML = '';
-        let orderTotal = 0;
-        
-        if (cartItems.length === 0) {
-            orderSummary.innerHTML = '<p>No products added yet.</p>';
-            document.getElementById('orderTotal').textContent = '₹0';
-            return;
-        }
-        
-        summaryHTML = '<div class="order-items-container">';
-        
-        cartItems.forEach((item, index) => {
-            const productName = item.name;
-            const quantity = item.quantity;
-            const price = item.price;
-            const image = item.image;
-            const productTotal = quantity * price;
-            const productId = item.productId;
             
-            orderTotal += productTotal;
+            // Get order summary elements with null checks
+            const orderSummary = document.getElementById('orderSummary');
+            const orderTotalElement = document.getElementById('orderTotal');
             
-            summaryHTML += `
-                <div class="order-item mb-3" data-product-id="${productId}">
-                    <div class="d-flex align-items-center">
-                        <div class="order-item-image me-3">
-                            <img src="${image}" alt="${productName}" class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">
-                        </div>
-                        <div class="order-item-details flex-grow-1">
-                            <h6 class="mb-1">${productName}</h6>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="quantity-controls">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary decrement-quantity" data-product-id="${productId}">-</button>
-                                    <span class="quantity-value mx-2">${quantity}</span>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary increment-quantity" data-product-id="${productId}">+</button>
-                                </div>
-                                <div class="order-item-price">
-                                    <span>₹${price}</span>
+            if (!orderSummary) {
+                console.error('Order summary element not found in DOM');
+                return;
+            }
+            
+            let summaryHTML = '';
+            let orderTotal = 0;
+            
+            // Handle empty cart
+            if (!cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
+                orderSummary.innerHTML = '<p>No products added yet.</p>';
+                if (orderTotalElement) orderTotalElement.textContent = '₹0';
+                return;
+            }
+            
+            summaryHTML = '<div class="order-items-container">';
+            
+            // Process each cart item with validation
+            cartItems.forEach((item, index) => {
+                if (!item || typeof item !== 'object') {
+                    console.error('Invalid cart item at index', index);
+                    return; // Skip invalid items
+                }
+                
+                const productName = item.name || 'Unknown Product';
+                const quantity = parseInt(item.quantity) || 1;  // Default to 1 if invalid
+                const price = parseFloat(item.price) || 0;  // Default to 0 if invalid
+                const image = item.image || '';  // Empty string if no image
+                const productTotal = quantity * price;
+                const productId = item.productId || `product-${index}`;  // Fallback ID if none exists
+                
+                orderTotal += productTotal;
+                
+                // Create HTML with proper escaping for user-generated content
+                summaryHTML += `
+                    <div class="order-item mb-3" data-product-id="${productId}">
+                        <div class="d-flex align-items-center">
+                            <div class="order-item-image me-3">
+                                ${image ? `<img src="${image}" alt="${productName}" class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">` : 
+                                    `<div class="img-thumbnail bg-light d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                        <span class="text-muted small">No image</span>
+                                    </div>`}
+                            </div>
+                            <div class="order-item-details flex-grow-1">
+                                <h6 class="mb-1">${productName}</h6>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="quantity-controls">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary decrement-quantity" data-product-id="${productId}">-</button>
+                                        <span class="quantity-value mx-2">${quantity}</span>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary increment-quantity" data-product-id="${productId}">+</button>
+                                    </div>
+                                    <div class="order-item-price">
+                                        <span>₹${price.toLocaleString('en-IN')}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                        <div class="order-item-total mt-2 text-end">
+                            <strong>Total: ₹${productTotal.toLocaleString('en-IN')}</strong>
+                        </div>
+                        <hr>
                     </div>
-                    <div class="order-item-total mt-2 text-end">
-                        <strong>Total: ₹${productTotal}</strong>
-                    </div>
-                    <hr>
-                </div>
-            `;
-        });
-        
-        summaryHTML += '</div>';
-        orderSummary.innerHTML = summaryHTML;
-        document.getElementById('orderTotal').textContent = `₹${orderTotal}`;
+                `;
+            });
+            
+            summaryHTML += '</div>';
+            
+            // Update the DOM with our generated content
+            orderSummary.innerHTML = summaryHTML;
+            if (orderTotalElement) orderTotalElement.textContent = `₹${orderTotal.toLocaleString('en-IN')}`;
+            
+            // Now also update the productList field with these items to ensure forms submit correctly
+            try {
+                const productList = document.getElementById('productList');
+                if (productList) {
+                    // Clear any existing products
+                    productList.innerHTML = '';
+                    
+                    // Add each product from cart to the form
+                    cartItems.forEach(item => {
+                        if (!item || !item.productId) return; // Skip invalid items
+                        
+                        const productItem = document.createElement('div');
+                        productItem.className = 'product-item card mb-3';
+                        productItem.innerHTML = `
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-md-6 mb-3 mb-md-0">
+                                        <label for="product_${item.productId}" class="form-label">Product Name</label>
+                                        <input type="text" class="form-control product-name" id="product_${item.productId}" 
+                                            name="product_${item.productId}" value="${item.name || ''}" required>
+                                    </div>
+                                    <div class="col-md-2 mb-3 mb-md-0">
+                                        <label for="quantity_${item.productId}" class="form-label">Quantity</label>
+                                        <input type="number" class="form-control product-quantity" id="quantity_${item.productId}" 
+                                            name="quantity_${item.productId}" min="1" value="${item.quantity || 1}" required>
+                                    </div>
+                                    <div class="col-md-3 mb-3 mb-md-0">
+                                        <label for="price_${item.productId}" class="form-label">Price</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">₹</span>
+                                            <input type="number" class="form-control product-price" id="price_${item.productId}" 
+                                                name="price_${item.productId}" min="1" step="1" value="${item.price || 0}" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-1 d-flex align-items-center justify-content-end mt-3 mt-md-0">
+                                        <button type="button" class="btn btn-danger btn-sm remove-product">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                                                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                                                <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        
+                        productList.appendChild(productItem);
+                    });
+                    
+                    console.log(`Updated product list with ${cartItems.length} items`);
+                } else {
+                    console.error('Product list element not found in DOM - this is needed for form submission');
+                }
+            } catch (productListError) {
+                console.error('Error updating product list:', productListError);
+            }
+            
+            // Finally add event listeners
+            try {
+                // Add event listeners to the newly created buttons
+                document.querySelectorAll('.increment-quantity').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const productId = this.getAttribute('data-product-id');
+                        incrementCartItemQuantity(productId);
+                    });
+                });
+                
+                document.querySelectorAll('.decrement-quantity').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const productId = this.getAttribute('data-product-id');
+                        decrementCartItemQuantity(productId);
+                    });
+                });
+                
+                // Also set up product listeners if needed
+                if (typeof setupProductListeners === 'function') {
+                    setupProductListeners();
+                }
+            } catch (listenerError) {
+                console.error('Error setting up event listeners:', listenerError);
+            }
+        } catch (mainError) {
+            console.error('Critical error in updateOrderSummary:', mainError);
+            
+            // Last resort fallback
+            try {
+                const orderSummary = document.getElementById('orderSummary');
+                const orderTotal = document.getElementById('orderTotal');
+                
+                if (orderSummary) orderSummary.innerHTML = '<p>There was an error loading your cart. Please try refreshing the page.</p>';
+                if (orderTotal) orderTotal.textContent = '₹0';
+            } catch (fallbackError) {
+                console.error('Even fallback display failed:', fallbackError);
+            }
+        }
+    }
         
         // Add event listeners to the newly created buttons
         document.querySelectorAll('.increment-quantity').forEach(button => {
