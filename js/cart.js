@@ -14,9 +14,19 @@
 // For development/testing - Debug function to reset the cart completely
 // Cart debugging functions
 window.cartDebug = {
-  // Reset the cart completely
+  // Reset the cart completely - ENHANCED to work with checkout
   resetCart: function() {
+    // First set emergency flags to prevent race conditions
+    localStorage.setItem('cartEmergencyCleared', 'true');
+    localStorage.setItem('cartEmergencyClearTime', Date.now().toString());
+    localStorage.setItem('pendingCartClear', 'true');
+    
+    // Clear all localStorage cart data
     localStorage.removeItem('auricCart');
+    localStorage.removeItem('auricCartItems');
+    localStorage.removeItem('cartItems');
+    localStorage.removeItem('cart');
+    localStorage.removeItem('checkout-cart');
     console.log('Cart has been reset in localStorage.');
     
     // If user is logged in, also clear Firestore cart
@@ -24,11 +34,49 @@ window.cartDebug = {
       const userId = firebase.auth().currentUser.uid;
       firebase.firestore().collection('carts').doc(userId).set({
         items: [],
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        operation: 'clear',
+        version: Date.now().toString(),
+        deviceId: localStorage.getItem('auricCartDeviceId') || `device_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        clearTimestamp: Date.now(),
+        emergencyClear: true
       })
       .then(() => {
         console.log('Cart has been reset in Firestore.');
         console.log('Page will reload now.');
+        
+        // Direct DOM manipulation to ensure UI is updated
+        try {
+          const elements = [
+            { selector: '#cartItems', action: 'innerHTML', value: '<p class="empty-cart-message">Your cart is empty</p>' },
+            { selector: '#sliding-cart-items', action: 'innerHTML', value: '<p class="empty-cart-message">Your cart is empty</p>' },
+            { selector: '.cart-count', action: 'textContent', value: '0' },
+            { selector: '.cart-count', action: 'style.display', value: 'none' },
+            { selector: '.subtotal-amount', action: 'textContent', value: '₹0.00' },
+            { selector: '#cartTotal', action: 'textContent', value: '₹0' }
+          ];
+          
+          elements.forEach(function(item) {
+            try {
+              var el = document.querySelector(item.selector);
+              if (el) {
+                if (item.action === 'innerHTML') {
+                  el.innerHTML = item.value;
+                } else if (item.action === 'textContent') {
+                  el.textContent = item.value;
+                } else if (item.action === 'style.display') {
+                  el.style.display = item.value;
+                }
+                console.log('Successfully cleared ' + item.selector);
+              }
+            } catch(err) {
+              console.error('Error clearing ' + item.selector + ': ' + err.message);
+            }
+          });
+        } catch (e) {
+          console.error('Error updating UI after cart reset:', e);
+        }
+        
         setTimeout(() => window.location.reload(), 500);
       })
       .catch(error => {
