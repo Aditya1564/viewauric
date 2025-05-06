@@ -1110,6 +1110,69 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error during cart clearing process:', cartClearError);
             }
             
+            // Create a special script element to reach the main window's DOM
+            // This is necessary because we need to manipulate the cart panel in the main window
+            // when returning from checkout
+            try {
+                // Create a script element to be injected into the main page when checkout completes
+                // This will ensure the cart panel is completely emptied even after navigation
+                const cartClearScript = document.createElement('script');
+                cartClearScript.id = 'cart-clear-script';
+                cartClearScript.textContent = `
+                    console.log('Executing emergency cart panel clear via injected script');
+                    
+                    // The most aggressive direct DOM manipulation possible
+                    setTimeout(function() {
+                        try {
+                            // Clear the cart using every method available
+                            if (typeof forceEmptyCartPanel === 'function') {
+                                forceEmptyCartPanel();
+                            }
+                            
+                            // Direct DOM manipulations - brute force approach
+                            // Clear the cart items container
+                            var cartItems = document.getElementById('cartItems');
+                            if (cartItems) {
+                                cartItems.innerHTML = '<p class="empty-cart-message">Your cart is empty</p>';
+                            }
+                            
+                            // Reset the cart count badge
+                            var countBadges = document.querySelectorAll('.cart-count, .cart-badge, .cart-item-count');
+                            countBadges.forEach(function(badge) {
+                                badge.textContent = '0';
+                                badge.style.display = 'none'; 
+                            });
+                            
+                            // Reset the cart total
+                            var totals = document.querySelectorAll('#cartTotal, .cart-total-amount, .cart-subtotal');
+                            totals.forEach(function(total) {
+                                total.textContent = '₹0';
+                            });
+                            
+                            // Force disable any checkout buttons
+                            var checkoutBtns = document.querySelectorAll('.checkout-btn, .proceed-to-checkout');
+                            checkoutBtns.forEach(function(btn) {
+                                btn.classList.add('disabled');
+                                btn.setAttribute('disabled', 'disabled');
+                            });
+                            
+                            console.log('Brute force cart panel clearing complete');
+                        } catch (e) {
+                            console.error('Error in emergency cart clear script:', e);
+                        }
+                    }, 500);
+                `;
+                
+                // Store this script in localStorage so it can be executed when returning to the main page
+                localStorage.setItem('pendingCartClear', 'true');
+                localStorage.setItem('cartClearScript', cartClearScript.textContent);
+                localStorage.setItem('cartClearTime', Date.now().toString());
+                
+                console.log('Cart clear script prepared for main page return');
+            } catch (scriptError) {
+                console.error('Error preparing cart clear script:', scriptError);
+            }
+            
             // Show confirmation modal
             document.getElementById('orderReference').textContent = orderReference;
             document.getElementById('orderDetails').innerHTML = orderDetails.modalSummaryHTML;
