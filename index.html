@@ -21,40 +21,23 @@
                 // Get the current timestamp
                 const now = Date.now();
                 
-                // Check if order completed flag is stale (older than 30 minutes)
-                const orderCompletedTime = parseInt(localStorage.getItem('orderCompletedTime') || '0');
-                if (now - orderCompletedTime > 30 * 60 * 1000) { // 30 minutes
-                    console.log('Resetting stale orderCompleted flag');
-                    localStorage.setItem('orderCompleted', 'false');
-                }
+                // Always reset these flags on page load to prevent persistent cart clearing
+                localStorage.setItem('orderCompleted', 'false');
+                console.log('Explicitly resetting orderCompleted flag to false');
                 
-                // Check if emergency clear flag is stale (older than 30 minutes)
-                const cartEmergencyClearTime = parseInt(localStorage.getItem('cartEmergencyClearTime') || '0');
-                if (now - cartEmergencyClearTime > 30 * 60 * 1000) { // 30 minutes
-                    console.log('Resetting stale cartEmergencyCleared flag');
-                    localStorage.setItem('cartEmergencyCleared', 'false');
-                }
+                localStorage.setItem('cartEmergencyCleared', 'false');
+                console.log('Explicitly resetting cartEmergencyCleared flag to false');
                 
-                // Always reset pendingCartClear flag if it's been more than 2 minutes
-                const pendingCartClearTime = parseInt(localStorage.getItem('pendingCartClearTime') || '0');
-                if (now - pendingCartClearTime > 2 * 60 * 1000 || !pendingCartClearTime) { // 2 minutes
-                    console.log('Resetting pendingCartClear flag');
-                    localStorage.setItem('pendingCartClear', 'false');
-                }
+                localStorage.setItem('pendingCartClear', 'false');
+                console.log('Explicitly resetting pendingCartClear flag to false');
                 
-                // Check if other cart clear flags are stale (older than 10 minutes)
-                const razorpaySuccessTime = parseInt(localStorage.getItem('razorpaySuccessTime') || '0');
-                if (now - razorpaySuccessTime > 10 * 60 * 1000) { // 10 minutes
-                    console.log('Resetting razorpaySuccessfulPayment flag');
-                    localStorage.setItem('razorpaySuccessfulPayment', 'false');
-                }
+                localStorage.setItem('razorpaySuccessfulPayment', 'false');
+                console.log('Explicitly resetting razorpaySuccessfulPayment flag to false');
                 
-                // Reset orderJustPlaced if it's been more than 5 minutes
-                const orderJustPlacedTime = parseInt(localStorage.getItem('orderCompletedTime') || '0');
-                if (now - orderJustPlacedTime > 5 * 60 * 1000) { // 5 minutes
-                    console.log('Resetting orderJustPlaced flag');
-                    localStorage.setItem('orderJustPlaced', 'false');
-                }
+                localStorage.setItem('orderJustPlaced', 'false');
+                console.log('Explicitly resetting orderJustPlaced flag to false');
+                
+                console.log('All cart flags have been reset to prevent unexpected cart clearing');
             }
             
             // Run this reset immediately
@@ -182,6 +165,7 @@
             <div class="nav-container">
                 <!-- Logo -->
                 <a href="index.html" class="brand">Auric</a>
+                <a href="reset-cart-flags.html" style="font-size: 10px; margin-left: 10px; color: #999;">Reset Cart</a>
                 
                 <!-- Mobile Toggle Button -->
                 <div class="hamburger" id="navToggle">

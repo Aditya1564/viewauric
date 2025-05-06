@@ -129,6 +129,12 @@
                 localStorage.setItem('cartClearTime', '0');
                 log('Reset all timestamp values', 'success');
                 
+                // Razorpay specific data
+                localStorage.removeItem('razorpay_payment_id');
+                localStorage.removeItem('razorpay_order_id');
+                localStorage.removeItem('razorpay_signature');
+                log('Cleared Razorpay payment data', 'success');
+                
                 // Additional cart sync data
                 localStorage.removeItem('auricCartVersion');
                 localStorage.removeItem('auricCartTimestamp');
@@ -173,6 +179,7 @@
                 { name: 'pendingCartClear', value: localStorage.getItem('pendingCartClear') },
                 { name: 'pendingCartClearTime', value: localStorage.getItem('pendingCartClearTime') },
                 { name: 'razorpaySuccessfulPayment', value: localStorage.getItem('razorpaySuccessfulPayment') },
+                { name: 'razorpay_payment_id', value: localStorage.getItem('razorpay_payment_id') },
                 { name: 'orderJustPlaced', value: localStorage.getItem('orderJustPlaced') },
                 { name: 'auricCartDeviceId', value: localStorage.getItem('auricCartDeviceId') }
             ];
