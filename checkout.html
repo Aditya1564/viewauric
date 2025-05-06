@@ -12,38 +12,20 @@
     <!-- Site Styles -->
     <link rel="stylesheet" href="css/styles.css?v=1.0.4">
     <link rel="stylesheet" href="css/responsive.css?v=1.0.4">
-    <link rel="stylesheet" href="css/navbar.css?v=1.1.1">
     <link rel="stylesheet" href="css/cart.css?v=1.0.1">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <!-- Header Section -->
-    <header>
-        <div class="navbar">
+    <!-- Simple Header -->
+    <header class="simple-header py-3 border-bottom">
+        <div class="container d-flex justify-content-between align-items-center">
             <div class="logo">
-                <a href="index.html">Auric</a>
+                <a href="index.html" class="text-decoration-none fs-3 fw-bold">Auric</a>
             </div>
-            <button class="mobile-menu-button" id="menuButton" aria-label="Open Menu">
-                <i class="fas fa-bars"></i>
-            </button>
-            <nav class="nav-links">
-                <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="#">Shop</a></li>
-                    <li><a href="#">About</a></li>
-                    <li><a href="#">Contact</a></li>
-                </ul>
-            </nav>
-            <div class="nav-icons">
-                <a href="#" class="account-link" id="accountLink">
-                    <i class="fas fa-user"></i>
-                </a>
-                <a href="#" class="cart-icon" id="cartToggle">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span class="cart-count" id="cartCount">0</span>
-                </a>
-            </div>
+            <a href="index.html" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-arrow-left me-1"></i> Back to Shopping
+            </a>
         </div>
     </header>
 
@@ -174,38 +156,9 @@
         </div>
     </div>
 
-    <!-- Footer Section -->
-    <footer>
-        <div class="footer-container">
-            <div class="footer-section">
-                <h3>Auric</h3>
-                <p>Elevate your style with our premium jewelry collection.</p>
-            </div>
-            <div class="footer-section">
-                <h3>Quick Links</h3>
-                <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="#">Shop</a></li>
-                    <li><a href="#">About</a></li>
-                    <li><a href="#">Contact</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3>Contact</h3>
-                <p>Email: info@auric.com</p>
-                <p>Phone: +1 234 567 890</p>
-            </div>
-            <div class="footer-section">
-                <h3>Follow Us</h3>
-                <div class="social-icons">
-                    <a href="#"><i class="fab fa-facebook"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                    <a href="#"><i class="fab fa-pinterest"></i></a>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">
+    <!-- Simple Footer -->
+    <footer class="py-4 bg-light mt-5">
+        <div class="container text-center">
             <p>&copy; 2025 Auric. All Rights Reserved.</p>
         </div>
     </footer>
@@ -269,7 +222,6 @@
     <script src="js/direct-auth.js?v=1.0.1"></script>
     <script src="js/cart-panel.js?v=1.0.0"></script>
     <script src="js/cart.js?v=1.0.4"></script>
-    <script src="js/navigation.js?v=1.0.4"></script>
     <script src="checkout-script.js"></script>
 </body>
 </html>
