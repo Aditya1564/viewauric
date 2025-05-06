@@ -670,7 +670,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
-        
+    
+    // This is for initial setup of event listeners - called separately from updateOrderSummary
+    function setupProductListeners() {
         // Add event listeners to the newly created buttons
         document.querySelectorAll('.increment-quantity').forEach(button => {
             button.addEventListener('click', function() {
@@ -683,6 +685,20 @@ document.addEventListener('DOMContentLoaded', function() {
             button.addEventListener('click', function() {
                 const productId = this.getAttribute('data-product-id');
                 decrementCartItemQuantity(productId);
+            });
+        });
+        
+        // Add listeners for remove buttons if they exist
+        document.querySelectorAll('.remove-product').forEach(button => {
+            button.addEventListener('click', function() {
+                const productItem = this.closest('.product-item');
+                if (productItem) {
+                    const productId = productItem.querySelector('.product-name').id.replace('product_', '');
+                    // Remove from DOM
+                    productItem.remove();
+                    // Update summary
+                    updateOrderSummary();
+                }
             });
         });
     }
