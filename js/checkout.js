@@ -577,27 +577,27 @@ document.addEventListener('DOMContentLoaded', function() {
     },
     
     /**
-     * Send parameters to EmailJS templates
-     * This only sends parameters to EmailJS service, which handles the templates and email delivery
+     * Send order data to EmailJS for template processing
+     * IMPORTANT: EmailJS templates should be configured to send to the appropriate recipient
      */
     sendConfirmationEmails: function(orderData) {
-      console.log('Preparing template parameters for EmailJS');
+      console.log('Sending order data to EmailJS for email template processing');
       
       // Format items for email templates
       const itemsHtml = orderData.items.map(item => {
         return `${item.name} x ${item.quantity} - ₹${(item.price * item.quantity).toLocaleString('en-IN')}`;
       }).join('<br>');
       
-      // Create parameters for customer template - ensure recipient is explicitly set
-      const customerTemplateParams = {
+      // ===== CUSTOMER EMAIL TEMPLATE =====
+      // Using the exact variable names from the customer email template (template_guvarr1)
+      const customerEmailData = {
+        // In the template, "to_name" is used for the customer's name
         to_name: orderData.customerName,
-        to_email: orderData.customerEmail, // Using customer's email from the form
-        reply_to: this.config.ownerEmail, // Shop email for customer to reply to
-        recipient: orderData.customerEmail, // Explicitly set recipient as customer email
-        send_to: orderData.customerEmail, // Additional parameter to ensure correct routing
+        to_email: orderData.customerEmail, // Add this for EmailJS to know where to send
+        // The rest of the variables match the template
         order_id: orderData.orderId,
         order_date: new Date().toLocaleDateString('en-IN'),
-        items: itemsHtml,
+        items: itemsHtml, // Template uses "items", not "items_list"
         subtotal: `₹${orderData.subtotal.toLocaleString('en-IN')}`,
         shipping: `₹${orderData.shipping.toLocaleString('en-IN')}`,
         total: `₹${orderData.total.toLocaleString('en-IN')}`,
@@ -605,66 +605,48 @@ document.addEventListener('DOMContentLoaded', function() {
         shipping_address: `${orderData.address}, ${orderData.city}, ${orderData.state}, ${orderData.postalCode}, ${orderData.country}`
       };
       
-      // Create parameters for store owner template - ensure recipient is shop owner
-      const ownerTemplateParams = {
+      // ===== OWNER EMAIL TEMPLATE =====
+      // Using the exact variable names from the owner email template (template_zzlllxm)
+      const ownerEmailData = {
+        // The template uses these exact variable names
         customer_name: orderData.customerName,
         customer_email: orderData.customerEmail,
-        reply_to: orderData.customerEmail, // Let owner reply to customer
-        recipient: this.config.ownerEmail, // Shop owner email from config
-        send_to: this.config.ownerEmail, // Additional parameter to ensure correct routing
         customer_phone: orderData.phone,
+        // Add owner's email so EmailJS knows where to send it
+        to_email: this.config.ownerEmail,
+        // Order details matching the template
         order_id: orderData.orderId,
         order_date: new Date().toLocaleDateString('en-IN'),
-        items: itemsHtml,
+        items: itemsHtml, // Template uses "items", not "items_list"
         total: `₹${orderData.total.toLocaleString('en-IN')}`,
         payment_id: orderData.paymentId,
         shipping_address: `${orderData.address}, ${orderData.city}, ${orderData.state}, ${orderData.postalCode}, ${orderData.country}`
       };
       
-      // Log template information with explicit routing information
-      console.log('EmailJS template configuration:', {
-        service_id: this.config.emailServiceId,
-        customer_template_id: `${this.config.customerTemplateId} (sending to: ${orderData.customerEmail})`,
-        owner_template_id: `${this.config.ownerTemplateId} (sending to: ${this.config.ownerEmail})`
-      });
+      // Log what we're about to do
+      console.log('EmailJS configuration:');
+      console.log(`Service ID: ${this.config.emailServiceId}`);
+      console.log(`Customer template (${this.config.customerTemplateId}) - configured to send to customer`);
+      console.log(`Owner template (${this.config.ownerTemplateId}) - configured to send to owner`);
       
-      // First, send the customer email - this template should be configured to send to the customer
-      console.log(`Sending customer receipt to: ${orderData.customerEmail}`);
-      this.sendTemplateParameters(
-        this.config.emailServiceId, 
-        this.config.customerTemplateId, 
-        customerTemplateParams
-      );
-      
-      // Then, send the owner notification - this template should be configured to send to the owner
-      console.log(`Sending owner notification to: ${this.config.ownerEmail}`);
-      this.sendTemplateParameters(
-        this.config.emailServiceId, 
-        this.config.ownerTemplateId, 
-        ownerTemplateParams
-      );
-    },
-    
-    /**
-     * Helper method to send parameters to an EmailJS template
-     * This just sends the parameters - EmailJS handles the actual email delivery
-     * Using explicit destination management to avoid routing issues
-     */
-    sendTemplateParameters: function(serviceId, templateId, parameters) {
-      // Clone the parameters to avoid modifying the original
-      const templateParams = {...parameters};
-      
-      // Store the recipient email before sending to make explicit in console
-      const recipient = templateParams.recipient || templateParams.to_email;
-      console.log(`Sending template ${templateId} parameters for recipient: ${recipient}`);
-      
-      // Send the parameters to EmailJS service
-      emailjs.send(serviceId, templateId, templateParams)
-        .then(function(response) {
-          console.log(`Template parameters sent successfully to ${recipient}:`, response);
+      // Process customer email template - the template itself should be configured to send to customer
+      console.log('Sending data to customer template...');
+      emailjs.send(this.config.emailServiceId, this.config.customerTemplateId, customerEmailData)
+        .then(response => {
+          console.log('Customer template processed successfully:', response);
         })
-        .catch(function(error) {
-          console.error(`Error sending template parameters to ${recipient}:`, error);
+        .catch(error => {
+          console.error('Error processing customer template:', error);
+        });
+      
+      // Process owner email template - the template itself should be configured to send to owner
+      console.log('Sending data to owner template...');
+      emailjs.send(this.config.emailServiceId, this.config.ownerTemplateId, ownerEmailData)
+        .then(response => {
+          console.log('Owner template processed successfully:', response);
+        })
+        .catch(error => {
+          console.error('Error processing owner template:', error);
         });
     },
     
