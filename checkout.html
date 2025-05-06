@@ -65,27 +65,27 @@
                             <div class="row mb-4">
                                 <div class="col-md-6 mb-3 mb-md-0">
                                     <label for="firstName" class="form-label">First Name</label>
-                                    <input type="text" class="form-control" id="firstName" name="firstName" required>
+                                    <input type="text" class="form-control" id="firstName" name="firstName" value="John" required>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="lastName" class="form-label">Last Name</label>
-                                    <input type="text" class="form-control" id="lastName" name="lastName" required>
+                                    <input type="text" class="form-control" id="lastName" name="lastName" value="Smith" required>
                                 </div>
                             </div>
 
                             <div class="mb-4">
                                 <label for="email" class="form-label">Email Address</label>
-                                <input type="email" class="form-control" id="email" name="email" required>
+                                <input type="email" class="form-control" id="email" name="email" value="test@example.com" required>
                             </div>
 
                             <div class="mb-4">
                                 <label for="phone" class="form-label">Phone Number</label>
-                                <input type="tel" class="form-control" id="phone" name="phone" required>
+                                <input type="tel" class="form-control" id="phone" name="phone" value="1234567890" required>
                             </div>
 
                             <div class="mb-4">
                                 <label for="address" class="form-label">Delivery Address</label>
-                                <textarea class="form-control" id="address" name="address" rows="3" required></textarea>
+                                <textarea class="form-control" id="address" name="address" rows="3" required>123 Main Street, Anytown, CA 12345</textarea>
                             </div>
 
                             <div class="mb-4">
@@ -96,7 +96,7 @@
                                             <div class="row align-items-center">
                                                 <div class="col-md-6 mb-3 mb-md-0">
                                                     <label for="product1" class="form-label">Product Name</label>
-                                                    <input type="text" class="form-control product-name" id="product1" name="product1" required>
+                                                    <input type="text" class="form-control product-name" id="product1" name="product1" value="Diamond Ring" required>
                                                 </div>
                                                 <div class="col-md-2 mb-3 mb-md-0">
                                                     <label for="quantity1" class="form-label">Quantity</label>
@@ -106,7 +106,7 @@
                                                     <label for="price1" class="form-label">Price</label>
                                                     <div class="input-group">
                                                         <span class="input-group-text">$</span>
-                                                        <input type="number" class="form-control product-price" id="price1" name="price1" min="0.01" step="0.01" required>
+                                                        <input type="number" class="form-control product-price" id="price1" name="price1" min="0.01" step="0.01" value="299.99" required>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-1 d-flex align-items-center justify-content-end mt-3 mt-md-0">
@@ -136,7 +136,7 @@
 
                             <div class="mb-4">
                                 <label for="notes" class="form-label">Order Notes (Optional)</label>
-                                <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                                <textarea class="form-control" id="notes" name="notes" rows="3">Please handle with care. Gift wrapping requested.</textarea>
                             </div>
 
                             <button type="submit" class="btn btn-primary">Place Order</button>
