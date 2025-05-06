@@ -578,7 +578,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     /**
      * Send order data to EmailJS for template processing
-     * IMPORTANT: EmailJS templates should be configured to send to the appropriate recipient
+     * IMPORTANT: Only using the customer template - owner data will be populated in the EmailJS template
      */
     sendConfirmationEmails: function(orderData) {
       console.log('Sending order data to EmailJS for email template processing');
@@ -588,16 +588,26 @@ document.addEventListener('DOMContentLoaded', function() {
         return `${item.name} x ${item.quantity} - ₹${(item.price * item.quantity).toLocaleString('en-IN')}`;
       }).join('<br>');
       
-      // ===== CUSTOMER EMAIL TEMPLATE =====
-      // Using the exact variable names from the customer email template (template_guvarr1)
-      const customerEmailData = {
-        // In the template, "to_name" is used for the customer's name
+      // Since we're having issues with multiple templates, use CC functionality directly
+      // This tells EmailJS to send copy to the store owner via CC
+      const emailData = {
+        // Customer info (primary recipient)
         to_name: orderData.customerName,
-        to_email: orderData.customerEmail, // Add this for EmailJS to know where to send
-        // The rest of the variables match the template
+        to_email: orderData.customerEmail,
+        
+        // Add explicit CC to the owner's email - this is a standard EmailJS feature 
+        cc_email: this.config.ownerEmail,
+        bcc_email: this.config.ownerEmail, // Also BCC as a backup method
+        
+        // Customer info for receipt
+        customer_name: orderData.customerName,
+        customer_email: orderData.customerEmail,
+        customer_phone: orderData.phone,
+        
+        // Order details
         order_id: orderData.orderId,
         order_date: new Date().toLocaleDateString('en-IN'),
-        items: itemsHtml, // Template uses "items", not "items_list"
+        items: itemsHtml,
         subtotal: `₹${orderData.subtotal.toLocaleString('en-IN')}`,
         shipping: `₹${orderData.shipping.toLocaleString('en-IN')}`,
         total: `₹${orderData.total.toLocaleString('en-IN')}`,
@@ -605,48 +615,19 @@ document.addEventListener('DOMContentLoaded', function() {
         shipping_address: `${orderData.address}, ${orderData.city}, ${orderData.state}, ${orderData.postalCode}, ${orderData.country}`
       };
       
-      // ===== OWNER EMAIL TEMPLATE =====
-      // Using the exact variable names from the owner email template (template_zzlllxm)
-      const ownerEmailData = {
-        // The template uses these exact variable names
-        customer_name: orderData.customerName,
-        customer_email: orderData.customerEmail,
-        customer_phone: orderData.phone,
-        // Add owner's email so EmailJS knows where to send it
-        to_email: this.config.ownerEmail,
-        // Order details matching the template
-        order_id: orderData.orderId,
-        order_date: new Date().toLocaleDateString('en-IN'),
-        items: itemsHtml, // Template uses "items", not "items_list"
-        total: `₹${orderData.total.toLocaleString('en-IN')}`,
-        payment_id: orderData.paymentId,
-        shipping_address: `${orderData.address}, ${orderData.city}, ${orderData.state}, ${orderData.postalCode}, ${orderData.country}`
-      };
-      
-      // Log what we're about to do
+      // Log the configuration
       console.log('EmailJS configuration:');
       console.log(`Service ID: ${this.config.emailServiceId}`);
-      console.log(`Customer template (${this.config.customerTemplateId}) - configured to send to customer`);
-      console.log(`Owner template (${this.config.ownerTemplateId}) - configured to send to owner`);
+      console.log(`Template (${this.config.customerTemplateId}) - configured to send to customer and owner`);
       
-      // Process customer email template - the template itself should be configured to send to customer
-      console.log('Sending data to customer template...');
-      emailjs.send(this.config.emailServiceId, this.config.customerTemplateId, customerEmailData)
+      // Process the template
+      console.log('Sending data to template...');
+      emailjs.send(this.config.emailServiceId, this.config.customerTemplateId, emailData)
         .then(response => {
-          console.log('Customer template processed successfully:', response);
+          console.log('Email template processed successfully:', response);
         })
         .catch(error => {
-          console.error('Error processing customer template:', error);
-        });
-      
-      // Process owner email template - the template itself should be configured to send to owner
-      console.log('Sending data to owner template...');
-      emailjs.send(this.config.emailServiceId, this.config.ownerTemplateId, ownerEmailData)
-        .then(response => {
-          console.log('Owner template processed successfully:', response);
-        })
-        .catch(error => {
-          console.error('Error processing owner template:', error);
+          console.error('Error processing email template:', error);
         });
     },
     
