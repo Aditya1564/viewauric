@@ -40,16 +40,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Initialize EmailJS with credentials
+    // Initialize email functionality (formerly EmailJS)
     function initEmailJS() {
-        const publicKey = 'eWkroiiJhLnSK1_Pn';
-        console.log('Initializing EmailJS');
-        try {
-            emailjs.init(publicKey);
-            console.log('EmailJS initialized successfully');
-        } catch (error) {
-            console.error('Error initializing EmailJS:', error);
-        }
+        console.log('Initializing email service');
+        // No longer using EmailJS - now using server-side Nodemailer
     }
     
     // Load cart items from localStorage
@@ -178,30 +172,56 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Send order confirmation email to customer
+    // Send order confirmation email to customer using server endpoint
     async function sendOrderConfirmationEmail(templateParams) {
-        const serviceId = 'service_prdjwt4';
-        const templateId = 'template_guvarr1';
-        
         try {
-            const response = await emailjs.send(serviceId, templateId, templateParams);
-            console.log('Customer email sent successfully:', response);
-            return response;
+            const response = await fetch('/api/send-email', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    emailType: 'customerConfirmation',
+                    templateParams: templateParams
+                })
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`Server responded with status: ${response.status}, message: ${errorData.error || 'Unknown error'}`);
+            }
+            
+            const result = await response.json();
+            console.log('Customer email sent successfully:', result);
+            return result;
         } catch (error) {
             console.error('Error sending customer email:', error);
             throw error;
         }
     }
     
-    // Send order notification email to shop owner
+    // Send order notification email to shop owner using server endpoint
     async function sendOwnerNotificationEmail(templateParams) {
-        const serviceId = 'service_prdjwt4';
-        const templateId = 'template_zzlllxm';
-        
         try {
-            const response = await emailjs.send(serviceId, templateId, templateParams);
-            console.log('Owner notification email sent successfully:', response);
-            return response;
+            const response = await fetch('/api/send-email', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    emailType: 'ownerNotification',
+                    templateParams: templateParams
+                })
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`Server responded with status: ${response.status}, message: ${errorData.error || 'Unknown error'}`);
+            }
+            
+            const result = await response.json();
+            console.log('Owner notification email sent successfully:', result);
+            return result;
         } catch (error) {
             console.error('Error sending owner notification email:', error);
             throw error;

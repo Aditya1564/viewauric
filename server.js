@@ -1,12 +1,21 @@
-// Enhanced no-cache HTTP server with Razorpay API support
-// Email functionality completely removed
+// Enhanced no-cache HTTP server with Razorpay API support and Nodemailer for emails
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const url = require('url');
 const https = require('https');
+const nodemailer = require('nodemailer');
 
 const PORT = 5000;
+
+// Create a nodemailer transporter using Gmail credentials
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'auricbysubha.web@gmail.com',
+    pass: 'vjkf sdow gkro szjx'
+  }
+});
 
 // Razorpay API keys
 const RAZORPAY_KEY_ID = "rzp_test_qZWULE2MoPHZJv";
@@ -170,11 +179,56 @@ const server = http.createServer(async (req, res) => {
     }
   }
   
-  // Email functionality completely removed
+  // Handle email sending with Nodemailer
   if (req.method === 'POST' && pathname === '/api/send-email') {
-    console.log('Email functionality has been removed');
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ message: 'Email functionality has been removed' }));
+    try {
+      const body = await getRequestBody(req);
+      console.log('Received email request:', body);
+      
+      // Extract email details from the request
+      const { emailType, templateParams } = body;
+      
+      let mailOptions = {};
+      
+      if (emailType === 'customerConfirmation') {
+        // Customer confirmation email
+        mailOptions = {
+          from: '"Auric Jewelry" <auricbysubha.web@gmail.com>',
+          to: templateParams.to_email,
+          subject: `Order Confirmation - ${templateParams.order_reference}`,
+          html: generateCustomerEmailHTML(templateParams)
+        };
+      } else if (emailType === 'ownerNotification') {
+        // Owner notification email
+        mailOptions = {
+          from: '"Auric Jewelry Website" <auricbysubha.web@gmail.com>',
+          to: 'auricbysubha.web@gmail.com', // Send to shop owner
+          subject: `New Order Received - ${templateParams.order_reference}`,
+          html: generateOwnerEmailHTML(templateParams)
+        };
+      } else {
+        throw new Error('Invalid email type specified');
+      }
+      
+      // Send email using Nodemailer
+      const info = await transporter.sendMail(mailOptions);
+      
+      console.log('Email sent successfully:', info.messageId);
+      
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ 
+        success: true, 
+        messageId: info.messageId 
+      }));
+      
+    } catch (error) {
+      console.error('Error sending email:', error);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ 
+        error: 'Failed to send email',
+        details: error.message
+      }));
+    }
     return;
   }
   
@@ -208,11 +262,90 @@ const server = http.createServer(async (req, res) => {
   });
 });
 
+// Generate HTML for customer order confirmation email
+function generateCustomerEmailHTML(params) {
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0;">
+      <div style="background-color: #f5b642; padding: 20px; text-align: center; color: white;">
+        <h2>Thank You for Your Order!</h2>
+      </div>
+      <div style="padding: 20px;">
+        <p>Dear ${params.from_name},</p>
+        
+        <p>Thank you for placing your order with us. We're delighted to confirm that your order has been received and is being processed.</p>
+        
+        <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 4px;">
+          <p><strong>Order Reference:</strong> <span style="color: #f5b642; font-weight: bold;">${params.order_reference}</span></p>
+          <p><strong>Order Date:</strong> ${params.order_date}</p>
+          <p><strong>Payment Method:</strong> ${params.payment_method}</p>
+          <p><strong>Delivery Address:</strong><br>${params.address}</p>
+        </div>
+        
+        <h3 style="border-bottom: 2px solid #f5b642; padding-bottom: 10px;">Order Summary</h3>
+        
+        ${params.order_summary}
+        
+        <p><strong>Total:</strong> ${params.order_total}</p>
+        
+        <p>If you have any questions about your order, please contact us with your order reference.</p>
+        
+        <p>Thank you for shopping with us!</p>
+        
+        <p>Best regards,<br>The Auric Jewelry Team</p>
+      </div>
+      <div style="background-color: #f0f0f0; padding: 15px; text-align: center; font-size: 12px; color: #666;">
+        <p>This is an automated email, please do not reply directly to this message.</p>
+      </div>
+    </div>
+  `;
+}
+
+// Generate HTML for owner order notification email
+function generateOwnerEmailHTML(params) {
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0;">
+      <div style="background-color: #4287f5; padding: 20px; text-align: center; color: white;">
+        <h2>New Order Received</h2>
+      </div>
+      <div style="padding: 20px;">
+        <p>You have received a new order from ${params.from_name}.</p>
+        
+        <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 4px;">
+          <h3 style="color: #4287f5;">Customer Information</h3>
+          <p><strong>Name:</strong> ${params.from_name}</p>
+          <p><strong>Email:</strong> ${params.to_email}</p>
+          <p><strong>Phone:</strong> ${params.phone}</p>
+          <p><strong>Delivery Address:</strong><br>${params.address}</p>
+          <p><strong>Order Notes:</strong> ${params.notes || 'None'}</p>
+        </div>
+        
+        <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 4px;">
+          <p><strong>Order Reference:</strong> <span style="color: #4287f5; font-weight: bold;">${params.order_reference}</span></p>
+          <p><strong>Order Date:</strong> ${params.order_date}</p>
+          <p><strong>Payment Method:</strong> ${params.payment_method}</p>
+        </div>
+        
+        <h3 style="border-bottom: 2px solid #4287f5; padding-bottom: 10px;">Order Summary</h3>
+        
+        ${params.order_summary}
+        
+        <p><strong>Total:</strong> ${params.order_total}</p>
+        
+        <p>Please process this order at your earliest convenience.</p>
+      </div>
+      <div style="background-color: #f0f0f0; padding: 15px; text-align: center; font-size: 12px; color: #666;">
+        <p>This is an automated email notification for your shop's orders.</p>
+      </div>
+    </div>
+  `;
+}
+
 server.listen(PORT, '0.0.0.0', () => {
   console.log('\n--- No-cache server with Razorpay support starting ---');
   console.log(`Server running at http://0.0.0.0:${PORT}/`);
   console.log(`Local files will not be cached by the browser`);
   console.log(`API endpoints:`);
   console.log(`  - Razorpay: /api/create-razorpay-order`);
+  console.log(`  - Email: /api/send-email`);
   console.log(`Press Ctrl+C to stop the server\n`);
 });
