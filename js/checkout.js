@@ -576,9 +576,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     /**
      * Send confirmation emails to customer and store owner
+     * This just passes parameters to EmailJS templates - the actual sending happens on EmailJS side
      */
     sendConfirmationEmails: function(orderData) {
-      console.log('Sending confirmation emails');
+      console.log('Preparing email parameters');
       
       // Format items for email
       const itemsHtml = orderData.items.map(item => {
@@ -588,7 +589,7 @@ document.addEventListener('DOMContentLoaded', function() {
       // Prepare template parameters for customer email
       const customerParams = {
         to_name: orderData.customerName,
-        to_email: orderData.customerEmail,
+        to_email: orderData.customerEmail, // Use the email from the form
         order_id: orderData.orderId,
         order_date: new Date().toLocaleDateString('en-IN'),
         items: itemsHtml,
@@ -602,7 +603,7 @@ document.addEventListener('DOMContentLoaded', function() {
       // Prepare template parameters for owner email
       const ownerParams = {
         customer_name: orderData.customerName,
-        customer_email: orderData.customerEmail,
+        customer_email: orderData.customerEmail, // Use the email from the form
         customer_phone: orderData.phone,
         order_id: orderData.orderId,
         order_date: new Date().toLocaleDateString('en-IN'),
@@ -619,26 +620,26 @@ document.addEventListener('DOMContentLoaded', function() {
         ownerTemplate: this.config.ownerTemplateId
       });
       
-      // Send email to customer with improved error handling
-      console.log('Sending customer email with params:', customerParams);
+      // Pass parameters to EmailJS for customer email template
+      console.log('Passing customer email template parameters:', customerParams);
       emailjs.send(this.config.emailServiceId, this.config.customerTemplateId, customerParams)
         .then(response => {
-          console.log('Customer email sent successfully:', response);
+          console.log('Customer email parameters processed successfully:', response);
         })
         .catch(error => {
-          console.error('Error sending customer email:', error);
-          // Continue with the checkout process even if email fails
+          console.error('Error processing customer email parameters:', error);
+          // Continue with the checkout process even if processing fails
         });
       
-      // Send email to store owner with improved error handling  
-      console.log('Sending owner email with params:', ownerParams);
+      // Pass parameters to EmailJS for owner email template
+      console.log('Passing owner email template parameters:', ownerParams);
       emailjs.send(this.config.emailServiceId, this.config.ownerTemplateId, ownerParams)
         .then(response => {
-          console.log('Owner email sent successfully:', response);
+          console.log('Owner email parameters processed successfully:', response);
         })
         .catch(error => {
-          console.error('Error sending owner email:', error);
-          // Continue with the checkout process even if email fails
+          console.error('Error processing owner email parameters:', error);
+          // Continue with the checkout process even if processing fails
         });
     },
     
