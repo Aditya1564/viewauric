@@ -633,12 +633,29 @@ document.addEventListener('DOMContentLoaded', function() {
       console.log('Customer email parameters:', customerEmail);
       console.log('Owner email parameters:', ownerEmail);
       
-      // Send customer email using EmailJS directly
-      console.log('Sending customer confirmation email to:', orderData.customerEmail);
+      // Send customer email using the OWNER template but with customer as recipient
+      console.log('Sending customer confirmation email using owner template to:', orderData.customerEmail);
+      
+      // Create customer email using owner template format
+      const customerWithOwnerTemplate = {
+        customer_name: orderData.customerName,
+        customer_email: orderData.customerEmail,
+        customer_phone: orderData.phone,
+        to_email: orderData.customerEmail, // Send to customer email
+        order_id: orderData.orderId,
+        order_date: new Date().toLocaleDateString('en-IN'),
+        payment_id: orderData.paymentId,
+        items: itemsHtml,
+        total: `₹${orderData.total.toLocaleString('en-IN')}`,
+        shipping_address: `${orderData.address}, ${orderData.city}, ${orderData.state}, ${orderData.postalCode}, ${orderData.country}`
+      };
+      
+      console.log('Modified customer email parameters:', customerWithOwnerTemplate);
+      
       emailjs.send(
         this.config.emailServiceId,
-        this.config.customerTemplateId,
-        customerEmail
+        this.config.ownerTemplateId, // Use OWNER template for customer
+        customerWithOwnerTemplate
       )
       .then((response) => {
         console.log('✅ Customer email sent successfully:', response);

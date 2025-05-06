@@ -100,10 +100,31 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Customer email parameters:', customerEmailParams);
     console.log('Owner email parameters:', ownerEmailParams);
     
-    // Send customer email
-    sendCustomerEmail(customerEmailParams)
-      .then(() => {
-        console.log('Customer email sent successfully');
+    // Send customer email using owner template
+    // Create customer email with owner template format
+    const customerWithOwnerTemplate = {
+      customer_name: orderData.customerName,
+      customer_email: orderData.customerEmail,
+      customer_phone: orderData.phone,
+      to_email: orderData.customerEmail, // Send to customer
+      order_id: orderData.orderId,
+      order_date: new Date().toLocaleDateString('en-IN'),
+      payment_id: orderData.paymentId,
+      items: itemsText,
+      total: `₹${orderData.total}`,
+      shipping_address: `${orderData.address}, ${orderData.city}, ${orderData.state}, ${orderData.postalCode}, ${orderData.country}`
+    };
+    
+    console.log('Customer with owner template:', customerWithOwnerTemplate);
+    
+    // Send using owner template
+    emailjs.send(
+      EMAIL_CONFIG.serviceId,
+      EMAIL_CONFIG.ownerTemplateId, // Use owner template
+      customerWithOwnerTemplate
+    )
+      .then((response) => {
+        console.log('Customer email sent successfully using owner template:', response);
         document.getElementById('customer-status').textContent = 'Sent successfully!';
         document.getElementById('customer-status').className = 'success';
       })
