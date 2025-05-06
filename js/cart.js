@@ -397,14 +397,17 @@ document.addEventListener('DOMContentLoaded', function() {
       console.log('Cart system initialized');
       
       // Direct attachment of click event to cart toggle (fallback method)
-      const cartToggleElement = document.querySelector('.cart-toggle');
-      if (cartToggleElement) {
-        console.log('Adding direct click event to cart toggle as fallback');
-        cartToggleElement.addEventListener('click', (e) => {
-          e.preventDefault();
-          console.log('Cart toggle clicked (direct), opening panel');
-          this.openCartPanel();
-        });
+      // Skip this on checkout page
+      if (!window.location.pathname.includes('checkout.html')) {
+        const cartToggleElement = document.querySelector('.cart-toggle');
+        if (cartToggleElement) {
+          console.log('Adding direct click event to cart toggle as fallback');
+          cartToggleElement.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('Cart toggle clicked (direct), opening panel');
+            this.openCartPanel();
+          });
+        }
       }
     },
     
@@ -412,6 +415,12 @@ document.addEventListener('DOMContentLoaded', function() {
      * Setup sliding cart panel functionality
      */
     setupCartPanel: function() {
+      // Skip this on checkout page
+      if (window.location.pathname.includes('checkout.html')) {
+        console.log('On checkout page - skipping cart panel initialization');
+        return;
+      }
+      
       console.log('Setting up cart panel with elements:', {
         cartToggle: this.cartToggle,
         closeCartBtn: this.closeCartBtn,
