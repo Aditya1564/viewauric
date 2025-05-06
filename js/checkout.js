@@ -367,7 +367,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const formData = new FormData(form);
       const orderData = {
         customerId: auth.currentUser.uid,
-        customerEmail: auth.currentUser.email,
+        customerEmail: formData.get('email') || auth.currentUser.email, // Use form email first, fallback to auth email
         customerName: formData.get('fullName'),
         phone: formData.get('phone'),
         address: formData.get('address'),
