@@ -1861,21 +1861,64 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Create a global clearCart function for use by checkout page
   window.clearCart = function() {
-    console.log('Global clearCart function called');
+    console.log('!!! EMERGENCY CART CLEARING FUNCTION CALLED !!!');
     
-    // AGGRESSIVE CART CLEARING STRATEGY
+    // NUCLEAR CART CLEARING STRATEGY
     
-    // 1. Clear localStorage cart
-    localStorage.removeItem('auricCart');
-    localStorage.removeItem('auricCartItems');
-    localStorage.removeItem('cartItems');
+    try {
+      // 0. Unsubscribe from any real-time listeners first to prevent re-syncing
+      if (AuricCart && AuricCart.firestoreUnsubscribe) {
+        console.log('Disabling Firestore real-time listener to prevent re-syncing');
+        AuricCart.firestoreUnsubscribe();
+        AuricCart.firestoreUnsubscribe = null;
+      }
+      
+      // Also stop any background sync that might be running
+      if (AuricCart && AuricCart.syncInterval) {
+        console.log('Stopping background sync interval');
+        clearInterval(AuricCart.syncInterval);
+        AuricCart.syncInterval = null;
+      }
+    } catch (listenerError) {
+      console.error('Error disabling listeners:', listenerError);
+    }
+      
+    // 1. AGGRESSIVELY clear ALL localStorage cart-related data
+    try {
+      console.log('Clearing ALL localStorage cart data');
+      
+      // Direct cart items
+      localStorage.removeItem('auricCart');
+      localStorage.removeItem('auricCartItems');
+      localStorage.removeItem('cartItems');
+      
+      // Other potential cart storage
+      localStorage.removeItem('cart');
+      localStorage.removeItem('checkout-cart');
+      localStorage.removeItem('auric-cart-data');
+      
+      // Sync-related data
+      localStorage.removeItem('auricCartDeviceId');
+      localStorage.removeItem('auricCartVersion');
+      localStorage.removeItem('auricCartTimestamp');
+      localStorage.removeItem('auricCartLastSync');
+      localStorage.removeItem('auricCartDeletedItems');
+      localStorage.removeItem('auricCartSyncing');
+      
+      // Generate a new device ID to break any sync chains
+      const newDeviceId = `emergency_clear_${Date.now()}_${Math.random().toString(36).substr(2, 10)}`;
+      localStorage.setItem('auricCartDeviceId', newDeviceId);
+      
+      if (AuricCart) {
+        AuricCart.deviceId = newDeviceId;
+      }
+      
+      console.log('All localStorage cart data cleared and device ID reset');
+    } catch (localStorageError) {
+      console.error('Error clearing localStorage:', localStorageError);
+    }
     
-    // Also clear any other potential cart-related data
-    localStorage.removeItem('cart');
-    localStorage.removeItem('checkout-cart');
-    localStorage.removeItem('auric-cart-data');
-    
-    // 2. If Firebase and auth are available, clear Firestore cart
+    // 2. FORCEFULLY clear Firestore cart with max priority
     if (typeof firebase !== 'undefined' && firebase.auth) {
       try {
         // Check if user is authenticated
@@ -1884,85 +1927,188 @@ document.addEventListener('DOMContentLoaded', function() {
           const db = firebase.firestore();
           const userId = currentUser.uid;
           
-          // Generate a unique device ID with high timestamp to ensure it's considered the newest update
-          const deviceId = `force_clear_${Date.now()}_${Math.random().toString(36).substr(2, 10)}`;
+          // Generate a uniquely identifiable device ID for this emergency clear
+          const deviceId = `emergency_clear_${Date.now()}_${Math.random().toString(36).substr(2, 10)}`;
           const timestamp = Date.now();
+          const veryHighPriorityVersion = (9999999999999 + timestamp).toString(); // Ensures this always wins version conflicts
           
-          console.log('Force clearing Firestore cart for user:', userId);
+          console.log('EMERGENCY CLEARING Firestore cart for user:', userId);
           
-          // Use a transaction to ensure the cart is properly cleared
+          // Set these flags to prevent our own clear from being overridden
+          if (AuricCart) {
+            AuricCart.isEmergencyClear = true;
+            AuricCart.emergencyClearTimestamp = timestamp;
+            AuricCart.isUpdatingFirestore = true;
+          }
+          
+          // Use a transaction for maximum reliability
           db.runTransaction(async (transaction) => {
             const cartRef = db.collection('carts').doc(userId);
             
-            // Set empty cart with clear operation and very high version number
+            // Get current document to check its version
+            const currentDoc = await transaction.get(cartRef);
+            
+            // Set absolutely empty cart with emergency clear flags that can't be ignored
             transaction.set(cartRef, {
               items: [],
               updatedAt: new Date().toISOString(),
               device: deviceId,
-              operation: 'force_clear',
-              version: timestamp.toString(),
+              operation: 'emergency_clear', 
+              version: veryHighPriorityVersion,
               clear_timestamp: timestamp,
-              force_cleared: true
+              emergency_cleared: true,
+              emergency_clear_timestamp: timestamp,
+              ignore_sync: true, // Signal to ignore future syncs
+              max_priority: true // Signal this should never be overridden
             });
             
             return Promise.resolve();
           }).then(() => {
-            console.log('Firestore cart cleared successfully via transaction');
-          }).catch(err => {
-            console.error('Transaction failed:', err);
+            console.log('Firestore cart EMERGENCY cleared successfully via transaction');
             
-            // Fallback to direct update if transaction fails
+            // Reset isUpdatingFirestore after a delay
+            setTimeout(() => {
+              if (AuricCart) {
+                AuricCart.isUpdatingFirestore = false;
+              }
+            }, 5000); // 5 seconds should be enough for the operation to complete fully
+            
+          }).catch(err => {
+            console.error('Transaction failed during EMERGENCY clear:', err);
+            
+            // Fallback to direct update with even higher timestamp if transaction fails
+            const fallbackTimestamp = Date.now();
+            const fallbackVersion = (99999999999999 + fallbackTimestamp).toString();
+            
             db.collection('carts').doc(userId).set({
               items: [],
               updatedAt: new Date().toISOString(),
-              device: deviceId,
-              operation: 'force_clear',
-              version: timestamp.toString(),
-              force_cleared: true
+              device: `fallback_emergency_${fallbackTimestamp}_${Math.random().toString(36).substr(2, 10)}`,
+              operation: 'fallback_emergency_clear',
+              version: fallbackVersion,
+              clear_timestamp: fallbackTimestamp,
+              emergency_cleared: true,
+              fallback_cleared: true,
+              ignore_sync: true,
+              max_priority: true
             }).then(() => {
-              console.log('Firestore cart cleared successfully via direct update');
+              console.log('Firestore cart EMERGENCY cleared via fallback direct update');
+              
+              // Reset isUpdatingFirestore after a delay
+              setTimeout(() => {
+                if (AuricCart) {
+                  AuricCart.isUpdatingFirestore = false;
+                }
+              }, 5000);
+              
             }).catch(innerErr => {
-              console.error('Error during fallback clear:', innerErr);
+              console.error('CRITICAL: Both transaction and fallback clear failed:', innerErr);
+              
+              if (AuricCart) {
+                AuricCart.isUpdatingFirestore = false;
+              }
             });
           });
         }
       } catch (err) {
-        console.error('Error accessing Firestore during cart clear:', err);
+        console.error('CRITICAL ERROR accessing Firestore during emergency clear:', err);
+        
+        if (AuricCart) {
+          AuricCart.isUpdatingFirestore = false;
+        }
       }
     }
     
-    // 3. Reset cart items array and update UI
-    if (AuricCart) {
-      AuricCart.items = [];
-      
-      // Force a complete UI refresh
-      try {
-        // Clear the cart container
-        const cartItems = document.getElementById('cartItems');
-        if (cartItems) {
-          cartItems.innerHTML = '<p class="empty-cart-message">Your cart is empty</p>';
-        }
+    // 3. FORCEFULLY reset cart object and UI
+    try {
+      if (AuricCart) {
+        console.log('FORCE RESETTING cart object');
         
-        // Reset the cart count badge
-        const cartCountBadge = document.querySelector('.cart-count');
-        if (cartCountBadge) {
-          cartCountBadge.textContent = '0';
-          cartCountBadge.style.display = 'none';
-        }
+        // Reset items array
+        AuricCart.items = [];
         
-        // Reset the cart total
-        const cartTotal = document.getElementById('cartTotal');
-        if (cartTotal) {
-          cartTotal.textContent = '₹0';
-        }
+        // Reset all flags
+        AuricCart.pendingFirestoreSync = false;
+        AuricCart.isUpdatingFirestore = false;
         
-        // Call the update function
-        AuricCart.updateCartUI();
-      } catch (uiErr) {
-        console.error('Error updating UI during clear:', uiErr);
+        // Force a complete UI refresh - DIRECT DOM MANIPULATIONS
+        try {
+          // Clear the cart container - try different selectors for maximum coverage
+          const cartContainers = [
+            document.getElementById('cartItems'),
+            document.querySelector('.cart-items'),
+            document.querySelector('.shopping-cart-items')
+          ];
+          
+          cartContainers.forEach(container => {
+            if (container) {
+              container.innerHTML = '<p class="empty-cart-message">Your cart is empty</p>';
+            }
+          });
+          
+          // Reset ALL possible cart count badges
+          const cartCountBadges = [
+            document.querySelector('.cart-count'),
+            document.querySelector('.cart-badge'),
+            document.querySelector('.cart-item-count')
+          ];
+          
+          cartCountBadges.forEach(badge => {
+            if (badge) {
+              badge.textContent = '0';
+              badge.style.display = 'none';
+            }
+          });
+          
+          // Reset ALL possible cart totals
+          const cartTotals = [
+            document.getElementById('cartTotal'),
+            document.querySelector('.cart-total-amount'),
+            document.querySelector('.cart-subtotal')
+          ];
+          
+          cartTotals.forEach(total => {
+            if (total) {
+              total.textContent = '₹0';
+            }
+          });
+          
+          // Call ALL update methods in case they exist
+          if (typeof AuricCart.updateCartUI === 'function') AuricCart.updateCartUI();
+          if (typeof AuricCart.renderCartItems === 'function') AuricCart.renderCartItems();
+          if (typeof AuricCart.updateCartTotal === 'function') AuricCart.updateCartTotal();
+        } catch (uiErr) {
+          console.error('Error updating UI during emergency clear:', uiErr);
+        }
+      } else {
+        console.log('AuricCart object not available - performing direct DOM manipulation');
+        
+        // Direct DOM manipulation as fallback
+        const cartElements = [
+          document.getElementById('cartItems'),
+          document.querySelector('.cart-items'),
+          document.querySelector('.cart-count'),
+          document.getElementById('cartTotal')
+        ];
+        
+        cartElements.forEach(el => {
+          if (el) {
+            if (el.classList.contains('cart-count')) {
+              el.textContent = '0';
+              el.style.display = 'none';
+            } else if (el.id === 'cartTotal') {
+              el.textContent = '₹0';
+            } else {
+              el.innerHTML = '<p>Your cart is empty</p>';
+            }
+          }
+        });
       }
+    } catch (cartObjectError) {
+      console.error('Error resetting cart object:', cartObjectError);
     }
     
-    console.log('Cart cleared successfully using aggressive strategy');
+    console.log('!!! CART EMERGENCY CLEARED SUCCESSFULLY !!!');
+    return true;
   };
 });
