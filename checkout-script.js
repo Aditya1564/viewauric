@@ -76,18 +76,56 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Try auricCartItems first (primary cart storage)
             if (auricCartItems) {
-                cartItems = JSON.parse(auricCartItems);
-                console.log('Cart items loaded from auricCartItems:', cartItems.length);
+                try {
+                    const parsedItems = JSON.parse(auricCartItems);
+                    // Check if it's an array or object with items property
+                    if (Array.isArray(parsedItems)) {
+                        cartItems = parsedItems;
+                        console.log('Cart items loaded from auricCartItems (array):', cartItems.length);
+                    } else if (parsedItems && parsedItems.items && Array.isArray(parsedItems.items)) {
+                        cartItems = parsedItems.items;
+                        console.log('Cart items loaded from auricCartItems (object.items):', cartItems.length);
+                    }
+                } catch (e) {
+                    console.error('Error parsing auricCartItems:', e);
+                }
             } 
             // Then try auricCart
-            else if (auricCart) {
-                cartItems = JSON.parse(auricCart);
-                console.log('Cart items loaded from auricCart:', cartItems.length);
+            if (cartItems.length === 0 && auricCart) {
+                try {
+                    const parsedItems = JSON.parse(auricCart);
+                    // Check if it's an array or object with items property
+                    if (Array.isArray(parsedItems)) {
+                        cartItems = parsedItems;
+                        console.log('Cart items loaded from auricCart (array):', cartItems.length);
+                    } else if (parsedItems && parsedItems.items && Array.isArray(parsedItems.items)) {
+                        cartItems = parsedItems.items;
+                        console.log('Cart items loaded from auricCart (object.items):', cartItems.length);
+                    }
+                } catch (e) {
+                    console.error('Error parsing auricCart:', e);
+                }
             }
             // Finally check legacy storage
-            else if (localCartItems) {
-                cartItems = JSON.parse(localCartItems);
-                console.log('Cart items loaded from cartItems:', cartItems.length);
+            if (cartItems.length === 0 && localCartItems) {
+                try {
+                    const parsedItems = JSON.parse(localCartItems);
+                    // Check if it's an array or object with items property
+                    if (Array.isArray(parsedItems)) {
+                        cartItems = parsedItems;
+                        console.log('Cart items loaded from cartItems (array):', cartItems.length);
+                    } else if (parsedItems && parsedItems.items && Array.isArray(parsedItems.items)) {
+                        cartItems = parsedItems.items;
+                        console.log('Cart items loaded from cartItems (object.items):', cartItems.length);
+                    }
+                } catch (e) {
+                    console.error('Error parsing cartItems:', e);
+                }
+            }
+            
+            // Debug - check exact cart item structure
+            if (cartItems.length > 0) {
+                console.log('First cart item structure:', JSON.stringify(cartItems[0]));
             }
             
             // Always clear the productList first
