@@ -155,9 +155,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <div class="col-md-3 mb-3 mb-md-0">
                                     <label for="price_${item.productId}" class="form-label">Price</label>
                                     <div class="input-group">
-                                        <span class="input-group-text">$</span>
+                                        <span class="input-group-text">₹</span>
                                         <input type="number" class="form-control product-price" id="price_${item.productId}" 
-                                            name="price_${item.productId}" min="0.01" step="0.01" value="${(item.price / 100).toFixed(2)}" required>
+                                            name="price_${item.productId}" min="1" step="1" value="${item.price}" required>
                                     </div>
                                 </div>
                                 <div class="col-md-1 d-flex align-items-center justify-content-end mt-3 mt-md-0">
@@ -193,8 +193,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="col-md-3 mb-3 mb-md-0">
                                 <label for="price1" class="form-label">Price</label>
                                 <div class="input-group">
-                                    <span class="input-group-text">$</span>
-                                    <input type="number" class="form-control product-price" id="price1" name="price1" min="0.01" step="0.01" value="299.99" required>
+                                    <span class="input-group-text">₹</span>
+                                    <input type="number" class="form-control product-price" id="price1" name="price1" min="1" step="1" value="25999" required>
                                 </div>
                             </div>
                             <div class="col-md-1 d-flex align-items-center justify-content-end mt-3 mt-md-0">
@@ -277,8 +277,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="col-md-3 mb-3 mb-md-0">
                         <label for="price${productCount}" class="form-label">Price</label>
                         <div class="input-group">
-                            <span class="input-group-text">$</span>
-                            <input type="number" class="form-control product-price" id="price${productCount}" name="price${productCount}" min="0.01" step="0.01" required>
+                            <span class="input-group-text">₹</span>
+                            <input type="number" class="form-control product-price" id="price${productCount}" name="price${productCount}" min="1" step="1" required>
                         </div>
                     </div>
                     <div class="col-md-1 d-flex align-items-center justify-content-end mt-3 mt-md-0">
@@ -328,7 +328,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (productItems.length === 0) {
             orderSummary.innerHTML = '<p>No products added yet.</p>';
-            document.getElementById('orderTotal').textContent = '$0.00';
+            document.getElementById('orderTotal').textContent = '₹0';
             return;
         }
         
@@ -345,15 +345,15 @@ document.addEventListener('DOMContentLoaded', function() {
             summaryHTML += `
                 <tr>
                     <td>${productName}</td>
-                    <td>${quantity} × $${price.toFixed(2)}</td>
-                    <td class="text-end">$${productTotal.toFixed(2)}</td>
+                    <td>${quantity} × ₹${price}</td>
+                    <td class="text-end">₹${productTotal}</td>
                 </tr>
             `;
         });
         
         summaryHTML += '</tbody></table>';
         orderSummary.innerHTML = summaryHTML;
-        document.getElementById('orderTotal').textContent = `$${orderTotal.toFixed(2)}`;
+        document.getElementById('orderTotal').textContent = `₹${orderTotal}`;
     }
     
     // Handle order submission
@@ -589,8 +589,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <tr>
                     <td style="padding: 10px; text-align: left; border: 1px solid #ddd;">${productName}</td>
                     <td style="padding: 10px; text-align: center; border: 1px solid #ddd;">${quantity}</td>
-                    <td style="padding: 10px; text-align: right; border: 1px solid #ddd;">$${price.toFixed(2)}</td>
-                    <td style="padding: 10px; text-align: right; border: 1px solid #ddd;">$${total.toFixed(2)}</td>
+                    <td style="padding: 10px; text-align: right; border: 1px solid #ddd;">₹${price}</td>
+                    <td style="padding: 10px; text-align: right; border: 1px solid #ddd;">₹${total}</td>
                 </tr>
             `;
             
@@ -599,8 +599,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <tr>
                     <td>${productName}</td>
                     <td>${quantity}</td>
-                    <td>$${price.toFixed(2)}</td>
-                    <td>$${total.toFixed(2)}</td>
+                    <td>₹${price}</td>
+                    <td>₹${total}</td>
                 </tr>
             `;
         });
@@ -611,7 +611,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <tfoot>
                     <tr>
                         <td colspan="3" style="padding: 10px; text-align: right; border: 1px solid #ddd;"><strong>Total</strong></td>
-                        <td style="padding: 10px; text-align: right; border: 1px solid #ddd;"><strong>$${orderTotal.toFixed(2)}</strong></td>
+                        <td style="padding: 10px; text-align: right; border: 1px solid #ddd;"><strong>₹${orderTotal}</strong></td>
                     </tr>
                 </tfoot>
             </table>
@@ -623,7 +623,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <tfoot>
                     <tr>
                         <td colspan="3" class="text-end"><strong>Total</strong></td>
-                        <td><strong>$${orderTotal.toFixed(2)}</strong></td>
+                        <td><strong>₹${orderTotal}</strong></td>
                     </tr>
                 </tfoot>
             </table>
