@@ -17,13 +17,44 @@
         // Direct check for cart clearing flags from checkout
         (function() {
             function checkCartShouldBeCleared() {
-                if (localStorage.getItem('orderCompleted') === 'true' || 
-                    localStorage.getItem('cartEmergencyCleared') === 'true' ||
-                    localStorage.getItem('pendingCartClear') === 'true') {
-                    
+                // Check if order was just completed within last 10 minutes (600,000 ms)
+                const orderCompleted = localStorage.getItem('orderCompleted') === 'true';
+                const orderCompletedTime = parseInt(localStorage.getItem('orderCompletedTime') || '0');
+                const orderJustCompleted = orderCompleted && 
+                    (Date.now() - orderCompletedTime < 600000); // Within 10 minutes
+                
+                // Check emergency clear flags with time limit
+                const cartEmergencyCleared = localStorage.getItem('cartEmergencyCleared') === 'true';
+                const cartEmergencyClearTime = parseInt(localStorage.getItem('cartEmergencyClearTime') || '0');
+                const emergencyClearJustHappened = cartEmergencyCleared && 
+                    (Date.now() - cartEmergencyClearTime < 600000); // Within 10 minutes
+                
+                // Pending cart clear flag
+                const pendingCartClear = localStorage.getItem('pendingCartClear') === 'true';
+                
+                // Only clear if one of the flags is set AND it happened recently
+                if (orderJustCompleted || emergencyClearJustHappened || pendingCartClear) {
                     console.log('*** EMERGENCY DETECTED: Cart needs to be cleared immediately ***');
+                    console.log('Conditions:', {
+                        orderJustCompleted,
+                        emergencyClearJustHappened,
+                        pendingCartClear
+                    });
                     return true;
                 }
+                
+                // If order was completed but it was a while ago, reset the flags
+                if (orderCompleted && !orderJustCompleted) {
+                    console.log('Order was completed, but it was a while ago. Resetting flags.');
+                    localStorage.setItem('orderCompleted', 'false');
+                }
+                
+                // If emergency clear was set but it was a while ago, reset the flags
+                if (cartEmergencyCleared && !emergencyClearJustHappened) {
+                    console.log('Emergency clear was set, but it was a while ago. Resetting flags.');
+                    localStorage.setItem('cartEmergencyCleared', 'false');
+                }
+                
                 return false;
             }
             
@@ -91,6 +122,9 @@
                     });
                     
                     console.log('Direct DOM manipulation complete');
+                    
+                    // Reset the pendingCartClear flag after successfully clearing
+                    localStorage.setItem('pendingCartClear', 'false');
                 }, 100);
             }
         })();
