@@ -17,6 +17,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update order summary on page load
     setTimeout(updateOrderSummary, 100);
     
+    // Add event listener for confirmation modal close button
+    document.getElementById('closeConfirmationBtn').addEventListener('click', function() {
+        // Redirect to homepage
+        window.location.href = 'index.html';
+    });
+    
     // Initialize EmailJS with credentials from environment variables
     function initEmailJS() {
         // These values come from environment variables set in the server
@@ -330,6 +336,33 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
             updateOrderSummary();
+            
+            // Clear the cart in localStorage
+            console.log('Order completed successfully, clearing cart');
+            localStorage.removeItem('auricCart');
+            localStorage.removeItem('auricCartItems');
+            
+            // If Firebase auth is available, clear Firestore cart too
+            if (typeof auth !== 'undefined' && auth && auth.currentUser) {
+                try {
+                    // Clear Firestore cart
+                    console.log('User is logged in, clearing Firestore cart');
+                    const userId = auth.currentUser.uid;
+                    db.collection('carts').doc(userId).set({
+                        items: [],
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        lastOperation: 'clear',
+                        operationTimestamp: Date.now(),
+                        lastSyncedDevice: navigator.userAgent,
+                        deviceId: localStorage.getItem('auricCartDeviceId') || 'checkout-device',
+                        lastSyncedAt: new Date().toISOString(),
+                        cartVersion: Date.now().toString(),
+                        itemCount: 0
+                    });
+                } catch (err) {
+                    console.error('Failed to clear Firestore cart, but order was successful:', err);
+                }
+            }
             
             // Show confirmation modal
             document.getElementById('orderReference').textContent = orderReference;
