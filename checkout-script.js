@@ -1286,16 +1286,31 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Handle Razorpay payment
     async function handleRazorpayPayment(orderReference, amount) {
+        console.log("Starting Razorpay payment process for amount:", amount);
+        
         // Convert amount to paise (Razorpay expects amount in smallest currency unit)
         const amountInPaise = Math.round(amount * 100);
+        console.log("Amount in paise:", amountInPaise);
         
         // Get user details for Razorpay options
         const name = document.getElementById('firstName').value + ' ' + document.getElementById('lastName').value;
         const email = document.getElementById('email').value;
         const phone = document.getElementById('phone').value;
         
+        console.log("Customer details for Razorpay:", { name, email, phone });
+        
+        // Check if Razorpay script is loaded
+        if (typeof Razorpay === 'undefined') {
+            console.error("Razorpay script is not loaded");
+            alert("Payment gateway not available. Please try again later or choose a different payment method.");
+            throw new Error("Razorpay script not loaded");
+        }
+        
+        console.log("Razorpay script is loaded, creating order");
+        
         // Create a Razorpay order first
         try {
+            console.log("Sending request to create Razorpay order");
             const response = await fetch('/api/create-razorpay-order', {
                 method: 'POST',
                 headers: {
@@ -1309,7 +1324,13 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             
             if (!response.ok) {
-                throw new Error('Failed to create Razorpay order');
+                const errorData = await response.json().catch(() => ({}));
+                console.error('Server response for Razorpay order creation:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    errorData: errorData
+                });
+                throw new Error(`Failed to create Razorpay order: ${response.status} ${response.statusText}`);
             }
             
             const orderData = await response.json();
@@ -1350,8 +1371,26 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 };
                 
-                const rzp = new Razorpay(options);
-                rzp.open();
+                console.log("Creating Razorpay instance with options:", options);
+                
+                try {
+                    const rzp = new Razorpay(options);
+                    console.log("Razorpay instance created successfully");
+                    
+                    console.log("Opening Razorpay payment modal");
+                    rzp.on('payment.failed', function (response){
+                        console.error('Payment failed:', response.error);
+                        alert('Payment failed: ' + response.error.description);
+                        reject(new Error('Payment failed: ' + response.error.description));
+                    });
+                    
+                    rzp.open();
+                    console.log("Razorpay open() method called");
+                } catch (error) {
+                    console.error("Error creating Razorpay instance or opening modal:", error);
+                    alert("Payment gateway error: " + error.message);
+                    reject(error);
+                }
             });
         } catch (error) {
             console.error('Error in Razorpay process:', error);
