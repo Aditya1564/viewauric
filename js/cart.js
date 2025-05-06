@@ -893,6 +893,67 @@ document.addEventListener('DOMContentLoaded', function() {
         return Promise.reject(new Error('No user ID provided'));
       }
       
+      // CRITICAL: Check for order completion or emergency clear flags FIRST
+      const orderCompleted = localStorage.getItem('orderCompleted') === 'true';
+      const orderJustPlaced = localStorage.getItem('orderJustPlaced') === 'true';
+      const cartEmergencyCleared = localStorage.getItem('cartEmergencyCleared') === 'true';
+      const pendingCartClear = localStorage.getItem('pendingCartClear') === 'true';
+      const razorpaySuccessful = localStorage.getItem('razorpaySuccessfulPayment') === 'true';
+      
+      // If any emergency flag is set, we need to send an empty cart to Firestore
+      if (orderCompleted || orderJustPlaced || cartEmergencyCleared || pendingCartClear || razorpaySuccessful) {
+        console.log('EMERGENCY DETECTED: Using forced empty cart in saveCartToFirestore');
+        console.log('Flags status:', {
+          orderCompleted,
+          orderJustPlaced,
+          cartEmergencyCleared,
+          pendingCartClear,
+          razorpaySuccessful
+        });
+        
+        // Set flag to prevent our own writes from triggering a sync loop
+        this.isUpdatingFirestore = true;
+        
+        // Create special emergency device ID to track the emergency clear
+        this.deviceId = 'emergency_clear_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+        localStorage.setItem('auricCartDeviceId', this.deviceId);
+        
+        // Write an empty cart to Firestore with special emergency flags
+        return db.collection('carts').doc(userId).set({
+          items: [],
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          lastOperation: 'emergency_clear',
+          operationTimestamp: Date.now(),
+          lastSyncedDevice: navigator.userAgent,
+          deviceId: this.deviceId,
+          lastSyncedAt: new Date().toISOString(),
+          cartVersion: Date.now().toString(),
+          itemCount: 0,
+          emergencyClear: true,
+          emergencyClearTime: Date.now(),
+          emergencyClearReason: orderCompleted ? 'order_completed' :
+                               orderJustPlaced ? 'order_just_placed' :
+                               cartEmergencyCleared ? 'cart_emergency_cleared' :
+                               pendingCartClear ? 'pending_cart_clear' :
+                               razorpaySuccessful ? 'razorpay_payment_successful' : 'unknown'
+        }, { merge: false })
+        .then(() => {
+          console.log('EMERGENCY CLEAR: Empty cart saved to Firestore successfully');
+          
+          // Clear updating flag after a short delay
+          setTimeout(() => {
+            this.isUpdatingFirestore = false;
+          }, 500);
+          
+          return Promise.resolve();
+        })
+        .catch((error) => {
+          console.error('Error saving empty cart to Firestore during emergency clear:', error);
+          this.isUpdatingFirestore = false;
+          return Promise.reject(error);
+        });
+      }
+      
       console.log('Attempting to save cart to Firestore for user:', userId);
       
       // First, ensure we are saving to localStorage as backup
@@ -1877,8 +1938,10 @@ document.addEventListener('DOMContentLoaded', function() {
               const serverData = doc.data();
               
               // CRITICAL CHECK #1: Look for emergency clear flags
-              if (serverData.emergency_cleared === true || 
+              if (serverData.emergencyClear === true || 
+                  serverData.emergency_cleared === true || 
                   serverData.operation === 'emergency_clear' || 
+                  serverData.lastOperation === 'emergency_clear' ||
                   serverData.operation === 'force_clear' ||
                   serverData.force_cleared === true) {
                 
@@ -1887,6 +1950,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Mark in localStorage that emergency clear occurred
                 localStorage.setItem('cartEmergencyCleared', 'true');
                 localStorage.setItem('cartEmergencyClearTime', Date.now().toString());
+                
+                // Clear the cart items immediately in memory
+                this.items = [];
+                
+                // Clear all cart-related localStorage items
+                const cartKeys = [
+                  'auricCart', 'auricCartItems', 'cartItems', 'cart', 
+                  'checkout-cart', 'auric-cart-data'
+                ];
+                
+                cartKeys.forEach(key => localStorage.removeItem(key));
+                
+                // Reset localStorage cart to empty array
+                localStorage.setItem('auricCart', JSON.stringify([]));
+                localStorage.setItem('auricCartItems', JSON.stringify([]));
+                
+                // Update UI to reflect empty cart
+                this.updateCartUI();
+                this.renderCartItems();
+                
+                // Save the empty cart back to Firestore to confirm the clearing
+                this.saveCartToFirestore(userId);
+                
+                // Skip further processing of this update
+                return;
                 
                 // Always clear the local cart when emergency clear is detected
                 this.items = [];
