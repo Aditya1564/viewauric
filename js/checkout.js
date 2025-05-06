@@ -10,8 +10,9 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Initialize EmailJS with the public key provided by the user
   try {
+    // Initialize with public key and specify default service
     emailjs.init("eWkroiiJhLnSK1_Pn");
-    console.log('EmailJS initialized successfully');
+    console.log('EmailJS initialized successfully with public key: eWkroiiJhLnSK1_Pn');
   } catch (error) {
     console.error('Error initializing EmailJS:', error);
   }
@@ -25,8 +26,9 @@ document.addEventListener('DOMContentLoaded', function() {
       currencyCode: 'INR',
       currencySymbol: '₹',
       emailServiceId: 'service_prdjwt4',
-      ownerTemplateId: 'template_zzlllxm',
-      customerTemplateId: 'template_guvarr1',
+      ownerTemplateId: 'template_zzlllxm',  // Template for sending notification to store owner
+      customerTemplateId: 'template_guvarr1', // Template for sending receipt to customer
+      ownerEmail: 'auric@gmail.com', // Shop owner email address
     },
     
     // Cart data
@@ -586,10 +588,13 @@ document.addEventListener('DOMContentLoaded', function() {
         return `${item.name} x ${item.quantity} - ₹${(item.price * item.quantity).toLocaleString('en-IN')}`;
       }).join('<br>');
       
-      // Create parameters for customer template
+      // Create parameters for customer template - ensure recipient is explicitly set
       const customerTemplateParams = {
         to_name: orderData.customerName,
         to_email: orderData.customerEmail, // Using customer's email from the form
+        reply_to: this.config.ownerEmail, // Shop email for customer to reply to
+        recipient: orderData.customerEmail, // Explicitly set recipient as customer email
+        send_to: orderData.customerEmail, // Additional parameter to ensure correct routing
         order_id: orderData.orderId,
         order_date: new Date().toLocaleDateString('en-IN'),
         items: itemsHtml,
@@ -600,10 +605,13 @@ document.addEventListener('DOMContentLoaded', function() {
         shipping_address: `${orderData.address}, ${orderData.city}, ${orderData.state}, ${orderData.postalCode}, ${orderData.country}`
       };
       
-      // Create parameters for store owner template
+      // Create parameters for store owner template - ensure recipient is shop owner
       const ownerTemplateParams = {
         customer_name: orderData.customerName,
-        customer_email: orderData.customerEmail, // Using customer's email from the form
+        customer_email: orderData.customerEmail,
+        reply_to: orderData.customerEmail, // Let owner reply to customer
+        recipient: this.config.ownerEmail, // Shop owner email from config
+        send_to: this.config.ownerEmail, // Additional parameter to ensure correct routing
         customer_phone: orderData.phone,
         order_id: orderData.orderId,
         order_date: new Date().toLocaleDateString('en-IN'),
@@ -613,23 +621,23 @@ document.addEventListener('DOMContentLoaded', function() {
         shipping_address: `${orderData.address}, ${orderData.city}, ${orderData.state}, ${orderData.postalCode}, ${orderData.country}`
       };
       
-      // Log template information
+      // Log template information with explicit routing information
       console.log('EmailJS template configuration:', {
         service_id: this.config.emailServiceId,
-        customer_template_id: this.config.customerTemplateId,
-        owner_template_id: this.config.ownerTemplateId
+        customer_template_id: `${this.config.customerTemplateId} (sending to: ${orderData.customerEmail})`,
+        owner_template_id: `${this.config.ownerTemplateId} (sending to: ${this.config.ownerEmail})`
       });
       
-      // Send parameters to customer email template on EmailJS service
-      console.log('Sending parameters to customer template:', customerTemplateParams);
+      // First, send the customer email - this template should be configured to send to the customer
+      console.log(`Sending customer receipt to: ${orderData.customerEmail}`);
       this.sendTemplateParameters(
         this.config.emailServiceId, 
         this.config.customerTemplateId, 
         customerTemplateParams
       );
       
-      // Send parameters to owner email template on EmailJS service
-      console.log('Sending parameters to owner template:', ownerTemplateParams);
+      // Then, send the owner notification - this template should be configured to send to the owner
+      console.log(`Sending owner notification to: ${this.config.ownerEmail}`);
       this.sendTemplateParameters(
         this.config.emailServiceId, 
         this.config.ownerTemplateId, 
@@ -640,14 +648,23 @@ document.addEventListener('DOMContentLoaded', function() {
     /**
      * Helper method to send parameters to an EmailJS template
      * This just sends the parameters - EmailJS handles the actual email delivery
+     * Using explicit destination management to avoid routing issues
      */
     sendTemplateParameters: function(serviceId, templateId, parameters) {
-      emailjs.send(serviceId, templateId, parameters)
+      // Clone the parameters to avoid modifying the original
+      const templateParams = {...parameters};
+      
+      // Store the recipient email before sending to make explicit in console
+      const recipient = templateParams.recipient || templateParams.to_email;
+      console.log(`Sending template ${templateId} parameters for recipient: ${recipient}`);
+      
+      // Send the parameters to EmailJS service
+      emailjs.send(serviceId, templateId, templateParams)
         .then(function(response) {
-          console.log('Template parameters sent successfully:', response);
+          console.log(`Template parameters sent successfully to ${recipient}:`, response);
         })
         .catch(function(error) {
-          console.error('Error sending template parameters:', error);
+          console.error(`Error sending template parameters to ${recipient}:`, error);
         });
     },
     
