@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="checkout-styles.css">
     <!-- EmailJS SDK -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <!-- Razorpay SDK -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <!-- Site Styles -->
     <link rel="stylesheet" href="css/styles.css?v=1.0.4">
     <link rel="stylesheet" href="css/responsive.css?v=1.0.4">
@@ -80,6 +82,12 @@
                                         Cash on Delivery
                                     </label>
                                 </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="razorpay" value="Razorpay">
+                                    <label class="form-check-label" for="razorpay">
+                                        Pay Online with Razorpay <img src="https://razorpay.com/assets/razorpay-logo.svg" alt="Razorpay" style="height: 20px; margin-left: 5px;">
+                                    </label>
+                                </div>
                             </div>
 
                             <div class="mb-4">
@@ -146,6 +154,10 @@
                         <p>Your order has been placed successfully. We'll send you a confirmation email shortly.</p>
                         <hr>
                         <p class="mb-0">Order Reference: <span id="orderReference"></span></p>
+                        <div id="paymentDetails" class="mt-2" style="display: none;">
+                            <p class="mb-0"><strong>Payment ID:</strong> <span id="paymentId"></span></p>
+                            <p class="mb-0"><strong>Payment Method:</strong> <span id="paymentMethod"></span></p>
+                        </div>
                     </div>
                     <div id="orderDetails"></div>
                 </div>
