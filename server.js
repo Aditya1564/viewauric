@@ -1,14 +1,19 @@
-// Enhanced no-cache HTTP server with Razorpay API support
+// Enhanced no-cache HTTP server with Razorpay API support and EmailJS proxy
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const url = require('url');
+const https = require('https');
 
 const PORT = 5000;
 
 // Razorpay API keys
 const RAZORPAY_KEY_ID = "rzp_test_qZWULE2MoPHZJv";
 const RAZORPAY_SECRET = "dwhI00HuTIRk5T61AyUq1Bhh";
+
+// EmailJS Configuration
+const EMAILJS_PUBLIC_KEY = "eWkroiiJhLnSK1_Pn";
+const EMAILJS_API_URL = "api.emailjs.com";
 
 // MIME types for different file extensions
 const MIME_TYPES = {
@@ -102,6 +107,71 @@ const server = http.createServer(async (req, res) => {
     }
   }
   
+  // EmailJS proxy endpoint
+  if (req.method === 'POST' && pathname === '/api/send-email') {
+    try {
+      // Get the body from the client request
+      const body = await getRequestBody(req);
+      
+      console.log('Proxying EmailJS request:', {
+        serviceId: body.service_id,
+        templateId: body.template_id,
+        userId: body.user_id,
+      });
+      
+      // Create options for the HTTPS request to EmailJS
+      const options = {
+        hostname: EMAILJS_API_URL,
+        port: 443,
+        path: '/api/v1.0/email/send',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      };
+      
+      // Create a new promise for the HTTPS request
+      const emailPromise = new Promise((resolve, reject) => {
+        const emailReq = https.request(options, (emailRes) => {
+          let data = '';
+          
+          emailRes.on('data', (chunk) => {
+            data += chunk;
+          });
+          
+          emailRes.on('end', () => {
+            resolve({
+              status: emailRes.statusCode,
+              data: data
+            });
+          });
+        });
+        
+        emailReq.on('error', (error) => {
+          console.error('Error sending email via proxy:', error);
+          reject(error);
+        });
+        
+        // Write JSON data to request body
+        emailReq.write(JSON.stringify(body));
+        emailReq.end();
+      });
+      
+      // Wait for the EmailJS response
+      const emailResponse = await emailPromise;
+      
+      // Return the EmailJS response to the client
+      res.writeHead(emailResponse.status, { 'Content-Type': 'application/json' });
+      res.end(emailResponse.data);
+      return;
+    } catch (error) {
+      console.error('Error in email proxy:', error);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Failed to send email' }));
+      return;
+    }
+  }
+  
   // Handle regular file requests
   let filePath = pathname === '/' ? './index.html' : '.' + pathname;
   
@@ -133,9 +203,11 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log('\n--- No-cache server with Razorpay API support starting ---');
+  console.log('\n--- No-cache server with Razorpay and EmailJS support starting ---');
   console.log(`Server running at http://0.0.0.0:${PORT}/`);
   console.log(`Local files will not be cached by the browser`);
-  console.log(`Razorpay API endpoints: /api/create-razorpay-order`);
+  console.log(`API endpoints:`);
+  console.log(`  - Razorpay: /api/create-razorpay-order`);
+  console.log(`  - EmailJS proxy: /api/send-email`);
   console.log(`Press Ctrl+C to stop the server\n`);
 });

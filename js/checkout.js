@@ -8,18 +8,9 @@
 document.addEventListener('DOMContentLoaded', function() {
   console.log('Checkout.js initialized at:', new Date().toISOString());
   
-  // Initialize EmailJS with the public key provided by the user and enable debug mode
-  try {
-    // Initialize with public key, enable debug mode to see all API calls in console
-    emailjs.init("eWkroiiJhLnSK1_Pn", {debug: true});
-    // Explicitly set the EmailJS URL to avoid issues with relative paths
-    (function(){
-      emailjs._origin = 'https://api.emailjs.com';
-    })();
-    console.log('EmailJS initialized successfully with public key: eWkroiiJhLnSK1_Pn (debug mode enabled)');
-  } catch (error) {
-    console.error('Error initializing EmailJS:', error);
-  }
+  // Note: We're no longer initializing EmailJS directly
+  // Instead, we're using our server's /api/send-email proxy endpoint
+  console.log('Using server proxy for email functionality');
   
   // Set up checkout object with methods for handling the checkout process
   const Checkout = {
@@ -692,25 +683,49 @@ document.addEventListener('DOMContentLoaded', function() {
         shipping_address: `${orderData.address}, ${orderData.city}, ${orderData.state}, ${orderData.postalCode}, ${orderData.country}`
       };
       
-      // Send customer email using the existing customer template
+      // Send customer email via our server proxy
       console.log('Sending customer email with data:', customerEmail);
-      emailjs.send(this.config.emailServiceId, this.config.customerTemplateId, customerEmail)
-        .then(response => {
-          console.log('✅ Customer email sent successfully:', response);
+      fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          service_id: this.config.emailServiceId,
+          template_id: this.config.customerTemplateId,
+          user_id: 'eWkroiiJhLnSK1_Pn',
+          template_params: customerEmail
         })
-        .catch(error => {
-          console.error('❌ Error sending customer email:', error);
-        });
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('✅ Customer email sent successfully via proxy:', data);
+      })
+      .catch(error => {
+        console.error('❌ Error sending customer email via proxy:', error);
+      });
       
-      // Send owner email using the existing owner template
+      // Send owner email via our server proxy
       console.log('Sending owner email with data:', ownerEmail);
-      emailjs.send(this.config.emailServiceId, this.config.ownerTemplateId, ownerEmail)
-        .then(response => {
-          console.log('✅ Owner email sent successfully:', response);
+      fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          service_id: this.config.emailServiceId,
+          template_id: this.config.ownerTemplateId,
+          user_id: 'eWkroiiJhLnSK1_Pn',
+          template_params: ownerEmail
         })
-        .catch(error => {
-          console.error('❌ Error sending owner email:', error);
-        });
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('✅ Owner email sent successfully via proxy:', data);
+      })
+      .catch(error => {
+        console.error('❌ Error sending owner email via proxy:', error);
+      });
     },
     
     /**
