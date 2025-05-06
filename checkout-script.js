@@ -1,21 +1,12 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Form submission
     document.getElementById('checkoutForm').addEventListener('submit', handleOrderSubmit);
-    
-    // Add product button
-    document.getElementById('addProduct').addEventListener('click', addProduct);
 
     // Initialize EmailJS with credentials from environment variables
     initEmailJS();
     
-    // Add event listeners to initial product inputs
-    setupProductListeners();
-    
-    // Load cart items if available
-    loadCartItems();
-
-    // Update order summary on page load
-    setTimeout(updateOrderSummary, 100);
+    // Update order summary with cart items
+    updateOrderSummary();
     
     // Add event listener for confirmation modal close button
     document.getElementById('closeConfirmationBtn').addEventListener('click', function() {
