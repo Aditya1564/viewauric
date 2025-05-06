@@ -568,7 +568,7 @@ document.addEventListener('DOMContentLoaded', function() {
     },
     
     /**
-     * Send separate confirmation emails to customer and store owner using direct EmailJS
+     * Placeholder for email functionality (completely removed)
      */
     sendConfirmationEmails: function(orderData) {
       console.log('Email functionality has been completely removed');
