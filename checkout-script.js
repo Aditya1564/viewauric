@@ -488,22 +488,18 @@ document.addEventListener('DOMContentLoaded', function() {
             // Reset form
             document.getElementById('checkoutForm').reset();
             
-            // Update order summary
-            const productItems = document.querySelectorAll('.product-item');
-            if (productItems.length > 1) {
-                productItems.forEach((item, index) => {
-                    if (index > 0) {
-                        item.remove();
-                    }
-                });
-            }
-            updateOrderSummary();
-            
             // Clear the cart in localStorage
             console.log('Order completed successfully, clearing cart');
             localStorage.removeItem('auricCart');
             localStorage.removeItem('auricCartItems');
             localStorage.removeItem('cartItems'); // Clear legacy cart also
+            
+            // Clear the order summary display
+            const orderSummary = document.getElementById('orderSummary');
+            if (orderSummary) {
+                orderSummary.innerHTML = '<p>No products added yet.</p>';
+                document.getElementById('orderTotal').textContent = '₹0';
+            }
             
             // If we have direct access to Cart API from cart.js, use it
             if (typeof clearCart === 'function') {
@@ -539,7 +535,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Show confirmation modal
             document.getElementById('orderReference').textContent = orderReference;
-            document.getElementById('orderDetails').innerHTML = orderDetails.orderSummaryHTML;
+            document.getElementById('orderDetails').innerHTML = orderDetails.modalSummaryHTML;
             
             const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
             confirmationModal.show();
@@ -568,39 +564,10 @@ document.addEventListener('DOMContentLoaded', function() {
             return false;
         }
         
-        // Check if products have names, quantities, and prices
-        const productItems = document.querySelectorAll('.product-item');
-        let isValid = true;
-        
-        productItems.forEach(item => {
-            const nameInput = item.querySelector('.product-name');
-            const quantityInput = item.querySelector('.product-quantity');
-            const priceInput = item.querySelector('.product-price');
-            
-            if (!nameInput.value) {
-                nameInput.setCustomValidity('Please enter a product name');
-                isValid = false;
-            } else {
-                nameInput.setCustomValidity('');
-            }
-            
-            if (!quantityInput.value || parseInt(quantityInput.value) < 1) {
-                quantityInput.setCustomValidity('Quantity must be at least 1');
-                isValid = false;
-            } else {
-                quantityInput.setCustomValidity('');
-            }
-            
-            if (!priceInput.value || parseFloat(priceInput.value) <= 0) {
-                priceInput.setCustomValidity('Please enter a valid price');
-                isValid = false;
-            } else {
-                priceInput.setCustomValidity('');
-            }
-        });
-        
-        if (!isValid) {
-            form.reportValidity();
+        // Check if there are any items in the cart
+        const cartItems = JSON.parse(localStorage.getItem('auricCartItems') || '[]');
+        if (cartItems.length === 0) {
+            showError('Your cart is empty. Please add items to your cart before checking out.');
             return false;
         }
         
