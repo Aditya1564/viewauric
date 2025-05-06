@@ -190,6 +190,11 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Always clear the productList first
             const productList = document.getElementById('productList');
+            if (!productList) {
+                console.error('Product list element not found in the DOM. Page may not be fully loaded.');
+                return; // Exit early if element is not found
+            }
+            
             productList.innerHTML = '';
             
             if (cartItems.length > 0) {
@@ -197,6 +202,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Add products from cart
                 cartItems.forEach(item => {
+                    if (!item || !item.productId) {
+                        console.error('Invalid cart item:', item);
+                        return; // Skip invalid items
+                    }
+                    
                     const productItem = document.createElement('div');
                     productItem.className = 'product-item card mb-3';
                     productItem.innerHTML = `
@@ -205,19 +215,19 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <div class="col-md-6 mb-3 mb-md-0">
                                     <label for="product_${item.productId}" class="form-label">Product Name</label>
                                     <input type="text" class="form-control product-name" id="product_${item.productId}" 
-                                        name="product_${item.productId}" value="${item.name}" required>
+                                        name="product_${item.productId}" value="${item.name || ''}" required>
                                 </div>
                                 <div class="col-md-2 mb-3 mb-md-0">
                                     <label for="quantity_${item.productId}" class="form-label">Quantity</label>
                                     <input type="number" class="form-control product-quantity" id="quantity_${item.productId}" 
-                                        name="quantity_${item.productId}" min="1" value="${item.quantity}" required>
+                                        name="quantity_${item.productId}" min="1" value="${item.quantity || 1}" required>
                                 </div>
                                 <div class="col-md-3 mb-3 mb-md-0">
                                     <label for="price_${item.productId}" class="form-label">Price</label>
                                     <div class="input-group">
                                         <span class="input-group-text">₹</span>
                                         <input type="number" class="form-control product-price" id="price_${item.productId}" 
-                                            name="price_${item.productId}" min="1" step="1" value="${item.price}" required>
+                                            name="price_${item.productId}" min="1" step="1" value="${item.price || 0}" required>
                                     </div>
                                 </div>
                                 <div class="col-md-1 d-flex align-items-center justify-content-end mt-3 mt-md-0">
@@ -272,13 +282,70 @@ document.addEventListener('DOMContentLoaded', function() {
                 productList.appendChild(defaultProduct);
             }
             
-            // Add event listeners to all products
-            setupProductListeners();
-            
-            // Update order summary
-            updateOrderSummary();
+            try {
+                // Add event listeners to all products
+                setupProductListeners();
+                
+                // Update order summary
+                updateOrderSummary();
+            } catch (listenerError) {
+                console.error('Error setting up listeners or updating summary:', listenerError);
+            }
         } catch (error) {
             console.error('Error loading cart items:', error);
+            
+            // Create a fallback product if there's an error with loading cart items
+            try {
+                const productList = document.getElementById('productList');
+                if (productList) {
+                    productList.innerHTML = ''; // Clear any partial content
+                    
+                    // Add a default product as fallback
+                    const defaultProduct = document.createElement('div');
+                    defaultProduct.className = 'product-item card mb-3';
+                    defaultProduct.innerHTML = `
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-6 mb-3 mb-md-0">
+                                    <label for="product1" class="form-label">Product Name</label>
+                                    <input type="text" class="form-control product-name" id="product1" name="product1" value="Diamond Ring" required>
+                                </div>
+                                <div class="col-md-2 mb-3 mb-md-0">
+                                    <label for="quantity1" class="form-label">Quantity</label>
+                                    <input type="number" class="form-control product-quantity" id="quantity1" name="quantity1" min="1" value="1" required>
+                                </div>
+                                <div class="col-md-3 mb-3 mb-md-0">
+                                    <label for="price1" class="form-label">Price</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₹</span>
+                                        <input type="number" class="form-control product-price" id="price1" name="price1" min="1" step="1" value="25999" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-1 d-flex align-items-center justify-content-end mt-3 mt-md-0">
+                                    <button type="button" class="btn btn-danger btn-sm remove-product" disabled>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                                            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                                            <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    productList.appendChild(defaultProduct);
+                    
+                    // Try to set up listeners and update summary
+                    try {
+                        setupProductListeners();
+                        updateOrderSummary();
+                    } catch (e) {
+                        console.error('Error with fallback product setup:', e);
+                    }
+                }
+            } catch (fallbackError) {
+                console.error('Fallback error handling failed:', fallbackError);
+            }
         }
     }
     
