@@ -93,15 +93,29 @@ const server = http.createServer(async (req, res) => {
       console.log('Creating Razorpay order with data:', body);
       
       // Make an actual request to Razorpay API
+      // Validate the amount is a positive number
+      if (!body.amount || isNaN(body.amount) || body.amount <= 0) {
+        console.error('Invalid amount provided:', body.amount);
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ 
+          error: 'Invalid amount',
+          details: 'Amount must be a positive number'
+        }));
+        return;
+      }
+      
+      console.log('Validated amount:', body.amount);
+      
       const razorpayData = {
-        amount: body.amount,
+        amount: Math.round(body.amount), // Ensure it's a whole number
         currency: body.currency || 'INR',
         receipt: body.receipt || 'receipt_' + Date.now(),
         notes: {
           orderSource: 'Auric Jewelry Website',
           customerName: body.name || 'Customer',
           customerEmail: body.email || '',
-          customerPhone: body.phone || ''
+          customerPhone: body.phone || '',
+          orderReference: body.receipt || ''
         }
       };
       

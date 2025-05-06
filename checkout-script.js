@@ -824,9 +824,16 @@ document.addEventListener('DOMContentLoaded', function() {
             // If Razorpay is selected, handle Razorpay payment first
             if (isRazorpaySelected) {
                 try {
-                    await handleRazorpayPayment(orderReference, orderDetails.orderTotal);
+                    console.log("Payment method: Razorpay selected");
+                    
+                    // orderDetails.orderTotal is the actual number, no need to parse
+                    const orderTotalNumber = orderDetails.orderTotal;
+                    
+                    console.log("Processing Razorpay payment for amount:", orderTotalNumber);
+                    await handleRazorpayPayment(orderReference, orderTotalNumber);
                 } catch (error) {
                     console.error("Razorpay payment failed:", error);
+                    alert("Payment failed: " + error.message);
                     throw new Error("Payment failed. Please try again.");
                 }
             }
@@ -1288,8 +1295,15 @@ document.addEventListener('DOMContentLoaded', function() {
     async function handleRazorpayPayment(orderReference, amount) {
         console.log("Starting Razorpay payment process for amount:", amount);
         
+        // Ensure amount is a number
+        const numericAmount = parseFloat(amount);
+        if (isNaN(numericAmount)) {
+            console.error("Invalid amount value:", amount);
+            throw new Error("Invalid payment amount");
+        }
+        
         // Convert amount to paise (Razorpay expects amount in smallest currency unit)
-        const amountInPaise = Math.round(amount * 100);
+        const amountInPaise = Math.round(numericAmount * 100);
         console.log("Amount in paise:", amountInPaise);
         
         // Get user details for Razorpay options
