@@ -113,6 +113,54 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize email functionality
     initEmailJS();
     
+    // Debug Razorpay
+    console.log("Checking Razorpay SDK initialization...");
+    if (typeof Razorpay === 'undefined') {
+        console.error("Razorpay SDK not loaded");
+    } else {
+        console.log("Razorpay SDK is available");
+        
+        // Add a test button for creating Razorpay instance
+        const testButtonContainer = document.createElement('div');
+        testButtonContainer.style.position = 'fixed';
+        testButtonContainer.style.top = '10px';
+        testButtonContainer.style.right = '10px';
+        testButtonContainer.style.zIndex = '9999';
+        
+        const testButton = document.createElement('button');
+        testButton.className = 'btn btn-sm btn-warning';
+        testButton.textContent = 'Test Razorpay';
+        testButton.onclick = function() {
+            try {
+                const testOptions = {
+                    key: 'rzp_test_qZWULE2MoPHZJv',
+                    amount: 10000, // 100 INR in paise
+                    currency: 'INR',
+                    name: 'Auric Jewelry',
+                    description: 'Test Payment',
+                    handler: function(response) {
+                        console.log("Test payment successful:", response);
+                        alert("Test payment successful");
+                    }
+                };
+                
+                console.log("Creating test Razorpay instance with options:", testOptions);
+                const rzp = new Razorpay(testOptions);
+                console.log("Test Razorpay instance created successfully");
+                
+                console.log("Opening test Razorpay payment modal");
+                rzp.open();
+                console.log("Test Razorpay open() method called");
+            } catch (error) {
+                console.error("Error in test Razorpay:", error);
+                alert("Test Razorpay error: " + error.message);
+            }
+        };
+        
+        testButtonContainer.appendChild(testButton);
+        document.body.appendChild(testButtonContainer);
+    }
+    
     // Note: updateOrderSummary will be called after loadCartItems only if user is authenticated
     
     // Add event listener for confirmation modal close button
