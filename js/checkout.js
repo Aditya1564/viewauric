@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
       emailServiceId: 'service_prdjwt4',
       ownerTemplateId: 'template_zzlllxm',  // Template for sending notification to store owner
       customerTemplateId: 'template_guvarr1', // Template for sending receipt to customer
-      ownerEmail: 'auric@gmail.com', // Shop owner email address
+      ownerEmail: 'auricbysubha.web@gmail.com', // Shop owner email address
     },
     
     // Cart data
