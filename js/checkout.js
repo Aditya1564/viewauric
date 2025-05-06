@@ -624,13 +624,18 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
       `;
       
-      // Create customer email data
+      // Create customer email data - match the template expected variables
       const customerEmail = {
-        from_name: "Auric Jewelry",
         to_name: orderData.customerName,
         to_email: orderData.customerEmail,
-        subject: `Your Auric Jewelry Order Confirmation - ${orderData.orderId}`,
-        message_html: customerHtml
+        order_id: orderData.orderId,
+        order_date: new Date().toLocaleDateString('en-IN'),
+        payment_id: orderData.paymentId,
+        items: itemsHtml,
+        subtotal: `₹${orderData.subtotal.toLocaleString('en-IN')}`,
+        shipping: `₹${orderData.shipping.toLocaleString('en-IN')}`,
+        total: `₹${orderData.total.toLocaleString('en-IN')}`,
+        shipping_address: `${orderData.address}, ${orderData.city}, ${orderData.state}, ${orderData.postalCode}, ${orderData.country}`
       };
       
       // OWNER EMAIL - Direct transactional email
@@ -669,18 +674,23 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
       `;
       
-      // Create owner email data
+      // Create owner email data - match the template expected variables
       const ownerEmail = {
-        from_name: "Auric Order System",
-        to_name: "Auric Team",
-        to_email: this.config.ownerEmail,
-        subject: `New Order Received - ${orderData.orderId}`,
-        message_html: ownerHtml
+        customer_name: orderData.customerName,
+        customer_email: orderData.customerEmail,
+        customer_phone: orderData.phone,
+        to_email: this.config.ownerEmail, // Still include the to_email for specifying recipient
+        order_id: orderData.orderId,
+        order_date: new Date().toLocaleDateString('en-IN'),
+        payment_id: orderData.paymentId,
+        items: itemsHtml,
+        total: `₹${orderData.total.toLocaleString('en-IN')}`,
+        shipping_address: `${orderData.address}, ${orderData.city}, ${orderData.state}, ${orderData.postalCode}, ${orderData.country}`
       };
       
-      // Send customer email
+      // Send customer email using the existing customer template
       console.log('Sending customer email with data:', customerEmail);
-      emailjs.send(this.config.emailServiceId, 'direct_email', customerEmail)
+      emailjs.send(this.config.emailServiceId, this.config.customerTemplateId, customerEmail)
         .then(response => {
           console.log('✅ Customer email sent successfully:', response);
         })
@@ -688,9 +698,9 @@ document.addEventListener('DOMContentLoaded', function() {
           console.error('❌ Error sending customer email:', error);
         });
       
-      // Send owner email
+      // Send owner email using the existing owner template
       console.log('Sending owner email with data:', ownerEmail);
-      emailjs.send(this.config.emailServiceId, 'direct_email', ownerEmail)
+      emailjs.send(this.config.emailServiceId, this.config.ownerTemplateId, ownerEmail)
         .then(response => {
           console.log('✅ Owner email sent successfully:', response);
         })
