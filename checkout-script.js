@@ -44,10 +44,31 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('emailjs_publicKey', publicKey);
     }
     
-    // Load cart items from localStorage
+    // Load cart items from localStorage - works with Auric cart system
     function loadCartItems() {
         try {
-            const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+            // Check for cart data in multiple possible localStorage keys
+            let cartItems = [];
+            const auricCartItems = localStorage.getItem('auricCartItems');
+            const auricCart = localStorage.getItem('auricCart');
+            const localCartItems = localStorage.getItem('cartItems');
+            
+            // Try auricCartItems first (primary cart storage)
+            if (auricCartItems) {
+                cartItems = JSON.parse(auricCartItems);
+                console.log('Cart items loaded from auricCartItems:', cartItems.length);
+            } 
+            // Then try auricCart
+            else if (auricCart) {
+                cartItems = JSON.parse(auricCart);
+                console.log('Cart items loaded from auricCart:', cartItems.length);
+            }
+            // Finally check legacy storage
+            else if (localCartItems) {
+                cartItems = JSON.parse(localCartItems);
+                console.log('Cart items loaded from cartItems:', cartItems.length);
+            }
+            
             if (cartItems.length > 0) {
                 // Clear existing products
                 const productList = document.getElementById('productList');
