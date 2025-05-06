@@ -1,6 +1,35 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Check if user is logged in first
-    checkUserAuthentication();
+    // Add global flags for tracking authentication state
+    window.authCheckAttempts = 0;
+    window.isUserAuthenticated = false;
+    window.cartLoadedForCheckout = false;
+    
+    // First try to get the current user synchronously
+    if (typeof firebase !== 'undefined' && firebase.auth) {
+        const currentUser = firebase.auth().currentUser;
+        if (currentUser) {
+            console.log("User already authenticated on page load:", currentUser.email);
+            window.isUserAuthenticated = true;
+            loadCartItems();
+            window.cartLoadedForCheckout = true;
+        } else {
+            console.log("No user found synchronously, checking auth state...");
+            checkUserAuthenticationWithRetry();
+        }
+    } else {
+        // Firebase not available, fall back to localStorage check
+        const localUser = localStorage.getItem('currentUser');
+        const userLoggedIn = localStorage.getItem('userLoggedIn');
+        if ((localUser && localUser !== 'null') || userLoggedIn === 'true') {
+            console.log("User authenticated via localStorage");
+            window.isUserAuthenticated = true;
+            loadCartItems();
+            window.cartLoadedForCheckout = true;
+        } else {
+            console.log("No user found in localStorage, checking again...");
+            checkUserAuthenticationWithRetry();
+        }
+    }
     
     // Form submission
     document.getElementById('checkoutForm').addEventListener('submit', handleOrderSubmit);
@@ -749,72 +778,88 @@ document.addEventListener('DOMContentLoaded', function() {
         errorModal.show();
     }
     
-    // Check if user is authenticated, if not redirect to signup page
-    function checkUserAuthentication() {
-        console.log("Checking user authentication...");
+    // Check user authentication with retry functionality
+    function checkUserAuthenticationWithRetry() {
+        window.authCheckAttempts++;
+        console.log(`Checking user authentication (attempt ${window.authCheckAttempts})...`);
         
-        // Initialize cart loading flag - we'll use this to ensure we only load cart once
-        window.cartLoadedForCheckout = false;
+        // Maximum number of attempts before showing auth modal
+        const MAX_ATTEMPTS = 2;
         
-        // Get current user from localStorage while waiting for Firebase
-        const localCurrentUser = localStorage.getItem('currentUser');
-        
-        // Check if Firebase auth is available
-        if (typeof firebase !== 'undefined' && firebase.auth) {
-            console.log("Using Firebase auth to check authentication");
-            
-            // We need to check current user immediately first, before the async call
-            const currentUser = firebase.auth().currentUser;
-            if (currentUser) {
-                console.log("User is already logged in:", currentUser.email);
-                if (!window.cartLoadedForCheckout) {
-                    loadCartItems();
-                    window.cartLoadedForCheckout = true;
+        // Check multiple sources for authentication status
+        const sources = [
+            // 1. Check Firebase auth directly (synchronous)
+            () => {
+                if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+                    console.log(`Auth source 1: User is authenticated as ${firebase.auth().currentUser.email}`);
+                    return true;
                 }
-                return;
+                return false;
+            },
+            // 2. Check localStorage values
+            () => {
+                const localUser = localStorage.getItem('currentUser');
+                const localUserLoggedIn = localStorage.getItem('userLoggedIn');
+                if ((localUser && localUser !== 'null') || localUserLoggedIn === 'true') {
+                    console.log('Auth source 2: User is authenticated via localStorage');
+                    return true;
+                }
+                return false;
+            },
+            // 3. Check if user auth data is available in any other form
+            () => {
+                if (window.isUserAuthenticated) {
+                    console.log('Auth source 3: User is authenticated via global flag');
+                    return true;
+                }
+                return false;
             }
-            
-            // If no current user immediately available, wait for auth state to be determined
+        ];
+        
+        // Check all authentication sources
+        let isAuthenticated = false;
+        for (const checkSource of sources) {
+            if (checkSource()) {
+                isAuthenticated = true;
+                break;
+            }
+        }
+        
+        if (isAuthenticated) {
+            window.isUserAuthenticated = true;
+            if (!window.cartLoadedForCheckout) {
+                loadCartItems();
+                window.cartLoadedForCheckout = true;
+            }
+            return;
+        }
+        
+        // If we've tried enough times and the user still isn't authenticated, show the auth modal
+        if (window.authCheckAttempts >= MAX_ATTEMPTS) {
+            console.log(`Authentication failed after ${window.authCheckAttempts} attempts, showing auth modal`);
+            showAuthRequiredModal();
+            localStorage.setItem('redirectAfterLogin', 'checkout.html');
+            return;
+        }
+        
+        // Set up async auth state tracking if Firebase is available
+        if (typeof firebase !== 'undefined' && firebase.auth) {
             firebase.auth().onAuthStateChanged(function(user) {
                 if (user) {
-                    console.log("User is logged in via auth state change:", user.email);
+                    console.log(`Auth state change detected: User is authenticated as ${user.email}`);
+                    window.isUserAuthenticated = true;
                     if (!window.cartLoadedForCheckout) {
                         loadCartItems();
                         window.cartLoadedForCheckout = true;
                     }
-                } else {
-                    console.log("User not logged in. Redirecting to signup page...");
-                    
-                    // Create an authentication required modal if it doesn't exist
-                    showAuthRequiredModal();
-                    
-                    // Store checkout as the intended destination after login
-                    localStorage.setItem('redirectAfterLogin', 'checkout.html');
+                } else if (window.authCheckAttempts < MAX_ATTEMPTS) {
+                    // Try again after a short delay
+                    setTimeout(checkUserAuthenticationWithRetry, 500);
                 }
             });
         } else {
-            // If Firebase auth is not available, use localStorage as fallback
-            console.log("Firebase auth not available, using localStorage instead");
-            
-            // Check if we have a local authorization flag for testing
-            const isLoggedIn = localStorage.getItem('userLoggedIn') === 'true' || 
-                              (localCurrentUser && localCurrentUser !== 'null');
-            
-            if (isLoggedIn) {
-                console.log("User is logged in via localStorage");
-                if (!window.cartLoadedForCheckout) {
-                    loadCartItems();
-                    window.cartLoadedForCheckout = true;
-                }
-            } else {
-                console.log("User not logged in. Redirecting to signup page...");
-                
-                // Create an authentication required modal if it doesn't exist
-                showAuthRequiredModal();
-                
-                // Store checkout as the intended destination after login
-                localStorage.setItem('redirectAfterLogin', 'checkout.html');
-            }
+            // No Firebase, try again after a short delay
+            setTimeout(checkUserAuthenticationWithRetry, 500);
         }
     }
     
