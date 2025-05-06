@@ -1011,14 +1011,33 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
-            // CRITICAL: Clear cart data IMMEDIATELY after successful order
-            console.log('Order processed successfully - clearing cart data now');
+            // CRITICAL: Set special flags to indicate order completion and prevent cart resync
+            console.log('Order processed successfully - setting order completion flags');
+            
+            // Set these flags BEFORE clearing cart to ensure listeners respect them
+            localStorage.setItem('orderCompleted', 'true');
+            localStorage.setItem('orderCompletedTime', Date.now().toString());
+            localStorage.setItem('orderJustPlaced', 'true');
+            localStorage.setItem('cartEmergencyCleared', 'true');
+            localStorage.setItem('cartEmergencyClearTime', Date.now().toString());
+            
+            // Set a timeout to clear the "just placed" flag after 2 minutes
+            setTimeout(() => {
+                localStorage.setItem('orderJustPlaced', 'false');
+            }, 2 * 60 * 1000);
+            
+            // Set a timeout to clear the "completed" flag after 5 minutes
+            setTimeout(() => {
+                localStorage.setItem('orderCompleted', 'false');
+            }, 5 * 60 * 1000);
+            
+            console.log('Order completion flags set, now clearing cart data');
             
             try {
-                // Use our enhanced aggressive cart clearing function
+                // Use our nuclear cart clearing function which will respect the flags we just set
                 if (typeof window.clearCart === 'function') {
                     window.clearCart();
-                    console.log('Cart cleared via aggressive global clearCart function');
+                    console.log('Cart cleared via emergency nuclear clearCart function');
                 } else {
                     console.warn('Global clearCart function not available, using fallback');
                     
@@ -1030,21 +1049,35 @@ document.addEventListener('DOMContentLoaded', function() {
                     localStorage.removeItem('checkout-cart');
                     localStorage.removeItem('auric-cart-data');
                     
-                    // Try to clear Firestore directly
+                    // Reset sync-related data
+                    localStorage.removeItem('auricCartDeviceId');
+                    localStorage.removeItem('auricCartVersion');
+                    localStorage.removeItem('auricCartTimestamp');
+                    localStorage.removeItem('auricCartLastSync');
+                    localStorage.removeItem('auricCartDeletedItems');
+                    localStorage.removeItem('auricCartSyncing');
+                    
+                    // Try to clear Firestore directly with emergency flags
                     if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
                         const db = firebase.firestore();
                         const userId = firebase.auth().currentUser.uid;
                         const timestamp = Date.now();
+                        const veryHighPriorityVersion = (9999999999999 + timestamp).toString();
                         
-                        console.log('Force clearing Firestore cart for user:', userId);
+                        console.log('EMERGENCY CLEARING Firestore cart for user:', userId);
                         db.collection('carts').doc(userId).set({
                             items: [],
                             updatedAt: new Date().toISOString(),
-                            device: `force_clear_${timestamp}_${Math.random().toString(36).substr(2, 10)}`,
-                            operation: 'force_clear',
-                            version: timestamp.toString(),
+                            device: `emergency_clear_${timestamp}_${Math.random().toString(36).substr(2, 10)}`,
+                            operation: 'emergency_clear',
+                            version: veryHighPriorityVersion,
                             clear_timestamp: timestamp,
-                            force_cleared: true
+                            emergency_cleared: true,
+                            emergency_clear_timestamp: timestamp,
+                            ignore_sync: true,
+                            max_priority: true,
+                            order_related: true,
+                            order_reference: orderReference
                         });
                     }
                 }
@@ -1064,6 +1097,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 const cartTotal = document.getElementById('cartTotal');
                 if (cartTotal) {
                     cartTotal.textContent = '₹0';
+                }
+                
+                // Temporarily disable any sync mechanisms by removing event listeners
+                if (AuricCart && AuricCart.stopPeriodicSync) {
+                    AuricCart.stopPeriodicSync();
+                    console.log('Background sync stopped');
                 }
                 
                 console.log('Cart cleared using all available methods');

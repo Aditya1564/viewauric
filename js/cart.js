@@ -1696,9 +1696,25 @@ document.addEventListener('DOMContentLoaded', function() {
     setupFirestoreListener: function(userId) {
       if (!userId) return;
       
-      // Clear any existing listener
+      // Clear any existing listener first
       if (this.firestoreUnsubscribe) {
-        this.firestoreUnsubscribe();
+        try {
+          this.firestoreUnsubscribe();
+        } catch (err) {
+          console.error('Error unsubscribing from previous listener:', err);
+        }
+        this.firestoreUnsubscribe = null;
+      }
+      
+      // Check if we have an emergency clear flag active
+      const emergencyCleared = localStorage.getItem('cartEmergencyCleared') === 'true';
+      const emergencyClearTime = parseInt(localStorage.getItem('cartEmergencyClearTime') || '0');
+      const timeSinceClear = Date.now() - emergencyClearTime;
+      
+      // If we've emergency cleared in the last 5 minutes, don't reestablish the listener
+      if (emergencyCleared && timeSinceClear < 5 * 60 * 1000) {
+        console.log('Skipping Firestore listener setup - emergency clear active');
+        return;
       }
       
       // Generate a unique device identifier if we don't have one
@@ -1711,89 +1727,159 @@ document.addEventListener('DOMContentLoaded', function() {
       
       console.log('Setting up real-time Firestore listener with device ID:', deviceId);
       
-      // Set up a new listener - use includeMetadataChanges: true for better real-time updates
-      this.firestoreUnsubscribe = db.collection('carts').doc(userId)
-        .onSnapshot({
-          includeMetadataChanges: true
-        }, doc => {
-          // Check if this is from cache or server
-          const source = doc.metadata.hasPendingWrites ? 'local' : 'server';
-          
-          // Only proceed if the data is from the server and the document exists
-          if (source === 'server' && doc.exists && doc.data().items) {
-            console.log('Received real-time update from Firestore:', source);
+      // Set up a new listener with emergency clear handling
+      try {
+        this.firestoreUnsubscribe = db.collection('carts').doc(userId)
+          .onSnapshot({
+            includeMetadataChanges: true
+          }, doc => {
+            // Check if the checkout page is active - we don't want to apply updates during checkout
+            const isCheckoutPage = window.location.pathname.includes('checkout');
             
-            const serverData = doc.data();
-            const serverItems = serverData.items || [];
-            const serverLastSyncedDevice = serverData.lastSyncedDevice || '';
-            const serverDeviceId = serverData.deviceId || '';
-            const serverTimestamp = serverData.operationTimestamp || 0;
-            const serverVersion = serverData.cartVersion || '0';
-            const serverLastOperation = serverData.lastOperation || 'update';
+            // Check if this is from cache or server
+            const source = doc.metadata.hasPendingWrites ? 'local' : 'server';
             
-            // Get our local version
-            const localVersion = localStorage.getItem('auricCartVersion') || '0';
-            
-            // Debug info
-            console.log('Server cart data:', {
-              items: serverItems.length,
-              device: serverDeviceId,
-              operation: serverLastOperation,
-              version: serverVersion
-            });
-            console.log('Local cart data:', {
-              items: this.items.length,
-              device: this.deviceId,
-              version: localVersion
-            });
-            
-            // Only update if:
-            // 1. This is not our own device (different device ID), or
-            // 2. The server version is newer than our local version
-            // 3. We're not currently updating Firestore ourselves
-            const isOurDevice = (serverDeviceId === this.deviceId);
-            const isNewerVersion = (parseInt(serverVersion) > parseInt(localVersion));
-            
-            if (!this.isUpdatingFirestore && 
-                (!isOurDevice || isNewerVersion || serverLastOperation === 'delete')) {
-              
-              console.log('Applying real-time update from server - cart change detected');
-              
-              // For deletions, we give extra priority - they must be reflected immediately
-              const isDeletion = serverLastOperation === 'delete';
-              if (isDeletion) {
-                console.log('Detected item deletion from another device, applying immediately');
-              }
-              
-              // Use server data
-              this.items = serverItems;
-              
-              // Update timestamps and version
-              localStorage.setItem('auricCartVersion', serverVersion);
-              localStorage.setItem('auricCartLastSync', Date.now().toString());
-              
-              // Save to localStorage
-              this.saveCartToLocalStorage();
-              
-              // Update UI
-              this.updateCartUI();
-              this.renderCartItems();
-              
-              // Show user notification
-              if (isDeletion) {
-                this.showSyncStatus('Item removed from your cart on another device');
-              } else if (serverItems.length > this.items.length) {
-                this.showSyncStatus('New items added to your cart from another device');
-              } else {
-                this.showSyncStatus('Cart updated from your other device');
-              }
-            } else {
-              console.log('Ignoring Firestore update - either our own update or older version');
+            // Check for emergency clear flag
+            if (localStorage.getItem('cartEmergencyCleared') === 'true') {
+              console.log('Ignoring Firestore update - emergency clear is active');
+              return;
             }
-          }
-        }, error => {
-          console.error('Error in Firestore listener:', error);
-        });
+            
+            // Check if we're on checkout path and have just placed an order
+            if (isCheckoutPage && localStorage.getItem('orderJustPlaced') === 'true') {
+              console.log('Ignoring Firestore update - order just placed');
+              return;
+            }
+            
+            // Only proceed if the data is from the server and the document exists
+            if (source === 'server' && doc.exists) {
+              console.log('Received real-time update from Firestore:', source);
+              
+              const serverData = doc.data();
+              
+              // CRITICAL CHECK #1: Look for emergency clear flags
+              if (serverData.emergency_cleared === true || 
+                  serverData.operation === 'emergency_clear' || 
+                  serverData.operation === 'force_clear' ||
+                  serverData.force_cleared === true) {
+                
+                console.log('EMERGENCY CLEAR flag detected in Firestore!');
+                
+                // Mark in localStorage that emergency clear occurred
+                localStorage.setItem('cartEmergencyCleared', 'true');
+                localStorage.setItem('cartEmergencyClearTime', Date.now().toString());
+                
+                // Always clear the local cart when emergency clear is detected
+                this.items = [];
+                localStorage.removeItem('auricCart');
+                localStorage.removeItem('auricCartItems');
+                localStorage.removeItem('cartItems');
+                
+                // Update UI
+                this.updateCartUI();
+                this.renderCartItems();
+                
+                // Stop and unsubscribe from listener to prevent further updates
+                if (this.firestoreUnsubscribe) {
+                  console.log('Unsubscribing from Firestore listener due to emergency clear');
+                  this.firestoreUnsubscribe();
+                  this.firestoreUnsubscribe = null;
+                }
+                
+                return; // Exit early
+              }
+              
+              // Regular cart sync logic when not emergency cleared
+              if (serverData.items) {
+                const serverItems = serverData.items || [];
+                const serverDeviceId = serverData.device || '';
+                const serverVersion = serverData.version || '0';
+                const serverOperation = serverData.operation || 'update';
+                
+                // Get our local version
+                const localVersion = localStorage.getItem('auricCartVersion') || '0';
+                
+                // Debug info
+                console.log('Server cart data:', {
+                  items: serverItems.length,
+                  device: serverDeviceId,
+                  operation: serverOperation,
+                  version: serverVersion
+                });
+                console.log('Local cart data:', {
+                  items: this.items.length,
+                  device: this.deviceId,
+                  version: localVersion
+                });
+                
+                // Only update if:
+                // 1. This is not our own device (different device ID), or
+                // 2. The server version is newer than our local version
+                // 3. We're not currently updating Firestore ourselves
+                // 4. We haven't just cleared the cart via order checkout
+                const isOurDevice = (serverDeviceId === this.deviceId);
+                const isNewerVersion = (parseInt(serverVersion) > parseInt(localVersion));
+                const recentlyOrderCompleted = localStorage.getItem('orderCompleted') === 'true' && 
+                                              (Date.now() - parseInt(localStorage.getItem('orderCompletedTime') || '0')) < 60000;
+                
+                // NEVER update the cart if we've just completed an order
+                if (recentlyOrderCompleted) {
+                  console.log('Ignoring update - order was recently completed');
+                  return;
+                }
+                
+                if (!this.isUpdatingFirestore && !recentlyOrderCompleted && 
+                    (!isOurDevice || isNewerVersion)) {
+                  
+                  console.log('Applying real-time update from server - cart change detected');
+                  
+                  // Special handling for clear operation
+                  if (serverOperation === 'clear' || serverItems.length === 0) {
+                    console.log('Server indicates cart should be cleared');
+                    this.items = [];
+                  } else {
+                    // Standard update - use server data
+                    this.items = serverItems;
+                  }
+                  
+                  // Update timestamps and version
+                  localStorage.setItem('auricCartVersion', serverVersion);
+                  localStorage.setItem('auricCartLastSync', Date.now().toString());
+                  
+                  // Save to localStorage
+                  this.saveCartToLocalStorage();
+                  
+                  // Update UI
+                  this.updateCartUI();
+                  this.renderCartItems();
+                  
+                  // Show user notification
+                  if (serverOperation === 'delete') {
+                    this.showSyncStatus('Item removed from your cart on another device');
+                  } else if (serverItems.length > this.items.length) {
+                    this.showSyncStatus('New items added to your cart from another device');
+                  } else {
+                    this.showSyncStatus('Cart updated from your other device');
+                  }
+                } else {
+                  console.log('Ignoring Firestore update - either our own update or older version');
+                }
+              }
+            }
+          }, error => {
+            console.error('Error in Firestore listener:', error);
+            
+            // Only set up to retry if not in emergency clear mode
+            if (localStorage.getItem('cartEmergencyCleared') !== 'true') {
+              window.addEventListener('online', () => {
+                console.log('Back online, refreshing Firestore listener');
+                this.setupFirestoreListener(userId);
+              }, { once: true });
+            }
+          });
+      } catch (listenerSetupError) {
+        console.error('Failed to set up Firestore listener:', listenerSetupError);
+      }
     },
     
     /**
