@@ -448,13 +448,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
       }
       
-      // Setup Checkout button
+      // Checkout functionality has been removed
       const checkoutButton = document.querySelector('.cart-panel-buttons .checkout-btn');
       if (checkoutButton) {
         checkoutButton.addEventListener('click', (e) => {
           e.preventDefault();
-          // Redirect to checkout page
-          window.location.href = 'checkout.html';
+          // Alert the user that checkout has been disabled
+          alert('Checkout functionality has been removed from this application.');
         });
       }
     },
