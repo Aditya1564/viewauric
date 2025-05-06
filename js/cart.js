@@ -463,22 +463,77 @@ document.addEventListener('DOMContentLoaded', function() {
         });
       }
       
-      // Checkout functionality - redirects to checkout page
+      // Checkout functionality - redirects to checkout page with auth check
       const checkoutButton = document.querySelector('.cart-panel-buttons .checkout-btn');
       if (checkoutButton) {
         checkoutButton.addEventListener('click', (e) => {
           e.preventDefault();
+          
           // Check if cart has items
           if (this.items.length === 0) {
             alert('Your cart is empty. Please add items before proceeding to checkout.');
             return;
           }
+          
+          // Check if user is authenticated before proceeding to checkout
+          const isLoggedIn = this.checkUserIsAuthenticated();
+          
           // Save current cart to localStorage to ensure it's available on checkout page
           this.saveCartToLocalStorage();
-          // Redirect to checkout page
-          window.location.href = 'checkout.html';
+          
+          // If logged in, proceed to checkout, otherwise redirect to signup
+          if (isLoggedIn) {
+            // Set a session flag that checkout was triggered while authenticated
+            localStorage.setItem('checkoutAuthState', 'authenticated');
+            window.location.href = 'checkout.html';
+          } else {
+            // Inform user they need to create an account first
+            const confirmLogin = confirm('You need to create an account before checking out. Would you like to create an account now?');
+            if (confirmLogin) {
+              localStorage.setItem('redirectAfterAuth', 'checkout.html');
+              window.location.href = 'signup.html';
+            }
+          }
         });
       }
+      
+      // Helper method to check if user is authenticated
+      this.checkUserIsAuthenticated = function() {
+        // Check for Firebase auth
+        if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+          return true;
+        }
+        
+        // Check localStorage flags
+        const localUser = localStorage.getItem('currentUser');
+        const userLoggedIn = localStorage.getItem('userLoggedIn');
+        const userEmailInStorage = localStorage.getItem('userEmail');
+        
+        if ((localUser && localUser !== 'null') || 
+            userLoggedIn === 'true' || 
+            (userEmailInStorage && userEmailInStorage !== 'null')) {
+          return true;
+        }
+        
+        // Check for any Firebase auth in localStorage
+        const firebaseAuthKey = 'firebase:authUser:';
+        try {
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith(firebaseAuthKey)) {
+              const value = localStorage.getItem(key);
+              const userData = JSON.parse(value);
+              if (userData && userData.email) {
+                return true;
+              }
+            }
+          }
+        } catch (e) {
+          console.error('Error checking Firebase auth in localStorage:', e);
+        }
+        
+        return false;
+      };
     },
     
     /**

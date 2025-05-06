@@ -58,13 +58,24 @@ document.addEventListener('DOMContentLoaded', function() {
         return false;
     }
     
-    // First quick check for authentication
-    if (checkAllAuthSources()) {
+    // Check for auth flag from cart.js first (most reliable)
+    const checkoutAuthState = localStorage.getItem('checkoutAuthState');
+    if (checkoutAuthState === 'authenticated') {
+        console.log("User is definitely authenticated - direct flag from cart.js");
+        window.isUserAuthenticated = true;
+        loadCartItems();
+        window.cartLoadedForCheckout = true;
+        
+        // Clear the auth state flag now that we've used it
+        localStorage.removeItem('checkoutAuthState');
+    }
+    // Then try standard auth source checks
+    else if (checkAllAuthSources()) {
         console.log("User is definitely authenticated based on quick checks");
         window.isUserAuthenticated = true;
         loadCartItems();
         window.cartLoadedForCheckout = true;
-    } 
+    }
     // If not found, try Firebase auth state change listener
     else if (typeof firebase !== 'undefined' && firebase.auth) {
         console.log("Quick auth check failed, trying Firebase auth state change listener");
