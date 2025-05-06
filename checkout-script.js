@@ -964,6 +964,43 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
+            // IMPORTANT: Clear cart data IMMEDIATELY after successful order
+            console.log('Order processed successfully - clearing cart data now');
+            
+            // First, clear localStorage directly for immediate effect
+            localStorage.removeItem('auricCart');
+            localStorage.removeItem('auricCartItems');
+            localStorage.removeItem('cartItems');
+            
+            // Then try the global clearCart function if available
+            if (typeof window.clearCart === 'function') {
+                try {
+                    window.clearCart();
+                    console.log('Cart cleared via global clearCart function');
+                } catch (err) {
+                    console.error('Error using global clearCart function:', err);
+                }
+            }
+            
+            // Finally try to clear Firestore directly
+            if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+                try {
+                    const db = firebase.firestore();
+                    const userId = firebase.auth().currentUser.uid;
+                    
+                    console.log('Clearing Firestore cart for user:', userId);
+                    db.collection('carts').doc(userId).set({
+                        items: [],
+                        updatedAt: new Date().toISOString(),
+                        device: `device_${Date.now()}_${Math.random().toString(36).substr(2, 10)}`,
+                        operation: 'clear',
+                        version: Date.now().toString()
+                    });
+                } catch (err) {
+                    console.error('Error clearing Firestore cart:', err);
+                }
+            }
+            
             // Show confirmation modal
             document.getElementById('orderReference').textContent = orderReference;
             document.getElementById('orderDetails').innerHTML = orderDetails.modalSummaryHTML;
