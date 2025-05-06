@@ -625,7 +625,17 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Prepare order summary for email and display
     function prepareOrderSummary() {
-        const productItems = document.querySelectorAll('.product-item');
+        // Get cart items directly from localStorage
+        let cartItems = [];
+        try {
+            const auricCartItems = localStorage.getItem('auricCartItems');
+            if (auricCartItems) {
+                cartItems = JSON.parse(auricCartItems);
+            }
+        } catch (error) {
+            console.error('Error parsing cart items:', error);
+        }
+        
         let orderTotal = 0;
         
         // Create HTML table for email
@@ -648,6 +658,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <thead>
                     <tr>
                         <th>Product</th>
+                        <th>Image</th>
                         <th>Quantity</th>
                         <th>Price</th>
                         <th>Total</th>
@@ -656,10 +667,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 <tbody>
         `;
         
-        productItems.forEach(item => {
-            const productName = item.querySelector('.product-name').value;
-            const quantity = parseInt(item.querySelector('.product-quantity').value);
-            const price = parseFloat(item.querySelector('.product-price').value);
+        cartItems.forEach(item => {
+            const productName = item.name;
+            const quantity = item.quantity;
+            const price = item.price;
+            const image = item.image;
             const total = quantity * price;
             
             orderTotal += total;
@@ -678,6 +690,7 @@ document.addEventListener('DOMContentLoaded', function() {
             modalSummaryHTML += `
                 <tr>
                     <td>${productName}</td>
+                    <td><img src="${image}" alt="${productName}" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;"></td>
                     <td>${quantity}</td>
                     <td>₹${price}</td>
                     <td>₹${total}</td>
@@ -702,7 +715,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="3" class="text-end"><strong>Total</strong></td>
+                        <td colspan="4" class="text-end"><strong>Total</strong></td>
                         <td><strong>₹${orderTotal}</strong></td>
                     </tr>
                 </tfoot>
