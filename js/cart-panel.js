@@ -8,6 +8,43 @@
 document.addEventListener('DOMContentLoaded', function() {
   console.log('Cart Panel module loaded');
   
+  // Check if on checkout page - if so, simply return
+  if (window.location.pathname.includes('checkout.html')) {
+    console.log('On checkout page - skipping cart panel initialization');
+    
+    // Make the cart panel close function globally available
+    window.closeCartPanelHandler = function(isInit) {
+      console.log('Closing cart panel, isInit:', isInit);
+      const cartPanel = document.querySelector('.cart-panel');
+      const cartOverlay = document.querySelector('.cart-overlay');
+      
+      if (cartPanel && cartOverlay) {
+        if (isInit) {
+          console.log('Setting initial cart panel styles (hidden state)');
+          cartPanel.style.right = '-100%';
+          cartOverlay.style.display = 'none';
+        } else {
+          // First remove active classes to trigger CSS transitions
+          cartPanel.classList.remove('active');
+          cartOverlay.classList.remove('active');
+          
+          // Apply inline style for right
+          cartPanel.style.right = '-100%';
+          
+          // Hide overlay after transition completes
+          setTimeout(() => {
+            cartOverlay.style.display = 'none';
+          }, 300); // Match this time to CSS transition duration
+          
+          // Re-enable scrolling
+          document.body.style.overflow = '';
+        }
+      }
+    };
+    
+    return;
+  }
+  
   // DOM elements
   const cartToggle = document.querySelector('.cart-toggle');
   const cartPanel = document.querySelector('.cart-panel');
@@ -56,6 +93,9 @@ document.addEventListener('DOMContentLoaded', function() {
       // Return focus to the page for accessibility
       document.body.focus();
     }
+    
+    // Make the function globally available
+    window.closeCartPanelHandler = closeCartPanelHandler;
     
     // Close cart panel when X button is clicked
     if (closeCartBtn) {
