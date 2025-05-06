@@ -8,9 +8,8 @@
 document.addEventListener('DOMContentLoaded', function() {
   console.log('Checkout.js initialized at:', new Date().toISOString());
   
-  // Note: We're no longer initializing EmailJS directly
-  // Instead, we're using our server's /api/send-email proxy endpoint
-  console.log('Using server proxy for email functionality');
+  // Email functionality completely removed
+  console.log('Email functionality has been completely removed');
   
   // Set up checkout object with methods for handling the checkout process
   const Checkout = {
@@ -20,10 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
       shippingFee: 99, // Standard shipping fee
       currencyCode: 'INR',
       currencySymbol: '₹',
-      emailServiceId: 'service_prdjwt4',
-      ownerTemplateId: 'template_zzlllxm',  // Template for sending notification to store owner
-      customerTemplateId: 'template_guvarr1', // Template for sending receipt to customer
-      ownerEmail: 'auricbysubha.web@gmail.com', // Shop owner email address
+      // Email functionality removed
     },
     
     // Cart data
@@ -575,108 +571,8 @@ document.addEventListener('DOMContentLoaded', function() {
      * Send separate confirmation emails to customer and store owner using direct EmailJS
      */
     sendConfirmationEmails: function(orderData) {
-      console.log('Sending confirmation emails using direct EmailJS');
-      
-      // Ensure EmailJS is initialized
-      if (typeof emailjs === 'undefined') {
-        console.error('EmailJS library not loaded. Attempting to load dynamically...');
-        // You might want to load the script dynamically here, but for now we'll just show an error
-        alert('Email service not available. Your order has been placed but you may not receive email confirmation.');
-        return;
-      }
-      
-      // Initialize EmailJS if not already done
-      if (!this.emailjsInitialized) {
-        console.log('Initializing EmailJS with public key:', 'eWkroiiJhLnSK1_Pn');
-        emailjs.init('eWkroiiJhLnSK1_Pn');
-        this.emailjsInitialized = true;
-      }
-      
-      // Format items for email templates
-      const itemsHtml = orderData.items.map(item => {
-        return `${item.name} x ${item.quantity} - ₹${(item.price * item.quantity).toLocaleString('en-IN')}`;
-      }).join('<br>');
-      
-      // Create customer email parameters with multiple recipient fields to ensure delivery
-      const customerEmail = {
-        to_name: orderData.customerName,
-        to_email: orderData.customerEmail,
-        reply_to: orderData.customerEmail,
-        from_name: "Auric Jewelry",
-        from_email: orderData.customerEmail, // Add customer email as from_email to ensure delivery
-        recipient: orderData.customerEmail,  // Additional recipient parameter
-        order_id: orderData.orderId,
-        order_date: new Date().toLocaleDateString('en-IN'),
-        payment_id: orderData.paymentId,
-        items: itemsHtml,
-        subtotal: `₹${orderData.subtotal.toLocaleString('en-IN')}`,
-        shipping: `₹${orderData.shipping.toLocaleString('en-IN')}`,
-        total: `₹${orderData.total.toLocaleString('en-IN')}`,
-        shipping_address: `${orderData.address}, ${orderData.city}, ${orderData.state}, ${orderData.postalCode}, ${orderData.country}`
-      };
-      
-      // Create owner email parameters
-      const ownerEmail = {
-        customer_name: orderData.customerName,
-        customer_email: orderData.customerEmail,
-        customer_phone: orderData.phone,
-        to_email: this.config.ownerEmail,
-        order_id: orderData.orderId,
-        order_date: new Date().toLocaleDateString('en-IN'),
-        payment_id: orderData.paymentId,
-        items: itemsHtml,
-        total: `₹${orderData.total.toLocaleString('en-IN')}`,
-        shipping_address: `${orderData.address}, ${orderData.city}, ${orderData.state}, ${orderData.postalCode}, ${orderData.country}`
-      };
-      
-      // Log the email data for debugging
-      console.log('Customer email parameters:', customerEmail);
-      console.log('Owner email parameters:', ownerEmail);
-      
-      // Send customer email using the OWNER template but with customer as recipient
-      console.log('Sending customer confirmation email using owner template to:', orderData.customerEmail);
-      
-      // Create customer email using owner template format
-      const customerWithOwnerTemplate = {
-        customer_name: orderData.customerName,
-        customer_email: orderData.customerEmail,
-        customer_phone: orderData.phone,
-        to_email: orderData.customerEmail, // Send to customer email
-        order_id: orderData.orderId,
-        order_date: new Date().toLocaleDateString('en-IN'),
-        payment_id: orderData.paymentId,
-        items: itemsHtml,
-        total: `₹${orderData.total.toLocaleString('en-IN')}`,
-        shipping_address: `${orderData.address}, ${orderData.city}, ${orderData.state}, ${orderData.postalCode}, ${orderData.country}`
-      };
-      
-      console.log('Modified customer email parameters:', customerWithOwnerTemplate);
-      
-      emailjs.send(
-        this.config.emailServiceId,
-        this.config.ownerTemplateId, // Use OWNER template for customer
-        customerWithOwnerTemplate
-      )
-      .then((response) => {
-        console.log('✅ Customer email sent successfully:', response);
-      })
-      .catch((error) => {
-        console.error('❌ Error sending customer email:', error);
-      });
-      
-      // Send owner notification email using EmailJS directly
-      console.log('Sending owner notification email to:', this.config.ownerEmail);
-      emailjs.send(
-        this.config.emailServiceId,
-        this.config.ownerTemplateId,
-        ownerEmail
-      )
-      .then((response) => {
-        console.log('✅ Owner email sent successfully:', response);
-      })
-      .catch((error) => {
-        console.error('❌ Error sending owner email:', error);
-      });
+      console.log('Email functionality has been completely removed');
+      // Email functionality has been removed - no emails will be sent
     },
     
     /**
@@ -725,7 +621,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <p><span class="label">Payment ID:</span> ${orderData.paymentId}</p>
           </div>
           
-          <p>A confirmation email has been sent to <strong>${orderData.customerEmail}</strong>.</p>
+          <p>Please save your order details for reference.</p>
           <a href="index.html" class="continue-shopping">Continue Shopping</a>
         </div>
       `;
