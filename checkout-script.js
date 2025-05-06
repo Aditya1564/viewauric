@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <div class="input-group">
                                         <span class="input-group-text">$</span>
                                         <input type="number" class="form-control product-price" id="price_${item.productId}" 
-                                            name="price_${item.productId}" min="0.01" step="0.01" value="${item.price / 100}" required>
+                                            name="price_${item.productId}" min="0.01" step="0.01" value="${(item.price / 100).toFixed(2)}" required>
                                     </div>
                                 </div>
                                 <div class="col-md-1 d-flex align-items-center justify-content-end mt-3 mt-md-0">
@@ -124,6 +124,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 setupProductListeners();
                 
                 // Update order summary
+                updateOrderSummary();
+            } else {
+                // If there are no items in the cart, at least make sure the default values are shown correctly in order summary
                 updateOrderSummary();
             }
         } catch (error) {
