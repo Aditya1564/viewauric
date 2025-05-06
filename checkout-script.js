@@ -321,39 +321,119 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Update order summary
     function updateOrderSummary() {
-        const productItems = document.querySelectorAll('.product-item');
+        // Get cart items directly from localStorage
+        let cartItems = [];
+        try {
+            const auricCartItems = localStorage.getItem('auricCartItems');
+            if (auricCartItems) {
+                cartItems = JSON.parse(auricCartItems);
+            }
+        } catch (error) {
+            console.error('Error parsing cart items:', error);
+        }
+        
         const orderSummary = document.getElementById('orderSummary');
         let summaryHTML = '';
         let orderTotal = 0;
         
-        if (productItems.length === 0) {
+        if (cartItems.length === 0) {
             orderSummary.innerHTML = '<p>No products added yet.</p>';
             document.getElementById('orderTotal').textContent = '₹0';
             return;
         }
         
-        summaryHTML = '<table class="summary-table"><tbody>';
+        summaryHTML = '<div class="order-items-container">';
         
-        productItems.forEach((item, index) => {
-            const productName = item.querySelector('.product-name').value || `Product ${index + 1}`;
-            const quantity = parseFloat(item.querySelector('.product-quantity').value) || 0;
-            const price = parseFloat(item.querySelector('.product-price').value) || 0;
-            const productTotal = calculateProductTotal(item);
+        cartItems.forEach((item, index) => {
+            const productName = item.name;
+            const quantity = item.quantity;
+            const price = item.price;
+            const image = item.image;
+            const productTotal = quantity * price;
+            const productId = item.productId;
             
             orderTotal += productTotal;
             
             summaryHTML += `
-                <tr>
-                    <td>${productName}</td>
-                    <td>${quantity} × ₹${price}</td>
-                    <td class="text-end">₹${productTotal}</td>
-                </tr>
+                <div class="order-item mb-3" data-product-id="${productId}">
+                    <div class="d-flex align-items-center">
+                        <div class="order-item-image me-3">
+                            <img src="${image}" alt="${productName}" class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">
+                        </div>
+                        <div class="order-item-details flex-grow-1">
+                            <h6 class="mb-1">${productName}</h6>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="quantity-controls">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary decrement-quantity" data-product-id="${productId}">-</button>
+                                    <span class="quantity-value mx-2">${quantity}</span>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary increment-quantity" data-product-id="${productId}">+</button>
+                                </div>
+                                <div class="order-item-price">
+                                    <span>₹${price}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="order-item-total mt-2 text-end">
+                        <strong>Total: ₹${productTotal}</strong>
+                    </div>
+                    <hr>
+                </div>
             `;
         });
         
-        summaryHTML += '</tbody></table>';
+        summaryHTML += '</div>';
         orderSummary.innerHTML = summaryHTML;
         document.getElementById('orderTotal').textContent = `₹${orderTotal}`;
+        
+        // Add event listeners to the newly created buttons
+        document.querySelectorAll('.increment-quantity').forEach(button => {
+            button.addEventListener('click', function() {
+                const productId = this.getAttribute('data-product-id');
+                incrementCartItemQuantity(productId);
+            });
+        });
+        
+        document.querySelectorAll('.decrement-quantity').forEach(button => {
+            button.addEventListener('click', function() {
+                const productId = this.getAttribute('data-product-id');
+                decrementCartItemQuantity(productId);
+            });
+        });
+    }
+    
+    // Function to increment cart item quantity
+    function incrementCartItemQuantity(productId) {
+        const cartItems = JSON.parse(localStorage.getItem('auricCartItems') || '[]');
+        const itemIndex = cartItems.findIndex(item => item.productId === productId);
+        
+        if (itemIndex !== -1) {
+            cartItems[itemIndex].quantity += 1;
+            cartItems[itemIndex].updatedAt = new Date().toISOString();
+            localStorage.setItem('auricCartItems', JSON.stringify(cartItems));
+            
+            // Update the UI
+            updateOrderSummary();
+        }
+    }
+    
+    // Function to decrement cart item quantity
+    function decrementCartItemQuantity(productId) {
+        const cartItems = JSON.parse(localStorage.getItem('auricCartItems') || '[]');
+        const itemIndex = cartItems.findIndex(item => item.productId === productId);
+        
+        if (itemIndex !== -1 && cartItems[itemIndex].quantity > 1) {
+            cartItems[itemIndex].quantity -= 1;
+            cartItems[itemIndex].updatedAt = new Date().toISOString();
+            localStorage.setItem('auricCartItems', JSON.stringify(cartItems));
+        } else if (itemIndex !== -1 && cartItems[itemIndex].quantity === 1) {
+            // If quantity is 1, remove the item
+            cartItems.splice(itemIndex, 1);
+            localStorage.setItem('auricCartItems', JSON.stringify(cartItems));
+        }
+        
+        // Update the UI
+        updateOrderSummary();
     }
     
     // Handle order submission
