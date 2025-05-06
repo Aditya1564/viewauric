@@ -803,27 +803,74 @@ document.addEventListener('DOMContentLoaded', function() {
             const modalHTML = `
                 <div class="modal fade" id="authRequiredModal" tabindex="-1" aria-labelledby="authRequiredModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="authRequiredModalLabel">Authentication Required</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <div class="modal-content border-0 shadow">
+                            <div class="modal-header border-0 bg-primary text-white">
+                                <h5 class="modal-title fw-bold" id="authRequiredModalLabel">Create an Account</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
-                            <div class="modal-body">
-                                <div class="text-center mb-4">
-                                    <i class="bi bi-exclamation-circle text-warning" style="font-size: 3rem;"></i>
+                            <div class="modal-body p-4">
+                                <div class="row">
+                                    <div class="col-12 col-md-6 mb-4 mb-md-0">
+                                        <div class="text-center mb-3">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-person-plus text-primary" viewBox="0 0 16 16">
+                                                <path d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H1s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C9.516 10.68 8.289 10 6 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
+                                                <path fill-rule="evenodd" d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5z"/>
+                                            </svg>
+                                        </div>
+                                        <h5 class="text-center fw-bold mb-3">New Customer</h5>
+                                        <p class="text-center mb-4">Create an account to track orders and enjoy member benefits</p>
+                                        <div class="d-grid">
+                                            <a href="signup.html" class="btn btn-primary btn-lg">Create Account</a>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <div class="text-center mb-3">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-person-check text-secondary" viewBox="0 0 16 16">
+                                                <path d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H1s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C9.516 10.68 8.289 10 6 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
+                                                <path fill-rule="evenodd" d="M15.854 5.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 0 1 .708-.708L12.5 7.793l2.646-2.647a.5.5 0 0 1 .708 0z"/>
+                                            </svg>
+                                        </div>
+                                        <h5 class="text-center fw-bold mb-3">Returning Customer</h5>
+                                        <p class="text-center mb-4">Sign in to your account to complete your purchase</p>
+                                        <div class="d-grid">
+                                            <a href="login.html" class="btn btn-outline-secondary btn-lg">Sign In</a>
+                                        </div>
+                                    </div>
                                 </div>
-                                <p>You need to create an account or sign in to complete your purchase.</p>
-                                <p>Creating an account allows you to:</p>
-                                <ul>
-                                    <li>Track your orders</li>
-                                    <li>Save your shipping information</li>
-                                    <li>Access exclusive deals</li>
-                                    <li>Enjoy a faster checkout experience</li>
-                                </ul>
-                            </div>
-                            <div class="modal-footer justify-content-center">
-                                <a href="signup.html" class="btn btn-primary">Create Account</a>
-                                <a href="login.html" class="btn btn-outline-secondary">Sign In</a>
+                                
+                                <div class="mt-4 pt-3 border-top">
+                                    <h6 class="fw-bold">Why create an account?</h6>
+                                    <div class="row mt-3">
+                                        <div class="col-6">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill text-success me-2" viewBox="0 0 16 16">
+                                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                                                </svg>
+                                                <span>Order tracking</span>
+                                            </div>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill text-success me-2" viewBox="0 0 16 16">
+                                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                                                </svg>
+                                                <span>Faster checkout</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill text-success me-2" viewBox="0 0 16 16">
+                                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                                                </svg>
+                                                <span>Exclusive offers</span>
+                                            </div>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill text-success me-2" viewBox="0 0 16 16">
+                                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                                                </svg>
+                                                <span>Saved preferences</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
