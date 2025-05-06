@@ -553,7 +553,14 @@ document.addEventListener('DOMContentLoaded', function() {
      * Load cart from localStorage for anonymous users
      */
     loadCartFromLocalStorage: function() {
-      const savedCart = localStorage.getItem('auricCart');
+      // Check multiple localStorage keys for cart data
+      let savedCart = localStorage.getItem('auricCartItems'); // Try checkout key first
+      
+      // If not found in auricCartItems, try auricCart
+      if (!savedCart) {
+        savedCart = localStorage.getItem('auricCart');
+      }
+      
       if (savedCart) {
         try {
           let loadedItems = JSON.parse(savedCart);
@@ -568,6 +575,11 @@ document.addEventListener('DOMContentLoaded', function() {
           });
           
           this.items = loadedItems;
+          
+          // Save to both localStorage keys for consistency
+          localStorage.setItem('auricCart', JSON.stringify(this.items));
+          localStorage.setItem('auricCartItems', JSON.stringify(this.items));
+          
           console.log('Cart loaded from localStorage:', this.items);
         } catch (error) {
           console.error('Error parsing cart from localStorage:', error);
@@ -615,6 +627,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Save to localStorage as backup with Firestore timestamp
             const firestoreTimestamp = doc.data().updatedAt ? doc.data().updatedAt.toMillis() : Date.now();
             localStorage.setItem('auricCart', JSON.stringify(this.items));
+            localStorage.setItem('auricCartItems', JSON.stringify(this.items)); // Save to both keys
             localStorage.setItem('auricCartTimestamp', firestoreTimestamp.toString());
             localStorage.setItem('auricCartLastSync', Date.now().toString());
             
@@ -683,8 +696,9 @@ document.addEventListener('DOMContentLoaded', function() {
      * Save cart to localStorage for anonymous users
      */
     saveCartToLocalStorage: function() {
-      // Save cart items
+      // Save cart items to both storage keys for consistent access
       localStorage.setItem('auricCart', JSON.stringify(this.items));
+      localStorage.setItem('auricCartItems', JSON.stringify(this.items));
       
       // Save current timestamp for synchronization comparisons
       const currentTime = new Date().getTime();
