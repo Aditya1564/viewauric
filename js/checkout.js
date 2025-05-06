@@ -572,54 +572,32 @@ document.addEventListener('DOMContentLoaded', function() {
     },
     
     /**
-     * Send separate confirmation emails to customer and store owner using direct EmailJS send
+     * Send separate confirmation emails to customer and store owner using direct EmailJS
      */
     sendConfirmationEmails: function(orderData) {
-      console.log('COMPLETELY NEW APPROACH: Sending separate direct emails');
+      console.log('Sending confirmation emails using direct EmailJS');
+      
+      // Ensure EmailJS is initialized
+      if (typeof emailjs === 'undefined') {
+        console.error('EmailJS library not loaded. Attempting to load dynamically...');
+        // You might want to load the script dynamically here, but for now we'll just show an error
+        alert('Email service not available. Your order has been placed but you may not receive email confirmation.');
+        return;
+      }
+      
+      // Initialize EmailJS if not already done
+      if (!this.emailjsInitialized) {
+        console.log('Initializing EmailJS with public key:', 'eWkroiiJhLnSK1_Pn');
+        emailjs.init('eWkroiiJhLnSK1_Pn');
+        this.emailjsInitialized = true;
+      }
       
       // Format items for email templates
       const itemsHtml = orderData.items.map(item => {
         return `${item.name} x ${item.quantity} - ₹${(item.price * item.quantity).toLocaleString('en-IN')}`;
       }).join('<br>');
       
-      // CUSTOMER EMAIL - Direct transactional email
-      // -----------------------------------------
-      console.log('Sending DIRECT customer email to:', orderData.customerEmail);
-      const customerHtml = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background-color: #D4AF37; color: white; padding: 20px; text-align: center;">
-            <h1>Thank You for Your Order!</h1>
-          </div>
-          <div style="padding: 20px; background-color: #fff;">
-            <p>Dear ${orderData.customerName},</p>
-            <p>Thank you for your order from Auric Jewelry. We're thrilled that you chose us for your jewelry needs.</p>
-            <div style="margin: 20px 0;">
-              <h2>Order Summary</h2>
-              <p><strong>Order Number:</strong> ${orderData.orderId}</p>
-              <p><strong>Order Date:</strong> ${new Date().toLocaleDateString('en-IN')}</p>
-              <p><strong>Payment ID:</strong> ${orderData.paymentId}</p>
-            </div>
-            <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 4px;">
-              <h3>Order Details</h3>
-              <div>${itemsHtml}</div>
-              <p>Subtotal: ₹${orderData.subtotal.toLocaleString('en-IN')}</p>
-              <p>Shipping: ₹${orderData.shipping.toLocaleString('en-IN')}</p>
-              <p><strong>Total: ₹${orderData.total.toLocaleString('en-IN')}</strong></p>
-            </div>
-            <div style="margin: 20px 0;">
-              <h3>Shipping Address</h3>
-              <p>${orderData.address}, ${orderData.city}, ${orderData.state}, ${orderData.postalCode}, ${orderData.country}</p>
-            </div>
-            <p>Thank you again for shopping with us!</p>
-            <p>Warm regards,<br>The Auric Jewelry Team</p>
-          </div>
-          <div style="background-color: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; color: #777;">
-            <p>&copy; 2025 Auric Jewelry. All rights reserved.</p>
-          </div>
-        </div>
-      `;
-      
-      // Create customer email data - match the template expected variables
+      // Create customer email parameters
       const customerEmail = {
         to_name: orderData.customerName,
         to_email: orderData.customerEmail,
@@ -633,48 +611,12 @@ document.addEventListener('DOMContentLoaded', function() {
         shipping_address: `${orderData.address}, ${orderData.city}, ${orderData.state}, ${orderData.postalCode}, ${orderData.country}`
       };
       
-      // OWNER EMAIL - Direct transactional email
-      // -----------------------------------------
-      console.log('Sending DIRECT owner email to:', this.config.ownerEmail); 
-      const ownerHtml = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background-color: #333; color: white; padding: 20px; text-align: center;">
-            <h1>New Order Received!</h1>
-          </div>
-          <div style="padding: 20px; background-color: #fff;">
-            <p>A new order has been placed on your website.</p>
-            <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 4px;">
-              <h2>Order Information</h2>
-              <p><strong>Order Number:</strong> ${orderData.orderId}</p>
-              <p><strong>Order Date:</strong> ${new Date().toLocaleDateString('en-IN')}</p>
-              <p><strong>Payment ID:</strong> ${orderData.paymentId}</p>
-              <p><strong>Total Amount:</strong> ₹${orderData.total.toLocaleString('en-IN')}</p>
-            </div>
-            <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 4px;">
-              <h2>Customer Information</h2>
-              <p><strong>Name:</strong> ${orderData.customerName}</p>
-              <p><strong>Email:</strong> ${orderData.customerEmail}</p>
-              <p><strong>Phone:</strong> ${orderData.phone}</p>
-              <p><strong>Shipping Address:</strong> ${orderData.address}, ${orderData.city}, ${orderData.state}, ${orderData.postalCode}, ${orderData.country}</p>
-            </div>
-            <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 4px;">
-              <h2>Order Items</h2>
-              <div>${itemsHtml}</div>
-            </div>
-            <p>Please process this order as soon as possible.</p>
-          </div>
-          <div style="background-color: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; color: #777;">
-            <p>This is an automated email notification from your Auric Jewelry website.</p>
-          </div>
-        </div>
-      `;
-      
-      // Create owner email data - match the template expected variables
+      // Create owner email parameters
       const ownerEmail = {
         customer_name: orderData.customerName,
         customer_email: orderData.customerEmail,
         customer_phone: orderData.phone,
-        to_email: this.config.ownerEmail, // Still include the to_email for specifying recipient
+        to_email: this.config.ownerEmail,
         order_id: orderData.orderId,
         order_date: new Date().toLocaleDateString('en-IN'),
         payment_id: orderData.paymentId,
@@ -683,48 +625,36 @@ document.addEventListener('DOMContentLoaded', function() {
         shipping_address: `${orderData.address}, ${orderData.city}, ${orderData.state}, ${orderData.postalCode}, ${orderData.country}`
       };
       
-      // Send customer email via our server proxy
-      console.log('Sending customer email with data:', customerEmail);
-      fetch('/api/send-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          service_id: this.config.emailServiceId,
-          template_id: this.config.customerTemplateId,
-          user_id: 'eWkroiiJhLnSK1_Pn',
-          template_params: customerEmail
-        })
+      // Log the email data for debugging
+      console.log('Customer email parameters:', customerEmail);
+      console.log('Owner email parameters:', ownerEmail);
+      
+      // Send customer email using EmailJS directly
+      console.log('Sending customer confirmation email to:', orderData.customerEmail);
+      emailjs.send(
+        this.config.emailServiceId,
+        this.config.customerTemplateId,
+        customerEmail
+      )
+      .then((response) => {
+        console.log('✅ Customer email sent successfully:', response);
       })
-      .then(response => response.json())
-      .then(data => {
-        console.log('✅ Customer email sent successfully via proxy:', data);
-      })
-      .catch(error => {
-        console.error('❌ Error sending customer email via proxy:', error);
+      .catch((error) => {
+        console.error('❌ Error sending customer email:', error);
       });
       
-      // Send owner email via our server proxy
-      console.log('Sending owner email with data:', ownerEmail);
-      fetch('/api/send-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          service_id: this.config.emailServiceId,
-          template_id: this.config.ownerTemplateId,
-          user_id: 'eWkroiiJhLnSK1_Pn',
-          template_params: ownerEmail
-        })
+      // Send owner notification email using EmailJS directly
+      console.log('Sending owner notification email to:', this.config.ownerEmail);
+      emailjs.send(
+        this.config.emailServiceId,
+        this.config.ownerTemplateId,
+        ownerEmail
+      )
+      .then((response) => {
+        console.log('✅ Owner email sent successfully:', response);
       })
-      .then(response => response.json())
-      .then(data => {
-        console.log('✅ Owner email sent successfully via proxy:', data);
-      })
-      .catch(error => {
-        console.error('❌ Error sending owner email via proxy:', error);
+      .catch((error) => {
+        console.error('❌ Error sending owner email:', error);
       });
     },
     
