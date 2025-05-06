@@ -448,13 +448,20 @@ document.addEventListener('DOMContentLoaded', function() {
         });
       }
       
-      // Checkout functionality has been removed
+      // Checkout functionality - redirects to checkout page
       const checkoutButton = document.querySelector('.cart-panel-buttons .checkout-btn');
       if (checkoutButton) {
         checkoutButton.addEventListener('click', (e) => {
           e.preventDefault();
-          // Alert the user that checkout has been disabled
-          alert('Checkout functionality has been removed from this application.');
+          // Check if cart has items
+          if (this.items.length === 0) {
+            alert('Your cart is empty. Please add items before proceeding to checkout.');
+            return;
+          }
+          // Save current cart to localStorage to ensure it's available on checkout page
+          this.saveCartToLocalStorage();
+          // Redirect to checkout page
+          window.location.href = 'checkout.html';
         });
       }
     },
