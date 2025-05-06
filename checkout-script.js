@@ -895,11 +895,35 @@ document.addEventListener('DOMContentLoaded', function() {
             // Reset form
             document.getElementById('checkoutForm').reset();
             
-            // Clear the cart in localStorage
+            // Clear the cart in localStorage and Firestore
             console.log('Order completed successfully, clearing cart');
             localStorage.removeItem('auricCart');
             localStorage.removeItem('auricCartItems');
             localStorage.removeItem('cartItems'); // Clear legacy cart also
+            
+            // Clear Firestore cart if user is authenticated with Firebase
+            if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+                const currentUser = firebase.auth().currentUser;
+                if (currentUser && currentUser.uid) {
+                    console.log('Clearing Firestore cart for user:', currentUser.uid);
+                    try {
+                        const db = firebase.firestore();
+                        db.collection('carts').doc(currentUser.uid).set({
+                            items: [],
+                            updatedAt: new Date().toISOString(),
+                            device: `device_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                            operation: 'clear',
+                            version: Date.now().toString()
+                        }).then(() => {
+                            console.log('Firestore cart cleared successfully');
+                        }).catch(err => {
+                            console.error('Error clearing Firestore cart:', err);
+                        });
+                    } catch (err) {
+                        console.error('Error accessing Firestore:', err);
+                    }
+                }
+            }
             
             // Clear the order summary display
             const orderSummary = document.getElementById('orderSummary');
