@@ -753,10 +753,36 @@ document.addEventListener('DOMContentLoaded', function() {
     function checkUserAuthentication() {
         console.log("Checking user authentication...");
         
-        // Check if Firebase auth is available and user is signed in
+        // Initialize cart loading flag - we'll use this to ensure we only load cart once
+        window.cartLoadedForCheckout = false;
+        
+        // Get current user from localStorage while waiting for Firebase
+        const localCurrentUser = localStorage.getItem('currentUser');
+        
+        // Check if Firebase auth is available
         if (typeof firebase !== 'undefined' && firebase.auth) {
+            console.log("Using Firebase auth to check authentication");
+            
+            // We need to check current user immediately first, before the async call
+            const currentUser = firebase.auth().currentUser;
+            if (currentUser) {
+                console.log("User is already logged in:", currentUser.email);
+                if (!window.cartLoadedForCheckout) {
+                    loadCartItems();
+                    window.cartLoadedForCheckout = true;
+                }
+                return;
+            }
+            
+            // If no current user immediately available, wait for auth state to be determined
             firebase.auth().onAuthStateChanged(function(user) {
-                if (!user) {
+                if (user) {
+                    console.log("User is logged in via auth state change:", user.email);
+                    if (!window.cartLoadedForCheckout) {
+                        loadCartItems();
+                        window.cartLoadedForCheckout = true;
+                    }
+                } else {
                     console.log("User not logged in. Redirecting to signup page...");
                     
                     // Create an authentication required modal if it doesn't exist
@@ -764,20 +790,23 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     // Store checkout as the intended destination after login
                     localStorage.setItem('redirectAfterLogin', 'checkout.html');
-                } else {
-                    console.log("User is logged in. Proceeding with checkout...");
-                    // If user is logged in, load cart items
-                    loadCartItems();
                 }
             });
         } else {
-            // If Firebase auth is not available, create a stub for testing
-            console.log("Creating auth stub for checkout");
+            // If Firebase auth is not available, use localStorage as fallback
+            console.log("Firebase auth not available, using localStorage instead");
             
             // Check if we have a local authorization flag for testing
-            const isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
+            const isLoggedIn = localStorage.getItem('userLoggedIn') === 'true' || 
+                              (localCurrentUser && localCurrentUser !== 'null');
             
-            if (!isLoggedIn) {
+            if (isLoggedIn) {
+                console.log("User is logged in via localStorage");
+                if (!window.cartLoadedForCheckout) {
+                    loadCartItems();
+                    window.cartLoadedForCheckout = true;
+                }
+            } else {
                 console.log("User not logged in. Redirecting to signup page...");
                 
                 // Create an authentication required modal if it doesn't exist
@@ -785,10 +814,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Store checkout as the intended destination after login
                 localStorage.setItem('redirectAfterLogin', 'checkout.html');
-            } else {
-                console.log("User is logged in. Proceeding with checkout...");
-                // If user is logged in, load cart items
-                loadCartItems();
             }
         }
     }
