@@ -113,7 +113,14 @@ document.addEventListener('DOMContentLoaded', function() {
         // Try each possible localStorage key to find cart data
         let storedCart = null;
         
-        // First try the most current format
+        // First check if we're logged in - prioritize Firestore data for logged in users
+        if (auth.currentUser) {
+          console.log('User is logged in, loading cart from Firestore');
+          this.loadCartFromFirestore(auth.currentUser.uid);
+          return; // Early return since Firestore will handle everything
+        }
+        
+        // If not logged in, try the most current format
         storedCart = localStorage.getItem('auricCartItems');
         if (storedCart) {
           console.log('Found cart data in auricCartItems');
@@ -187,6 +194,53 @@ document.addEventListener('DOMContentLoaded', function() {
     /**
      * Show message for empty cart
      */
+    loadCartFromFirestore: function(userId) {
+      console.log('Loading cart from Firestore in checkout.js');
+      
+      // Get the cart data from Firestore
+      db.collection('carts').doc(userId).get()
+        .then((doc) => {
+          if (doc.exists && doc.data().items) {
+            // Get items from Firestore
+            const firestoreItems = doc.data().items;
+            console.log('Found cart items in Firestore:', firestoreItems.length);
+            
+            // Ensure all items have valid quantity values
+            const validatedItems = firestoreItems.map(item => {
+              // Force quantity to be 1 if it's invalid or not provided
+              if (!item.quantity || isNaN(item.quantity) || item.quantity < 1) {
+                console.log('Fixed invalid quantity for item:', item.name);
+                item.quantity = 1;
+              }
+              return item;
+            });
+            
+            // Update our cart with Firestore data
+            this.cart.items = validatedItems;
+            
+            // If cart is empty after parsing, show empty message
+            if (this.cart.items.length === 0) {
+              console.log('Cart is empty after Firestore load');
+              this.showEmptyCartMessage();
+              return;
+            }
+            
+            // Calculate totals
+            this.calculateTotals();
+            
+            // Render items in order summary
+            this.renderOrderItems();
+          } else {
+            console.log('No cart found in Firestore or cart is empty');
+            this.showEmptyCartMessage();
+          }
+        })
+        .catch(error => {
+          console.error('Error loading cart from Firestore:', error);
+          this.showEmptyCartMessage();
+        });
+    },
+    
     showEmptyCartMessage: function() {
       if (this.elements.orderItemsContainer) {
         this.elements.orderItemsContainer.innerHTML = `
@@ -595,8 +649,9 @@ document.addEventListener('DOMContentLoaded', function() {
       // Clear cart items array
       this.cart.items = [];
       
-      // Clear localStorage
+      // Clear all localStorage cart items to ensure consistency
       localStorage.setItem('auricCartItems', JSON.stringify([]));
+      localStorage.setItem('auricCart', JSON.stringify([])); 
       
       // If user is logged in, clear Firestore cart
       if (auth.currentUser) {
