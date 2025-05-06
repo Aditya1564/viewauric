@@ -1,54 +1,18 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // FORCE CHECK FOR AUTHENTICATION - look at actual URL params first
-    // This is a direct approach to fixing the issue with authentication detection
+    // COMPLETELY REVISED AUTHENTICATION DETECTION
+    // This approach checks all possible authentication sources
     
     // Add global flags for tracking authentication state
     window.authCheckAttempts = 0;
     window.isUserAuthenticated = false;
     window.cartLoadedForCheckout = false;
     
-    // IMPORTANT: First check if we came from profile page (a clear sign we're logged in)
+    // Get referrer for later checks
     const referrer = document.referrer;
-    if (referrer && (referrer.includes('profile.html') || referrer.includes('/profile'))) {
-        console.log("User came from profile page - definitely authenticated");
-        window.isUserAuthenticated = true;
-        loadCartItems();
-        window.cartLoadedForCheckout = true;
-    } 
-    // Then check for logged-in state through Firebase functions
-    else if (typeof firebase !== 'undefined' && firebase.auth) {
-        // Force refresh token to ensure we have the latest auth state
-        firebase.auth().currentUser?.getIdToken(true).catch(err => console.log("Token refresh error:", err));
-        
-        const currentUser = firebase.auth().currentUser;
-        if (currentUser) {
-            console.log("User already authenticated on page load:", currentUser.email);
-            window.isUserAuthenticated = true;
-            loadCartItems();
-            window.cartLoadedForCheckout = true;
-        } else {
-            // Force check user token in localStorage
-            const localUserData = localStorage.getItem('firebase:authUser:' + firebase.app().options.apiKey + ':[DEFAULT]');
-            if (localUserData) {
-                try {
-                    const userData = JSON.parse(localUserData);
-                    if (userData && userData.email) {
-                        console.log("User authenticated via Firebase localStorage:", userData.email);
-                        window.isUserAuthenticated = true;
-                        loadCartItems();
-                        window.cartLoadedForCheckout = true;
-                        return;
-                    }
-                } catch (e) {
-                    console.error("Error parsing Firebase user data:", e);
-                }
-            }
-            
-            console.log("No direct Firebase auth, checking state changes...");
-            checkUserAuthenticationWithRetry();
-        }
-    } else {
-        // Firebase not available, fall back to localStorage check
+    
+    // Check all possible authentication sources
+    function checkAllAuthSources() {
+        // 1. Check standard localStorage variables
         const localUser = localStorage.getItem('currentUser');
         const userLoggedIn = localStorage.getItem('userLoggedIn');
         const userEmailInStorage = localStorage.getItem('userEmail');
@@ -56,14 +20,80 @@ document.addEventListener('DOMContentLoaded', function() {
         if ((localUser && localUser !== 'null') || 
             userLoggedIn === 'true' || 
             (userEmailInStorage && userEmailInStorage !== 'null')) {
-            console.log("User authenticated via localStorage");
-            window.isUserAuthenticated = true;
-            loadCartItems();
-            window.cartLoadedForCheckout = true;
+            console.log("User authenticated via standard localStorage variables");
+            return true;
+        }
+        
+        // 2. Check for any Firebase auth data in localStorage
+        const firebaseAuthKey = 'firebase:authUser:';
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith(firebaseAuthKey)) {
+                try {
+                    const value = localStorage.getItem(key);
+                    const userData = JSON.parse(value);
+                    if (userData && userData.email) {
+                        console.log("User authenticated via Firebase localStorage:", userData.email);
+                        return true;
+                    }
+                } catch (e) {
+                    // Ignore parsing errors
+                }
+            }
+        }
+        
+        // 3. Check Firebase current user if available
+        if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+            console.log("User authenticated via Firebase currentUser:", firebase.auth().currentUser.email);
+            return true;
+        }
+        
+        // 4. Check referrer as a signal
+        if (referrer && (referrer.includes('profile.html') || referrer.includes('/profile'))) {
+            console.log("User authenticated via referrer (came from profile page)");
+            return true;
+        }
+        
+        // No authentication found
+        return false;
+    }
+    
+    // First quick check for authentication
+    if (checkAllAuthSources()) {
+        console.log("User is definitely authenticated based on quick checks");
+        window.isUserAuthenticated = true;
+        loadCartItems();
+        window.cartLoadedForCheckout = true;
+    } 
+    // If not found, try Firebase auth state change listener
+    else if (typeof firebase !== 'undefined' && firebase.auth) {
+        console.log("Quick auth check failed, trying Firebase auth state change listener");
+        // Try to refresh token first
+        if (firebase.auth().currentUser) {
+            firebase.auth().currentUser.getIdToken(true)
+                .then(() => {
+                    console.log("Token refreshed, rechecking authentication");
+                    if (firebase.auth().currentUser) {
+                        console.log("User authenticated after token refresh:", firebase.auth().currentUser.email);
+                        window.isUserAuthenticated = true;
+                        loadCartItems();
+                        window.cartLoadedForCheckout = true;
+                    } else {
+                        checkUserAuthenticationWithRetry();
+                    }
+                })
+                .catch(err => {
+                    console.log("Token refresh error:", err);
+                    checkUserAuthenticationWithRetry();
+                });
         } else {
-            console.log("No user found in localStorage, checking again...");
             checkUserAuthenticationWithRetry();
         }
+    } 
+    // Last resort - try authentication retry
+    else {
+        console.log("Firebase not available, trying auth retry");
+        checkUserAuthenticationWithRetry();
     }
     
     // Form submission
