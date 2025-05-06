@@ -1547,10 +1547,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     handler: function(response) {
                         // This handler is called when payment is successful
                         console.log('Razorpay payment successful:', response);
+                        
+                        // Set emergency flags as soon as payment is successful
+                        // This prevents any Firestore listeners from reviving the cart
+                        // before the main handleOrderSubmit function completes
+                        localStorage.setItem('orderCompleted', 'true');
+                        localStorage.setItem('orderCompletedTime', Date.now().toString());
+                        localStorage.setItem('orderJustPlaced', 'true');
+                        localStorage.setItem('cartEmergencyCleared', 'true');
+                        localStorage.setItem('cartEmergencyClearTime', Date.now().toString());
+                        
                         // Add payment details to localStorage for reference
                         localStorage.setItem('razorpay_payment_id', response.razorpay_payment_id);
                         localStorage.setItem('razorpay_order_id', response.razorpay_order_id);
                         localStorage.setItem('razorpay_signature', response.razorpay_signature);
+                        
+                        console.log('Emergency cart flags set during Razorpay payment success');
                         resolve(response);
                     },
                     modal: {
