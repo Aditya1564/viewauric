@@ -1,8 +1,11 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Check if user is logged in first
+    checkUserAuthentication();
+    
     // Form submission
     document.getElementById('checkoutForm').addEventListener('submit', handleOrderSubmit);
 
-    // Initialize EmailJS with credentials from environment variables
+    // Initialize email functionality
     initEmailJS();
     
     // Update order summary with cart items
@@ -745,6 +748,56 @@ document.addEventListener('DOMContentLoaded', function() {
         const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
         document.getElementById('errorMessage').textContent = message;
         errorModal.show();
+    }
+    
+    // Check if user is authenticated, if not redirect to login page
+    function checkUserAuthentication() {
+        console.log("Checking user authentication...");
+        
+        // Check if Firebase auth is available and user is signed in
+        if (typeof firebase !== 'undefined' && firebase.auth) {
+            firebase.auth().onAuthStateChanged(function(user) {
+                if (!user) {
+                    console.log("User not logged in. Redirecting to login page...");
+                    // Show message that login is required
+                    const message = "You must be logged in to proceed with checkout. Redirecting to login page...";
+                    alert(message);
+                    
+                    // Store checkout as the intended destination after login
+                    localStorage.setItem('redirectAfterLogin', 'checkout.html');
+                    
+                    // Redirect to login page
+                    window.location.href = 'login.html';
+                } else {
+                    console.log("User is logged in. Proceeding with checkout...");
+                    // If user is logged in, load cart items
+                    loadCartItems();
+                }
+            });
+        } else {
+            // If Firebase auth is not available, create a stub for testing
+            console.log("Creating auth stub for checkout");
+            
+            // Check if we have a local authorization flag for testing
+            const isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
+            
+            if (!isLoggedIn) {
+                console.log("User not logged in. Redirecting to login page...");
+                // Show message that login is required
+                const message = "You must be logged in to proceed with checkout. Redirecting to login page...";
+                alert(message);
+                
+                // Store checkout as the intended destination after login
+                localStorage.setItem('redirectAfterLogin', 'checkout.html');
+                
+                // Redirect to login page
+                window.location.href = 'login.html';
+            } else {
+                console.log("User is logged in. Proceeding with checkout...");
+                // If user is logged in, load cart items
+                loadCartItems();
+            }
+        }
     }
     
     // Handle Razorpay payment
