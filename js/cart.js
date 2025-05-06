@@ -270,6 +270,12 @@ window.resetCart = window.cartDebug.resetCart;
 function setupDirectCartToggle() {
   console.log('Setting up direct cart toggle as additional failsafe');
   
+  // Skip if on checkout page
+  if (window.location.pathname.includes('checkout.html')) {
+    console.log("On checkout page - skipping direct cart toggle setup");
+    return;
+  }
+  
   // Find elements needed for basic cart panel operation
   const cartToggle = document.querySelector('.cart-toggle');
   const cartPanel = document.querySelector('.cart-panel');
@@ -545,15 +551,20 @@ document.addEventListener('DOMContentLoaded', function() {
      * Load cart items from localStorage or Firestore based on authentication status
      */
     loadCart: function() {
-      const currentUser = auth.currentUser;
+      // Check if auth is defined, and load cart accordingly
+      if (typeof auth !== 'undefined' && auth) {
+        const currentUser = auth.currentUser;
+        
+        if (currentUser) {
+          // User is logged in, load from Firestore
+          this.loadCartFromFirestore(currentUser.uid);
+          return;
+        }
+      } 
       
-      if (currentUser) {
-        // User is logged in, load from Firestore
-        this.loadCartFromFirestore(currentUser.uid);
-      } else {
-        // User is anonymous, load from localStorage
-        this.loadCartFromLocalStorage();
-      }
+      // User is anonymous or auth is not available, load from localStorage
+      console.log('User is not authenticated');
+      this.loadCartFromLocalStorage();
     },
     
     /**
@@ -1496,6 +1507,14 @@ document.addEventListener('DOMContentLoaded', function() {
     setupAuthListener: function() {
       // Create status indicator for sync operations
       this.createSyncStatusIndicator();
+      
+      // Check if auth is defined
+      if (typeof auth === 'undefined' || !auth) {
+        console.log('Auth is not defined, using localStorage only');
+        this.loadCartFromLocalStorage();
+        this.updateCartUI();
+        return;
+      }
       
       auth.onAuthStateChanged((user) => {
         if (user) {
