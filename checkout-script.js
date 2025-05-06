@@ -8,8 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize email functionality
     initEmailJS();
     
-    // Update order summary with cart items
-    updateOrderSummary();
+    // Note: updateOrderSummary will be called after loadCartItems only if user is authenticated
     
     // Add event listener for confirmation modal close button
     document.getElementById('closeConfirmationBtn').addEventListener('click', function() {
@@ -750,7 +749,7 @@ document.addEventListener('DOMContentLoaded', function() {
         errorModal.show();
     }
     
-    // Check if user is authenticated, if not redirect to login page
+    // Check if user is authenticated, if not redirect to signup page
     function checkUserAuthentication() {
         console.log("Checking user authentication...");
         
@@ -758,16 +757,13 @@ document.addEventListener('DOMContentLoaded', function() {
         if (typeof firebase !== 'undefined' && firebase.auth) {
             firebase.auth().onAuthStateChanged(function(user) {
                 if (!user) {
-                    console.log("User not logged in. Redirecting to login page...");
-                    // Show message that login is required
-                    const message = "You must be logged in to proceed with checkout. Redirecting to login page...";
-                    alert(message);
+                    console.log("User not logged in. Redirecting to signup page...");
+                    
+                    // Create an authentication required modal if it doesn't exist
+                    showAuthRequiredModal();
                     
                     // Store checkout as the intended destination after login
                     localStorage.setItem('redirectAfterLogin', 'checkout.html');
-                    
-                    // Redirect to login page
-                    window.location.href = 'login.html';
                 } else {
                     console.log("User is logged in. Proceeding with checkout...");
                     // If user is logged in, load cart items
@@ -782,22 +778,75 @@ document.addEventListener('DOMContentLoaded', function() {
             const isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
             
             if (!isLoggedIn) {
-                console.log("User not logged in. Redirecting to login page...");
-                // Show message that login is required
-                const message = "You must be logged in to proceed with checkout. Redirecting to login page...";
-                alert(message);
+                console.log("User not logged in. Redirecting to signup page...");
+                
+                // Create an authentication required modal if it doesn't exist
+                showAuthRequiredModal();
                 
                 // Store checkout as the intended destination after login
                 localStorage.setItem('redirectAfterLogin', 'checkout.html');
-                
-                // Redirect to login page
-                window.location.href = 'login.html';
             } else {
                 console.log("User is logged in. Proceeding with checkout...");
                 // If user is logged in, load cart items
                 loadCartItems();
             }
         }
+    }
+    
+    // Show authentication required modal
+    function showAuthRequiredModal() {
+        // Check if modal already exists in HTML
+        let authModal = document.getElementById('authRequiredModal');
+        
+        // If modal doesn't exist, create it
+        if (!authModal) {
+            const modalHTML = `
+                <div class="modal fade" id="authRequiredModal" tabindex="-1" aria-labelledby="authRequiredModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="authRequiredModalLabel">Authentication Required</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="text-center mb-4">
+                                    <i class="bi bi-exclamation-circle text-warning" style="font-size: 3rem;"></i>
+                                </div>
+                                <p>You need to create an account or sign in to complete your purchase.</p>
+                                <p>Creating an account allows you to:</p>
+                                <ul>
+                                    <li>Track your orders</li>
+                                    <li>Save your shipping information</li>
+                                    <li>Access exclusive deals</li>
+                                    <li>Enjoy a faster checkout experience</li>
+                                </ul>
+                            </div>
+                            <div class="modal-footer justify-content-center">
+                                <a href="signup.html" class="btn btn-primary">Create Account</a>
+                                <a href="login.html" class="btn btn-outline-secondary">Sign In</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Append modal to body
+            const modalContainer = document.createElement('div');
+            modalContainer.innerHTML = modalHTML;
+            document.body.appendChild(modalContainer.firstElementChild);
+            
+            // Initialize the modal
+            authModal = document.getElementById('authRequiredModal');
+        }
+        
+        // Show the modal
+        const bsModal = new bootstrap.Modal(authModal);
+        bsModal.show();
+        
+        // Add event listener for when modal is hidden to redirect
+        authModal.addEventListener('hidden.bs.modal', function () {
+            window.location.href = 'signup.html';
+        });
     }
     
     // Handle Razorpay payment
