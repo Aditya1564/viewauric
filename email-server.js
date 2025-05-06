@@ -1,10 +1,10 @@
-// Simple server that forwards email requests to EmailJS
+// This file is kept for compatibility purposes only
+// All email functionality has been completely removed
+
 const http = require('http');
-const https = require('https');
 const url = require('url');
 
 const PORT = 5001;
-const EMAILJS_API_URL = 'api.emailjs.com';
 
 // Helper function to parse JSON body from requests
 const getRequestBody = (req) => {
@@ -45,83 +45,26 @@ const server = http.createServer(async (req, res) => {
   const parsedUrl = url.parse(req.url, true);
   const pathname = parsedUrl.pathname;
   
-  // Handle the email sending endpoint
+  // Handle the email sending endpoint with a notification that functionality is removed
   if (req.method === 'POST' && pathname === '/api/send-email') {
     try {
       // Get the body from the client request
       const body = await getRequestBody(req);
       
-      console.log('Received email request:', {
-        serviceId: body.service_id,
-        templateId: body.template_id,
-        recipient: body.template_params?.to_email || 'no recipient specified'
-      });
+      console.log('Received email request, but email functionality has been removed');
       
-      // Create the proper EmailJS request payload
-      const emailJSPayload = {
-        service_id: body.service_id,
-        template_id: body.template_id,
-        user_id: body.user_id,
-        template_params: body.template_params
-      };
-      
-      // Create options for the HTTPS request to EmailJS
-      const options = {
-        hostname: EMAILJS_API_URL,
-        port: 443,
-        path: '/api/v1.0/email/send',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Origin': 'https://yourdomain.com' // Replace with your actual domain
-        }
-      };
-      
-      console.log('Making request to EmailJS API...');
-      
-      // Create a new promise for the HTTPS request
-      const emailPromise = new Promise((resolve, reject) => {
-        const emailReq = https.request(options, (emailRes) => {
-          console.log('Response status code:', emailRes.statusCode);
-          
-          let data = '';
-          
-          emailRes.on('data', (chunk) => {
-            data += chunk;
-          });
-          
-          emailRes.on('end', () => {
-            console.log('EmailJS response:', data);
-            resolve({
-              status: emailRes.statusCode,
-              data: data
-            });
-          });
-        });
-        
-        emailReq.on('error', (error) => {
-          console.error('Error sending email:', error);
-          reject(error);
-        });
-        
-        // Write JSON data to request body
-        const jsonPayload = JSON.stringify(emailJSPayload);
-        emailReq.write(jsonPayload);
-        emailReq.end();
-      });
-      
-      // Wait for the EmailJS response
-      const emailResponse = await emailPromise;
-      
-      // Return the EmailJS response to the client
-      res.writeHead(emailResponse.status, { 'Content-Type': 'application/json' });
-      res.end(emailResponse.data || JSON.stringify({ message: 'Email sent successfully' }));
+      // Return a success response to not break the application flow
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ 
+        message: 'Email functionality has been removed from the application',
+        status: 'success'
+      }));
       
     } catch (error) {
-      console.error('Error in email proxy:', error);
+      console.error('Error processing request:', error);
       res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ 
-        error: 'Failed to send email',
+        error: 'Failed to process request',
         message: error.message
       }));
     }
@@ -133,7 +76,8 @@ const server = http.createServer(async (req, res) => {
   res.end(JSON.stringify({ error: 'Not found' }));
 });
 
+// This server is kept for compatibility but it's no longer needed
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Email proxy server running at http://0.0.0.0:${PORT}/`);
-  console.log(`Endpoint: /api/send-email`);
+  console.log(`Email functionality has been completely removed`);
+  console.log(`Placeholder server running at http://0.0.0.0:${PORT}/`);
 });
