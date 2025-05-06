@@ -672,27 +672,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error updating product list:', productListError);
             }
             
-            // Finally add event listeners
+            // Set up event listeners for the buttons
             try {
-                // Add event listeners to the newly created buttons
-                document.querySelectorAll('.increment-quantity').forEach(button => {
-                    button.addEventListener('click', function() {
-                        const productId = this.getAttribute('data-product-id');
-                        incrementCartItemQuantity(productId);
-                    });
-                });
-                
-                document.querySelectorAll('.decrement-quantity').forEach(button => {
-                    button.addEventListener('click', function() {
-                        const productId = this.getAttribute('data-product-id');
-                        decrementCartItemQuantity(productId);
-                    });
-                });
-                
-                // Also set up product listeners if needed
-                if (typeof setupProductListeners === 'function') {
-                    setupProductListeners();
-                }
+                // Use our centralized function to set up all product listeners
+                setupProductListeners();
             } catch (listenerError) {
                 console.error('Error setting up event listeners:', listenerError);
             }
@@ -714,27 +697,45 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // This is for initial setup of event listeners - called separately from updateOrderSummary
     function setupProductListeners() {
-        // Add event listeners to the newly created buttons
+        console.log("Setting up event listeners for product items");
+        
+        // First, remove any existing event listeners by cloning and replacing elements
+        // This prevents duplicate event handlers
+        
+        // Handle increment quantity buttons
         document.querySelectorAll('.increment-quantity').forEach(button => {
-            button.addEventListener('click', function() {
+            const newButton = button.cloneNode(true);
+            button.parentNode.replaceChild(newButton, button);
+            
+            newButton.addEventListener('click', function() {
                 const productId = this.getAttribute('data-product-id');
+                console.log("Increment quantity clicked for product:", productId);
                 incrementCartItemQuantity(productId);
             });
         });
         
+        // Handle decrement quantity buttons
         document.querySelectorAll('.decrement-quantity').forEach(button => {
-            button.addEventListener('click', function() {
+            const newButton = button.cloneNode(true);
+            button.parentNode.replaceChild(newButton, button);
+            
+            newButton.addEventListener('click', function() {
                 const productId = this.getAttribute('data-product-id');
+                console.log("Decrement quantity clicked for product:", productId);
                 decrementCartItemQuantity(productId);
             });
         });
         
         // Add listeners for remove buttons if they exist
         document.querySelectorAll('.remove-product').forEach(button => {
-            button.addEventListener('click', function() {
+            const newButton = button.cloneNode(true);
+            button.parentNode.replaceChild(newButton, button);
+            
+            newButton.addEventListener('click', function() {
                 const productItem = this.closest('.product-item');
                 if (productItem) {
                     const productId = productItem.querySelector('.product-name').id.replace('product_', '');
+                    console.log("Removing product:", productId);
                     // Remove from DOM
                     productItem.remove();
                     // Update summary
