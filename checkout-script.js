@@ -19,6 +19,20 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Add event listener for confirmation modal close button
     document.getElementById('closeConfirmationBtn').addEventListener('click', function() {
+        // Make sure cart is cleared before redirecting
+        try {
+            console.log("Clearing cart before redirecting to homepage");
+            if (typeof clearCart === 'function') {
+                clearCart();
+            } else {
+                localStorage.removeItem('auricCart');
+                localStorage.removeItem('auricCartItems');
+                localStorage.removeItem('cartItems');
+            }
+        } catch (err) {
+            console.error("Error clearing cart on redirect:", err);
+        }
+        
         // Redirect to homepage
         window.location.href = 'index.html';
     });
@@ -53,6 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load cart items from localStorage - works with Auric cart system
     function loadCartItems() {
         try {
+            console.log('Loading cart items for checkout...');
             // Check for cart data in multiple possible localStorage keys
             let cartItems = [];
             const auricCartItems = localStorage.getItem('auricCartItems');
@@ -75,10 +90,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('Cart items loaded from cartItems:', cartItems.length);
             }
             
+            // Always clear the productList first
+            const productList = document.getElementById('productList');
+            productList.innerHTML = '';
+            
             if (cartItems.length > 0) {
-                // Clear existing products
-                const productList = document.getElementById('productList');
-                productList.innerHTML = '';
+                console.log('Adding cart items to checkout form:', cartItems);
                 
                 // Add products from cart
                 cartItems.forEach(item => {
@@ -119,16 +136,49 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     productList.appendChild(productItem);
                 });
-                
-                // Add event listeners to new products
-                setupProductListeners();
-                
-                // Update order summary
-                updateOrderSummary();
             } else {
-                // If there are no items in the cart, at least make sure the default values are shown correctly in order summary
-                updateOrderSummary();
+                console.log('No cart items found, adding default product');
+                // If there are no cart items, add a default empty product
+                const defaultProduct = document.createElement('div');
+                defaultProduct.className = 'product-item card mb-3';
+                defaultProduct.innerHTML = `
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <label for="product1" class="form-label">Product Name</label>
+                                <input type="text" class="form-control product-name" id="product1" name="product1" value="Diamond Ring" required>
+                            </div>
+                            <div class="col-md-2 mb-3 mb-md-0">
+                                <label for="quantity1" class="form-label">Quantity</label>
+                                <input type="number" class="form-control product-quantity" id="quantity1" name="quantity1" min="1" value="1" required>
+                            </div>
+                            <div class="col-md-3 mb-3 mb-md-0">
+                                <label for="price1" class="form-label">Price</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control product-price" id="price1" name="price1" min="0.01" step="0.01" value="299.99" required>
+                                </div>
+                            </div>
+                            <div class="col-md-1 d-flex align-items-center justify-content-end mt-3 mt-md-0">
+                                <button type="button" class="btn btn-danger btn-sm remove-product" disabled>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                productList.appendChild(defaultProduct);
             }
+            
+            // Add event listeners to all products
+            setupProductListeners();
+            
+            // Update order summary
+            updateOrderSummary();
         } catch (error) {
             console.error('Error loading cart items:', error);
         }
@@ -344,6 +394,17 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Order completed successfully, clearing cart');
             localStorage.removeItem('auricCart');
             localStorage.removeItem('auricCartItems');
+            localStorage.removeItem('cartItems'); // Clear legacy cart also
+            
+            // If we have direct access to Cart API from cart.js, use it
+            if (typeof clearCart === 'function') {
+                try {
+                    console.log('Using cart.js API to clear cart');
+                    clearCart();
+                } catch (err) {
+                    console.error('Error using clearCart API:', err);
+                }
+            }
             
             // If Firebase auth is available, clear Firestore cart too
             if (typeof auth !== 'undefined' && auth && auth.currentUser) {
