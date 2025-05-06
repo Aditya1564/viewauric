@@ -16,18 +16,62 @@
     <script>
         // Direct check for cart clearing flags from checkout
         (function() {
+            // IMPORTANT: Reset any stale flags immediately to fix issues
+            function resetStaleFlags() {
+                // Get the current timestamp
+                const now = Date.now();
+                
+                // Check if order completed flag is stale (older than 30 minutes)
+                const orderCompletedTime = parseInt(localStorage.getItem('orderCompletedTime') || '0');
+                if (now - orderCompletedTime > 30 * 60 * 1000) { // 30 minutes
+                    console.log('Resetting stale orderCompleted flag');
+                    localStorage.setItem('orderCompleted', 'false');
+                }
+                
+                // Check if emergency clear flag is stale (older than 30 minutes)
+                const cartEmergencyClearTime = parseInt(localStorage.getItem('cartEmergencyClearTime') || '0');
+                if (now - cartEmergencyClearTime > 30 * 60 * 1000) { // 30 minutes
+                    console.log('Resetting stale cartEmergencyCleared flag');
+                    localStorage.setItem('cartEmergencyCleared', 'false');
+                }
+                
+                // Always reset pendingCartClear flag if it's been more than 2 minutes
+                const pendingCartClearTime = parseInt(localStorage.getItem('pendingCartClearTime') || '0');
+                if (now - pendingCartClearTime > 2 * 60 * 1000 || !pendingCartClearTime) { // 2 minutes
+                    console.log('Resetting pendingCartClear flag');
+                    localStorage.setItem('pendingCartClear', 'false');
+                }
+                
+                // Check if other cart clear flags are stale (older than 10 minutes)
+                const razorpaySuccessTime = parseInt(localStorage.getItem('razorpaySuccessTime') || '0');
+                if (now - razorpaySuccessTime > 10 * 60 * 1000) { // 10 minutes
+                    console.log('Resetting razorpaySuccessfulPayment flag');
+                    localStorage.setItem('razorpaySuccessfulPayment', 'false');
+                }
+                
+                // Reset orderJustPlaced if it's been more than 5 minutes
+                const orderJustPlacedTime = parseInt(localStorage.getItem('orderCompletedTime') || '0');
+                if (now - orderJustPlacedTime > 5 * 60 * 1000) { // 5 minutes
+                    console.log('Resetting orderJustPlaced flag');
+                    localStorage.setItem('orderJustPlaced', 'false');
+                }
+            }
+            
+            // Run this reset immediately
+            resetStaleFlags();
+            
             function checkCartShouldBeCleared() {
-                // Check if order was just completed within last 10 minutes (600,000 ms)
+                // Only check within the first 10 minutes after order completion
                 const orderCompleted = localStorage.getItem('orderCompleted') === 'true';
                 const orderCompletedTime = parseInt(localStorage.getItem('orderCompletedTime') || '0');
                 const orderJustCompleted = orderCompleted && 
-                    (Date.now() - orderCompletedTime < 600000); // Within 10 minutes
+                    (Date.now() - orderCompletedTime < 10 * 60 * 1000); // Within 10 minutes
                 
-                // Check emergency clear flags with time limit
+                // Check emergency clear flags with strict time limit
                 const cartEmergencyCleared = localStorage.getItem('cartEmergencyCleared') === 'true';
                 const cartEmergencyClearTime = parseInt(localStorage.getItem('cartEmergencyClearTime') || '0');
                 const emergencyClearJustHappened = cartEmergencyCleared && 
-                    (Date.now() - cartEmergencyClearTime < 600000); // Within 10 minutes
+                    (Date.now() - cartEmergencyClearTime < 5 * 60 * 1000); // Within 5 minutes
                 
                 // Pending cart clear flag
                 const pendingCartClear = localStorage.getItem('pendingCartClear') === 'true';
@@ -41,18 +85,6 @@
                         pendingCartClear
                     });
                     return true;
-                }
-                
-                // If order was completed but it was a while ago, reset the flags
-                if (orderCompleted && !orderJustCompleted) {
-                    console.log('Order was completed, but it was a while ago. Resetting flags.');
-                    localStorage.setItem('orderCompleted', 'false');
-                }
-                
-                // If emergency clear was set but it was a while ago, reset the flags
-                if (cartEmergencyCleared && !emergencyClearJustHappened) {
-                    console.log('Emergency clear was set, but it was a while ago. Resetting flags.');
-                    localStorage.setItem('cartEmergencyCleared', 'false');
                 }
                 
                 return false;

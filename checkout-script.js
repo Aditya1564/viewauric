@@ -1165,6 +1165,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Store this script in localStorage so it can be executed when returning to the main page
                 localStorage.setItem('pendingCartClear', 'true');
+                localStorage.setItem('pendingCartClearTime', Date.now().toString());
                 localStorage.setItem('cartClearScript', cartClearScript.textContent);
                 localStorage.setItem('cartClearTime', Date.now().toString());
                 

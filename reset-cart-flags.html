@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Cart Flags</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #3399cc;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #3399cc;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+            font-family: monospace;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .warning {
+            color: orange;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Auric Cart Flag Reset Tool</h1>
+    
+    <div class="card">
+        <h2>Reset Cart Emergency Flags</h2>
+        <p>Use this tool if you're experiencing issues with your cart clearing unexpectedly or not working properly. This will reset all cart-related flags in your browser's localStorage.</p>
+        
+        <button id="resetButton">Reset All Cart Flags</button>
+        
+        <div id="logOutput" class="log"></div>
+    </div>
+    
+    <div class="card">
+        <h2>Current Flag Status</h2>
+        <div id="flagStatus" class="log"></div>
+        <button id="refreshStatus">Refresh Status</button>
+    </div>
+    
+    <script>
+        // Get DOM elements
+        const resetButton = document.getElementById('resetButton');
+        const logOutput = document.getElementById('logOutput');
+        const flagStatus = document.getElementById('flagStatus');
+        const refreshStatusButton = document.getElementById('refreshStatus');
+        
+        // Function to log messages
+        function log(message, type = 'info') {
+            const logEntry = document.createElement('div');
+            logEntry.textContent = message;
+            if (type === 'success') {
+                logEntry.classList.add('success');
+            } else if (type === 'warning') {
+                logEntry.classList.add('warning');
+            } else if (type === 'error') {
+                logEntry.classList.add('error');
+            }
+            logOutput.appendChild(logEntry);
+            logOutput.scrollTop = logOutput.scrollHeight;
+        }
+        
+        // Function to reset all cart flags
+        function resetAllCartFlags() {
+            log('Starting cart flag reset process...');
+            
+            try {
+                // Cart data
+                localStorage.removeItem('auricCart');
+                localStorage.removeItem('auricCartItems');
+                localStorage.removeItem('cartItems');
+                localStorage.removeItem('cart');
+                localStorage.removeItem('checkout-cart');
+                log('Cleared all cart data items', 'success');
+                
+                // Emergency flags
+                localStorage.setItem('orderCompleted', 'false');
+                localStorage.setItem('cartEmergencyCleared', 'false');
+                localStorage.setItem('pendingCartClear', 'false');
+                localStorage.setItem('razorpaySuccessfulPayment', 'false');
+                localStorage.setItem('orderJustPlaced', 'false');
+                log('Reset all emergency flags to false', 'success');
+                
+                // Timestamps
+                localStorage.setItem('orderCompletedTime', '0');
+                localStorage.setItem('cartEmergencyClearTime', '0');
+                localStorage.setItem('pendingCartClearTime', '0');
+                localStorage.setItem('razorpaySuccessTime', '0');
+                localStorage.setItem('cartClearTime', '0');
+                log('Reset all timestamp values', 'success');
+                
+                // Additional cart sync data
+                localStorage.removeItem('auricCartVersion');
+                localStorage.removeItem('auricCartTimestamp');
+                localStorage.removeItem('auricCartLastSync');
+                localStorage.removeItem('auricCartDeletedItems');
+                localStorage.removeItem('auricCartSyncing');
+                localStorage.removeItem('auricCartDeviceId');
+                localStorage.removeItem('cartClearScript');
+                log('Cleared all cart synchronization data', 'success');
+                
+                // Create a new device ID to break any synchronization chains
+                const newDeviceId = `reset_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                localStorage.setItem('auricCartDeviceId', newDeviceId);
+                log(`Created new device ID: ${newDeviceId}`, 'success');
+                
+                // Reset global flag if it exists
+                if (typeof window.FORCE_CART_CLEAR_NEEDED !== 'undefined') {
+                    window.FORCE_CART_CLEAR_NEEDED = false;
+                    log('Reset global FORCE_CART_CLEAR_NEEDED flag', 'success');
+                }
+                
+                log('All cart flags have been successfully reset!', 'success');
+                log('You can now safely return to the store and continue shopping.');
+                
+                // Refresh status display
+                displayFlagStatus();
+                
+            } catch (error) {
+                log(`Error during reset: ${error.message}`, 'error');
+            }
+        }
+        
+        // Function to display current flag status
+        function displayFlagStatus() {
+            flagStatus.innerHTML = '';
+            
+            const flags = [
+                { name: 'orderCompleted', value: localStorage.getItem('orderCompleted') },
+                { name: 'orderCompletedTime', value: localStorage.getItem('orderCompletedTime') },
+                { name: 'cartEmergencyCleared', value: localStorage.getItem('cartEmergencyCleared') },
+                { name: 'cartEmergencyClearTime', value: localStorage.getItem('cartEmergencyClearTime') },
+                { name: 'pendingCartClear', value: localStorage.getItem('pendingCartClear') },
+                { name: 'pendingCartClearTime', value: localStorage.getItem('pendingCartClearTime') },
+                { name: 'razorpaySuccessfulPayment', value: localStorage.getItem('razorpaySuccessfulPayment') },
+                { name: 'orderJustPlaced', value: localStorage.getItem('orderJustPlaced') },
+                { name: 'auricCartDeviceId', value: localStorage.getItem('auricCartDeviceId') }
+            ];
+            
+            flags.forEach(flag => {
+                const entry = document.createElement('div');
+                
+                if (flag.value === 'true') {
+                    entry.classList.add('warning');
+                } else if (flag.value === null || flag.value === undefined) {
+                    entry.classList.add('error');
+                }
+                
+                entry.textContent = `${flag.name}: ${flag.value !== null ? flag.value : 'null'}`;
+                flagStatus.appendChild(entry);
+            });
+            
+            // Check cart data
+            const cartData = localStorage.getItem('auricCartItems') || localStorage.getItem('auricCart');
+            let cartStatus = document.createElement('div');
+            
+            if (cartData) {
+                try {
+                    const cartItems = JSON.parse(cartData);
+                    cartStatus.textContent = `Cart Items: ${cartItems.length} items`;
+                    
+                    if (cartItems.length > 0) {
+                        cartStatus.classList.add('success');
+                    }
+                } catch (e) {
+                    cartStatus.textContent = `Cart Items: ERROR parsing cart data`;
+                    cartStatus.classList.add('error');
+                }
+            } else {
+                cartStatus.textContent = `Cart Items: Empty cart`;
+            }
+            
+            flagStatus.appendChild(cartStatus);
+        }
+        
+        // Event listeners
+        resetButton.addEventListener('click', resetAllCartFlags);
+        refreshStatusButton.addEventListener('click', displayFlagStatus);
+        
+        // Initial flag status display
+        displayFlagStatus();
+    </script>
+</body>
+</html>
