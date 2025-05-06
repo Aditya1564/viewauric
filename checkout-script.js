@@ -150,13 +150,60 @@ document.addEventListener('DOMContentLoaded', function() {
         const closeConfirmationBtn = document.getElementById('closeConfirmationBtn');
         if (closeConfirmationBtn) {
             closeConfirmationBtn.addEventListener('click', () => {
+                console.log('FINAL CART CLEARING before redirecting to homepage');
+                
                 // Clear any Razorpay payment details
                 localStorage.removeItem('razorpay_payment_id');
                 localStorage.removeItem('razorpay_order_id');
                 localStorage.removeItem('razorpay_signature');
                 
-                // Redirect to homepage
-                window.location.href = 'index.html';
+                // Perform aggressive cart clearing
+                localStorage.removeItem('auricCart');
+                localStorage.removeItem('auricCartItems');
+                localStorage.removeItem('cartItems');
+                localStorage.removeItem('cart');
+                localStorage.removeItem('checkout-cart');
+                localStorage.removeItem('auric-cart-data');
+                
+                // Try the enhanced clearCart function if available
+                if (typeof window.clearCart === 'function') {
+                    console.log('Using enhanced clearCart before redirect');
+                    try {
+                        window.clearCart();
+                    } catch (err) {
+                        console.error('Error in clearCart:', err);
+                    }
+                }
+                
+                // Also try direct Firestore clearing if available
+                if (typeof firebase !== 'undefined' && firebase.auth) {
+                    try {
+                        const currentUser = firebase.auth().currentUser;
+                        if (currentUser && currentUser.uid) {
+                            const db = firebase.firestore();
+                            const userId = currentUser.uid;
+                            const timestamp = Date.now();
+                            
+                            console.log('FINAL Firestore cart clearing for user:', userId);
+                            db.collection('carts').doc(userId).set({
+                                items: [],
+                                updatedAt: new Date().toISOString(),
+                                device: `final_clear_${timestamp}_${Math.random().toString(36).substr(2, 10)}`,
+                                operation: 'final_clear',
+                                version: timestamp.toString(),
+                                force_cleared: true,
+                                final_clear: true
+                            });
+                        }
+                    } catch (err) {
+                        console.error('Error clearing Firestore cart:', err);
+                    }
+                }
+                
+                // Delay redirect slightly to allow Firestore write to complete
+                setTimeout(function() {
+                    window.location.href = 'index.html';
+                }, 300);
             });
         }
         
@@ -964,41 +1011,64 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
-            // IMPORTANT: Clear cart data IMMEDIATELY after successful order
+            // CRITICAL: Clear cart data IMMEDIATELY after successful order
             console.log('Order processed successfully - clearing cart data now');
             
-            // First, clear localStorage directly for immediate effect
-            localStorage.removeItem('auricCart');
-            localStorage.removeItem('auricCartItems');
-            localStorage.removeItem('cartItems');
-            
-            // Then try the global clearCart function if available
-            if (typeof window.clearCart === 'function') {
-                try {
+            try {
+                // Use our enhanced aggressive cart clearing function
+                if (typeof window.clearCart === 'function') {
                     window.clearCart();
-                    console.log('Cart cleared via global clearCart function');
-                } catch (err) {
-                    console.error('Error using global clearCart function:', err);
-                }
-            }
-            
-            // Finally try to clear Firestore directly
-            if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
-                try {
-                    const db = firebase.firestore();
-                    const userId = firebase.auth().currentUser.uid;
+                    console.log('Cart cleared via aggressive global clearCart function');
+                } else {
+                    console.warn('Global clearCart function not available, using fallback');
                     
-                    console.log('Clearing Firestore cart for user:', userId);
-                    db.collection('carts').doc(userId).set({
-                        items: [],
-                        updatedAt: new Date().toISOString(),
-                        device: `device_${Date.now()}_${Math.random().toString(36).substr(2, 10)}`,
-                        operation: 'clear',
-                        version: Date.now().toString()
-                    });
-                } catch (err) {
-                    console.error('Error clearing Firestore cart:', err);
+                    // Fallback: Clear localStorage directly for immediate effect
+                    localStorage.removeItem('auricCart');
+                    localStorage.removeItem('auricCartItems');
+                    localStorage.removeItem('cartItems');
+                    localStorage.removeItem('cart');
+                    localStorage.removeItem('checkout-cart');
+                    localStorage.removeItem('auric-cart-data');
+                    
+                    // Try to clear Firestore directly
+                    if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+                        const db = firebase.firestore();
+                        const userId = firebase.auth().currentUser.uid;
+                        const timestamp = Date.now();
+                        
+                        console.log('Force clearing Firestore cart for user:', userId);
+                        db.collection('carts').doc(userId).set({
+                            items: [],
+                            updatedAt: new Date().toISOString(),
+                            device: `force_clear_${timestamp}_${Math.random().toString(36).substr(2, 10)}`,
+                            operation: 'force_clear',
+                            version: timestamp.toString(),
+                            clear_timestamp: timestamp,
+                            force_cleared: true
+                        });
+                    }
                 }
+                
+                // ADDITIONAL: Manually update cart DOM elements
+                const cartItems = document.getElementById('cartItems');
+                if (cartItems) {
+                    cartItems.innerHTML = '<p class="empty-cart-message">Your cart is empty</p>';
+                }
+                
+                const cartCountBadge = document.querySelector('.cart-count');
+                if (cartCountBadge) {
+                    cartCountBadge.textContent = '0';
+                    cartCountBadge.style.display = 'none';
+                }
+                
+                const cartTotal = document.getElementById('cartTotal');
+                if (cartTotal) {
+                    cartTotal.textContent = '₹0';
+                }
+                
+                console.log('Cart cleared using all available methods');
+            } catch (cartClearError) {
+                console.error('Error during cart clearing process:', cartClearError);
             }
             
             // Show confirmation modal

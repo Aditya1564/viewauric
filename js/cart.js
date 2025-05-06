@@ -1863,43 +1863,106 @@ document.addEventListener('DOMContentLoaded', function() {
   window.clearCart = function() {
     console.log('Global clearCart function called');
     
-    // Clear localStorage cart
+    // AGGRESSIVE CART CLEARING STRATEGY
+    
+    // 1. Clear localStorage cart
     localStorage.removeItem('auricCart');
     localStorage.removeItem('auricCartItems');
     localStorage.removeItem('cartItems');
     
-    // If Firebase and auth are available, clear Firestore cart
-    if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+    // Also clear any other potential cart-related data
+    localStorage.removeItem('cart');
+    localStorage.removeItem('checkout-cart');
+    localStorage.removeItem('auric-cart-data');
+    
+    // 2. If Firebase and auth are available, clear Firestore cart
+    if (typeof firebase !== 'undefined' && firebase.auth) {
       try {
-        const db = firebase.firestore();
-        const userId = firebase.auth().currentUser.uid;
-        
-        // Use a timestamp-based deviceId to ensure other devices recognize this as newer
-        const deviceId = `device_${Date.now()}_${Math.random().toString(36).substr(2, 10)}`;
-        
-        // Set an empty cart with clear operation flag
-        db.collection('carts').doc(userId).set({
-          items: [],
-          updatedAt: new Date().toISOString(),
-          device: deviceId,
-          operation: 'clear',
-          version: Date.now().toString()
-        }).then(() => {
-          console.log('Firestore cart cleared successfully');
-        }).catch(err => {
-          console.error('Error clearing Firestore cart:', err);
-        });
+        // Check if user is authenticated
+        const currentUser = firebase.auth().currentUser;
+        if (currentUser && currentUser.uid) {
+          const db = firebase.firestore();
+          const userId = currentUser.uid;
+          
+          // Generate a unique device ID with high timestamp to ensure it's considered the newest update
+          const deviceId = `force_clear_${Date.now()}_${Math.random().toString(36).substr(2, 10)}`;
+          const timestamp = Date.now();
+          
+          console.log('Force clearing Firestore cart for user:', userId);
+          
+          // Use a transaction to ensure the cart is properly cleared
+          db.runTransaction(async (transaction) => {
+            const cartRef = db.collection('carts').doc(userId);
+            
+            // Set empty cart with clear operation and very high version number
+            transaction.set(cartRef, {
+              items: [],
+              updatedAt: new Date().toISOString(),
+              device: deviceId,
+              operation: 'force_clear',
+              version: timestamp.toString(),
+              clear_timestamp: timestamp,
+              force_cleared: true
+            });
+            
+            return Promise.resolve();
+          }).then(() => {
+            console.log('Firestore cart cleared successfully via transaction');
+          }).catch(err => {
+            console.error('Transaction failed:', err);
+            
+            // Fallback to direct update if transaction fails
+            db.collection('carts').doc(userId).set({
+              items: [],
+              updatedAt: new Date().toISOString(),
+              device: deviceId,
+              operation: 'force_clear',
+              version: timestamp.toString(),
+              force_cleared: true
+            }).then(() => {
+              console.log('Firestore cart cleared successfully via direct update');
+            }).catch(innerErr => {
+              console.error('Error during fallback clear:', innerErr);
+            });
+          });
+        }
       } catch (err) {
         console.error('Error accessing Firestore during cart clear:', err);
       }
     }
     
-    // Reset cart items array and update UI
+    // 3. Reset cart items array and update UI
     if (AuricCart) {
       AuricCart.items = [];
-      AuricCart.updateCartUI();
+      
+      // Force a complete UI refresh
+      try {
+        // Clear the cart container
+        const cartItems = document.getElementById('cartItems');
+        if (cartItems) {
+          cartItems.innerHTML = '<p class="empty-cart-message">Your cart is empty</p>';
+        }
+        
+        // Reset the cart count badge
+        const cartCountBadge = document.querySelector('.cart-count');
+        if (cartCountBadge) {
+          cartCountBadge.textContent = '0';
+          cartCountBadge.style.display = 'none';
+        }
+        
+        // Reset the cart total
+        const cartTotal = document.getElementById('cartTotal');
+        if (cartTotal) {
+          cartTotal.textContent = '₹0';
+        }
+        
+        // Call the update function
+        AuricCart.updateCartUI();
+      } catch (uiErr) {
+        console.error('Error updating UI during clear:', uiErr);
+      }
     }
     
-    console.log('Cart cleared successfully');
+    console.log('Cart cleared successfully using aggressive strategy');
   };
 });
