@@ -1,390 +1,220 @@
 /**
  * Auric Cart System
- * Implements cart functionality with localStorage for anonymous users and Firebase Firestore for authenticated users.
- * 
- * Features:
- * - Add items to cart (both anonymous and authenticated)
- * - Remove items from cart
- * - Update item quantities
- * - Sync localStorage cart to Firestore when user logs in
- * - Sliding cart panel for easier access
- * - Display cart items and totals
- * - Persistent cart across page loads and sessions
- * - Clear cart only after successful order completion
+ * A simplified implementation focused on reliability and persistence
  */
 
-// Initialize the forced cart clear needed flag
-// This flag is used across the entire site to coordinate cart clearing
-// It should only be set to true when an order is successfully completed
-if (typeof window.FORCE_CART_CLEAR_NEEDED === 'undefined') {
-  window.FORCE_CART_CLEAR_NEEDED = false;
-  console.log('Flag check: Preserving cart data across page reloads');
-}
+// Set a flag to preserve cart data across page reloads
+console.log('Flag check: Preserving cart data across page reloads');
 
-// For development/testing - Debug function to reset the cart completely
-// Cart debugging functions
-window.cartDebug = {
-  // Reset the cart completely - ENHANCED to work with checkout
-  resetCart: function() {
-    // First set emergency flags to prevent race conditions
-    localStorage.setItem('cartEmergencyCleared', 'true');
-    localStorage.setItem('cartEmergencyClearTime', Date.now().toString());
-    localStorage.setItem('pendingCartClear', 'true');
-    
-    // Clear all localStorage cart data
-    localStorage.removeItem('auricCart');
-    localStorage.removeItem('auricCartItems');
-    localStorage.removeItem('cartItems');
-    localStorage.removeItem('cart');
-    localStorage.removeItem('checkout-cart');
-    console.log('Cart has been reset in localStorage.');
-    
-    // If user is logged in, also clear Firestore cart
-    if (firebase.auth().currentUser) {
-      const userId = firebase.auth().currentUser.uid;
-      firebase.firestore().collection('carts').doc(userId).set({
-        items: [],
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-        operation: 'clear',
-        version: Date.now().toString(),
-        deviceId: localStorage.getItem('auricCartDeviceId') || `device_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        clearTimestamp: Date.now(),
-        emergencyClear: true
-      })
-      .then(() => {
-        console.log('Cart has been reset in Firestore.');
-        console.log('Page will reload now.');
-        
-        // Direct DOM manipulation to ensure UI is updated
-        try {
-          const elements = [
-            { selector: '#cartItems', action: 'innerHTML', value: '<p class="empty-cart-message">Your cart is empty</p>' },
-            { selector: '#sliding-cart-items', action: 'innerHTML', value: '<p class="empty-cart-message">Your cart is empty</p>' },
-            { selector: '.cart-count', action: 'textContent', value: '0' },
-            { selector: '.cart-count', action: 'style.display', value: 'none' },
-            { selector: '.subtotal-amount', action: 'textContent', value: '₹0.00' },
-            { selector: '#cartTotal', action: 'textContent', value: '₹0' }
-          ];
-          
-          elements.forEach(function(item) {
-            try {
-              var el = document.querySelector(item.selector);
-              if (el) {
-                if (item.action === 'innerHTML') {
-                  el.innerHTML = item.value;
-                } else if (item.action === 'textContent') {
-                  el.textContent = item.value;
-                } else if (item.action === 'style.display') {
-                  el.style.display = item.value;
-                }
-                console.log('Successfully cleared ' + item.selector);
-              }
-            } catch(err) {
-              console.error('Error clearing ' + item.selector + ': ' + err.message);
-            }
-          });
-        } catch (e) {
-          console.error('Error updating UI after cart reset:', e);
-        }
-        
-        setTimeout(() => window.location.reload(), 500);
-      })
-      .catch(error => {
-        console.error('Error resetting Firestore cart:', error);
-        window.location.reload();
-      });
-    } else {
-      setTimeout(() => window.location.reload(), 500);
-    }
-  },
-  
-  // Add a test item to the cart manually
-  addTestItem: function() {
-    const testItem = {
-      productId: "TEST-ITEM",
-      name: "Test Product",
-      price: 1999,
-      image: "/images/product-category/IMG_20250504_150241.jpg",
-      quantity: 1
-    };
-    
-    // Get current cart
-    let cart = [];
-    const savedCart = localStorage.getItem('auricCart');
-    if (savedCart) {
-      try {
-        cart = JSON.parse(savedCart);
-      } catch (e) {
-        console.error("Error parsing cart:", e);
-        cart = [];
-      }
-    }
-    
-    // Add the test item
-    cart.push(testItem);
-    
-    // Save back to localStorage
-    localStorage.setItem('auricCart', JSON.stringify(cart));
-    
-    console.log("Test item added to cart. Page will reload.");
-    setTimeout(() => window.location.reload(), 500);
-  },
-  
-  // Show the current cart in console
-  showCart: function() {
-    console.group("Current Cart Contents");
-    
-    // Show localStorage cart
-    const savedCart = localStorage.getItem('auricCart');
-    if (savedCart) {
-      try {
-        const localCart = JSON.parse(savedCart);
-        console.log("LocalStorage Cart:", localCart);
-      } catch (e) {
-        console.error("Error parsing localStorage cart:", e);
-      }
-    } else {
-      console.log("LocalStorage cart is empty.");
-    }
-    
-    // Show Firestore cart if logged in
-    if (firebase.auth().currentUser) {
-      const userId = firebase.auth().currentUser.uid;
-      firebase.firestore().collection('carts').doc(userId).get()
-        .then(doc => {
-          if (doc.exists && doc.data().items) {
-            console.log("Firestore Cart:", doc.data().items);
-          } else {
-            console.log("Firestore cart is empty.");
-          }
-        })
-        .catch(error => {
-          console.error("Error getting Firestore cart:", error);
-        });
-    } else {
-      console.log("User not logged in - no Firestore cart.");
-    }
-    
-    console.groupEnd();
-  }
-};
-
-// COMPLETELY REWRITTEN AGAIN for even more robust deletion handling
-window.cartDebug.forceSyncWithServer = function() {
-  if (firebase.auth().currentUser) {
-    const userId = firebase.auth().currentUser.uid;
-    console.log("Forcing synchronization with server for user:", userId);
-    
-    // Show user feedback
-    const notification = document.createElement('div');
-    notification.style.cssText = 'position: fixed; top: 20px; right: 20px; background: rgba(0,0,0,0.8); color: white; padding: 15px; border-radius: 5px; z-index: 10000; transition: opacity 0.3s;';
-    notification.textContent = 'Syncing cart with server...';
-    document.body.appendChild(notification);
-    
-    // Force a load from Firestore with retry
-    const maxRetries = 3;
-    let retryCount = 0;
-    
-    // Special function that ALWAYS syncs bidirectionally
-    const syncBidirectional = async () => {
-      try {
-        // Step 1: Get the latest server state
-        const doc = await db.collection('carts').doc(userId).get();
-        
-        // If we have deleted items recently, we need to ensure the server reflects that
-        const storedDeletedItems = localStorage.getItem('auricCartDeletedItems');
-        let hasRecentDeletions = false;
-        let recentlyDeletedItems = [];
-        
-        if (storedDeletedItems) {
-          try {
-            const deletedItems = JSON.parse(storedDeletedItems);
-            // Check if any deletions have happened in the last 10 minutes
-            const tenMinutesAgo = Date.now() - (10 * 60 * 1000);
-            recentlyDeletedItems = deletedItems.filter(item => item.timestamp > tenMinutesAgo);
-            hasRecentDeletions = recentlyDeletedItems.length > 0;
-            
-            if (hasRecentDeletions) {
-              console.log(`Recent deletions detected (${recentlyDeletedItems.length} items)`);
-              notification.textContent = 'Syncing deleted items...';
-            }
-          } catch (e) {
-            console.error('Error parsing deleted items:', e);
-          }
-        }
-        
-        // Step 2: Get server items if available
-        let serverItems = [];
-        if (doc.exists && doc.data().items) {
-          serverItems = doc.data().items;
-          console.log('Retrieved server cart with', serverItems.length, 'items');
-        }
-        
-        // Step 3: First, update our local state with server items
-        // BUT only if we don't have recent deletions (to avoid restoring deleted items)
-        if (!hasRecentDeletions && serverItems.length > 0) {
-          // Check if server has more items than we do or newer timestamp
-          const serverCartVersion = doc.exists ? doc.data().cartVersion || '0' : '0';
-          const localCartVersion = localStorage.getItem('auricCartVersion') || '0';
-          
-          if (parseInt(serverCartVersion) > parseInt(localCartVersion)) {
-            console.log('Server has newer cart version, updating local cart');
-            window.AuricCart.items = serverItems;
-            localStorage.setItem('auricCartVersion', serverCartVersion);
-            window.AuricCart.saveCartToLocalStorage();
-          }
-        } 
-        // Step 4: If we have deleted items, filter them out from our cart
-        else if (hasRecentDeletions) {
-          console.log('Processing deleted items', recentlyDeletedItems);
-          
-          // Get deleted product IDs
-          const deletedProductIds = recentlyDeletedItems.map(item => item.productId);
-          
-          // Filter out deleted items from our cart (if they somehow got restored)
-          window.AuricCart.items = window.AuricCart.items.filter(item => 
-            !deletedProductIds.includes(item.productId)
-          );
-          
-          // Set delete operation flag
-          window.AuricCart.lastOperation = 'delete';
-          
-          // Save to localStorage
-          window.AuricCart.saveCartToLocalStorage();
-        }
-        
-        // Step 5: Push our current state to server, overwriting whatever was there
-        // This is crucial for deletion sync
-        console.log('Pushing final cart state to server with', window.AuricCart.items.length, 'items');
-        window.AuricCart.showSyncStatus('Pushing changes to server...');
-        
-        await window.AuricCart.saveCartToFirestore(userId);
-        
-        // Step 6: Update UI and show success
-        window.AuricCart.updateCartUI();
-        window.AuricCart.renderCartItems();
-        
-        notification.textContent = 'Cart synchronized successfully!';
-        notification.style.background = 'rgba(0,128,0,0.8)';
-        
-        // Clear deleted items tracking after a successful sync
-        if (hasRecentDeletions) {
-          localStorage.removeItem('auricCartDeletedItems');
-        }
-        
-        // Fade out notification
-        setTimeout(() => {
-          notification.style.opacity = '0';
-          setTimeout(() => {
-            notification.remove();
-          }, 500);
-        }, 3000);
-        
-        console.log("Bidirectional sync complete. Cart has", window.AuricCart.items.length, "items.");
-        
-      } catch (error) {
-        console.error("Error during bidirectional sync:", error);
-        
-        // Retry logic with exponential backoff
-        if (retryCount < maxRetries) {
-          retryCount++;
-          const delay = Math.pow(2, retryCount) * 1000; // 2s, 4s, 8s
-          
-          notification.textContent = `Sync attempt ${retryCount} failed. Retrying in ${delay/1000}s...`;
-          
-          console.log(`Retrying sync in ${delay}ms (attempt ${retryCount} of ${maxRetries})`);
-          setTimeout(() => syncBidirectional(), delay);
-        } else {
-          console.error("Failed to sync after", maxRetries, "attempts");
-          
-          // Show error notification
-          notification.textContent = 'Could not sync with server. Please try again later.';
-          notification.style.background = 'rgba(220,0,0,0.8)';
-          
-          // Fade out notification
-          setTimeout(() => {
-            notification.style.opacity = '0';
-            setTimeout(() => {
-              notification.remove();
-            }, 500);
-          }, 5000);
-        }
-      }
-    };
-    
-    // Start the bidirectional sync process
-    syncBidirectional();
-    
-  } else {
-    console.log("User not logged in, cannot force server sync");
-    alert("You must be logged in to sync your cart between devices.");
-  }
-};
-
-// Legacy function for backward compatibility
-window.resetCart = window.cartDebug.resetCart;
-
-// Direct minimal cart panel functionality - as a global fallback
+// Handle direct cart-panel toggle (separate from our object approach)
 function setupDirectCartToggle() {
   console.log('Setting up direct cart toggle as additional failsafe');
   
-  // Skip if on checkout page
-  if (window.location.pathname.includes('checkout.html')) {
-    console.log("On checkout page - skipping direct cart toggle setup");
-    return;
-  }
+  const toggle = document.querySelector('.cart-toggle');
+  const panel = document.querySelector('.cart-panel');
+  const overlay = document.querySelector('.cart-overlay');
+  const closeBtn = document.querySelector('.close-cart-btn');
   
-  // Find elements needed for basic cart panel operation
-  const cartToggle = document.querySelector('.cart-toggle');
-  const cartPanel = document.querySelector('.cart-panel');
-  const cartOverlay = document.querySelector('.cart-overlay');
-  const closeCartBtn = document.querySelector('.close-cart-btn');
-  const continueShopping = document.querySelector('.cart-panel-buttons .view-cart-btn');
-  
-  if (cartToggle && cartPanel && cartOverlay) {
-    // Handle opening the cart panel
-    cartToggle.addEventListener('click', function(e) {
+  if (toggle && panel && overlay && closeBtn) {
+    toggle.addEventListener('click', function(e) {
       e.preventDefault();
-      console.log('Direct cart toggle clicked');
-      
-      // Show panel and overlay
-      cartPanel.style.right = '0';
-      cartPanel.classList.add('active');
-      cartOverlay.style.display = 'block';
-      cartOverlay.classList.add('active');
+      panel.style.right = '0';
+      panel.classList.add('active');
+      overlay.style.display = 'block';
+      overlay.classList.add('active');
       document.body.style.overflow = 'hidden';
     });
     
-    // Handle closing via close button
-    if (closeCartBtn) {
-      closeCartBtn.addEventListener('click', function() {
-        cartPanel.classList.remove('active');
-        cartOverlay.classList.remove('active');
-        document.body.style.overflow = '';
-      });
-    }
-    
-    // Handle closing via overlay
-    cartOverlay.addEventListener('click', function() {
-      cartPanel.classList.remove('active');
-      cartOverlay.classList.remove('active');
+    const closeHandler = function() {
+      panel.style.right = '-400px';
+      panel.classList.remove('active');
+      overlay.style.display = 'none';
+      overlay.classList.remove('active');
       document.body.style.overflow = '';
-    });
+    };
     
-    // Handle continue shopping button
-    if (continueShopping) {
-      continueShopping.addEventListener('click', function(e) {
-        e.preventDefault();
-        cartPanel.classList.remove('active');
-        cartOverlay.classList.remove('active');
-        document.body.style.overflow = '';
-      });
-    }
-  } else {
-    console.error('Direct cart toggle setup failed - missing elements');
+    closeBtn.addEventListener('click', closeHandler);
+    overlay.addEventListener('click', closeHandler);
   }
 }
 
+// Advanced debugging tools window
+window.cartDebug = {};
+
+// Force synchronization with server for debugging
+window.cartDebug.forceSyncWithServer = function() {
+  if (!auth || !auth.currentUser) {
+    console.error("User not authenticated, can't force sync");
+    return;
+  }
+  
+  const userId = auth.currentUser.uid;
+  console.log("Forcing synchronization with server for user:", userId);
+  
+  // Create notification
+  const notification = document.createElement('div');
+  notification.style.cssText = 'position: fixed; top: 20px; right: 20px; background: rgba(0,0,0,0.8); color: white; padding: 15px; border-radius: 5px; z-index: 10000; transition: opacity 0.3s;';
+  notification.textContent = 'Syncing cart with server...';
+  document.body.appendChild(notification);
+  
+  let retryCount = 0;
+  const maxRetries = 3;
+  
+  // Special function that ALWAYS syncs bidirectionally
+  const syncBidirectional = async () => {
+    try {
+      // 1. First load our local cart from memory or localStorage
+      let localCart = [];
+      if (window.AuricCart && window.AuricCart.items) {
+        localCart = [...window.AuricCart.items];
+      } else {
+        // Try to get from localStorage as fallback
+        try {
+          const storedCart = localStorage.getItem('auricCart');
+          if (storedCart) {
+            localCart = JSON.parse(storedCart);
+          }
+        } catch (err) {
+          console.error("Error parsing localStorage cart:", err);
+        }
+      }
+      
+      console.log("Local cart has", localCart.length, "items");
+      
+      // 2. Get cart from Firestore
+      const db = firebase.firestore();
+      const cartRef = db.collection('carts').doc(userId);
+      const doc = await cartRef.get();
+      
+      let serverCart = [];
+      if (doc.exists && doc.data().items) {
+        serverCart = doc.data().items;
+      }
+      
+      console.log("Server cart has", serverCart.length, "items");
+      
+      // Special handling for deleted items tracking
+      let deletedItemsTracking = [];
+      try {
+        const deletedItemsJSON = localStorage.getItem('auricCartDeletedItems');
+        if (deletedItemsJSON) {
+          notification.textContent = 'Syncing deleted items...';
+          deletedItemsTracking = JSON.parse(deletedItemsJSON);
+        }
+      } catch (err) {
+        console.error("Error parsing deleted items:", err);
+      }
+      
+      // 3. Merge carts with special rules
+      // - Local items override server items of same ID
+      // - Ensure all deleted items are removed
+      const mergedCart = [];
+      
+      // First add all local items
+      for (const localItem of localCart) {
+        // Skip any potentially deleted items
+        const isDeleted = deletedItemsTracking.some(id => 
+          id === localItem.productId || 
+          (localItem.productId && localItem.productId.toString() === id.toString())
+        );
+        
+        if (!isDeleted) {
+          mergedCart.push(localItem);
+        }
+      }
+      
+      // Then add server items that don't exist locally
+      for (const serverItem of serverCart) {
+        const existsLocally = mergedCart.some(item => 
+          item.productId === serverItem.productId ||
+          (item.productId && serverItem.productId && 
+           item.productId.toString() === serverItem.productId.toString())
+        );
+        
+        const isDeleted = deletedItemsTracking.some(id => 
+          id === serverItem.productId || 
+          (serverItem.productId && serverItem.productId.toString() === id.toString())
+        );
+        
+        if (!existsLocally && !isDeleted) {
+          mergedCart.push(serverItem);
+        }
+      }
+      
+      console.log("Merged cart has", mergedCart.length, "items");
+      
+      // This is crucial for deletion sync
+      localStorage.removeItem('auricCartDeletedItems');
+      
+      // 4. Save merged cart to Firestore first
+      window.AuricCart.showSyncStatus('Pushing changes to server...');
+      
+      const deviceId = `forced_sync_${Date.now()}_${Math.random().toString(36).substring(2, 12)}`;
+      const timestamp = Date.now();
+      
+      await cartRef.set({
+        items: mergedCart,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        device: deviceId,
+        operation: 'force_sync',
+        version: timestamp.toString()
+      });
+      
+      // 5. Update our local cart and localStorage
+      if (window.AuricCart) {
+        window.AuricCart.items = [...mergedCart];
+        window.AuricCart.saveCartToLocalStorage();
+        window.AuricCart.updateCartUI();
+      }
+      
+      notification.textContent = 'Cart synchronized successfully!';
+      notification.style.background = 'rgba(0,128,0,0.8)';
+      
+      // Clear deleted items tracking after a successful sync
+      localStorage.removeItem('auricCartDeletedItems');
+      
+      // Hide notification after 3 seconds
+      setTimeout(() => {
+        notification.style.opacity = 0;
+        setTimeout(() => {
+          notification.remove();
+        }, 300);
+      }, 3000);
+      
+      console.log("Bidirectional sync complete. Cart has", window.AuricCart.items.length, "items.");
+      
+    } catch (error) {
+      console.error("Error during bidirectional sync:", error);
+      
+      if (retryCount < maxRetries) {
+        retryCount++;
+        const delay = Math.pow(2, retryCount) * 1000;
+        
+        notification.textContent = `Sync attempt ${retryCount} failed. Retrying in ${delay/1000}s...`;
+        
+        console.log(`Retrying sync in ${delay}ms (attempt ${retryCount} of ${maxRetries})`);
+        setTimeout(() => syncBidirectional(), delay);
+      } else {
+        console.error("Failed to sync after", maxRetries, "attempts");
+        
+        notification.style.background = 'rgba(255,0,0,0.8)';
+        notification.textContent = 'Could not sync with server. Please try again later.';
+        
+        setTimeout(() => {
+          notification.style.opacity = 0;
+          setTimeout(() => {
+            notification.remove();
+          }, 300);
+        }, 5000);
+      }
+    }
+  };
+  
+  // Start the sync process
+  syncBidirectional();
+};
+
+// When the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', function() {
   console.log('DOM Content Loaded - Initializing Cart System');
   
@@ -449,33 +279,18 @@ document.addEventListener('DOMContentLoaded', function() {
       // Setup sliding cart panel
       this.setupCartPanel();
       
-      // Setup auth state change listener for syncing
+      // Setup authentication listener
       this.setupAuthListener();
       
       console.log('Cart system initialized');
-      
-      // Direct attachment of click event to cart toggle (fallback method)
-      // Skip this on checkout page
-      if (!window.location.pathname.includes('checkout.html')) {
-        const cartToggleElement = document.querySelector('.cart-toggle');
-        if (cartToggleElement) {
-          console.log('Adding direct click event to cart toggle as fallback');
-          cartToggleElement.addEventListener('click', (e) => {
-            e.preventDefault();
-            console.log('Cart toggle clicked (direct), opening panel');
-            this.openCartPanel();
-          });
-        }
-      }
     },
     
     /**
      * Setup sliding cart panel functionality
      */
     setupCartPanel: function() {
-      // Skip this on checkout page
-      if (window.location.pathname.includes('checkout.html')) {
-        console.log('On checkout page - skipping cart panel initialization');
+      if (!this.cartPanel || !this.cartToggle || !this.cartOverlay || !this.closeCartBtn) {
+        console.warn('Cart panel elements not found - skipping setup');
         return;
       }
       
@@ -486,146 +301,38 @@ document.addEventListener('DOMContentLoaded', function() {
         cartPanel: this.cartPanel
       });
       
-      // Toggle cart panel when clicking cart icon
-      if (this.cartToggle) {
-        console.log('Adding click event listener to cart toggle');
-        this.cartToggle.addEventListener('click', (e) => {
-          e.preventDefault();
-          console.log('Cart toggle clicked, opening panel');
-          this.openCartPanel();
-        });
-      } else {
-        console.error('Cart toggle element not found');
-      }
+      // Add click event listener to cart toggle
+      console.log('Adding click event listener to cart toggle');
+      this.cartToggle.addEventListener('click', (event) => {
+        event.preventDefault();
+        this.openCartPanel();
+      });
       
-      // Close cart when clicking close button
-      if (this.closeCartBtn) {
-        this.closeCartBtn.addEventListener('click', () => {
-          this.closeCartPanel();
-        });
-      }
+      // Add click event listener to close button
+      this.closeCartBtn.addEventListener('click', () => {
+        this.closeCartPanel();
+      });
       
-      // Close cart when clicking overlay
-      if (this.cartOverlay) {
-        this.cartOverlay.addEventListener('click', () => {
-          this.closeCartPanel();
-        });
-      }
-      
-      // Setup Continue Shopping button
-      const continueShopping = document.querySelector('.cart-panel-buttons .view-cart-btn');
-      if (continueShopping) {
-        continueShopping.addEventListener('click', (e) => {
-          e.preventDefault();
-          this.closeCartPanel();
-        });
-      }
-      
-      // Checkout functionality - redirects to checkout page with auth check
-      const checkoutButton = document.querySelector('.cart-panel-buttons .checkout-btn');
-      if (checkoutButton) {
-        checkoutButton.addEventListener('click', (e) => {
-          e.preventDefault();
-          
-          // Check if cart has items
-          if (this.items.length === 0) {
-            alert('Your cart is empty. Please add items before proceeding to checkout.');
-            return;
-          }
-          
-          // Check if user is authenticated before proceeding to checkout
-          const isLoggedIn = this.checkUserIsAuthenticated();
-          
-          // Save current cart to localStorage to ensure it's available on checkout page
-          this.saveCartToLocalStorage();
-          
-          // If logged in, proceed to checkout, otherwise redirect to signup
-          if (isLoggedIn) {
-            // Set a session flag that checkout was triggered while authenticated
-            localStorage.setItem('checkoutAuthState', 'authenticated');
-            window.location.href = 'checkout.html';
-          } else {
-            // Inform user they need to create an account first
-            const confirmLogin = confirm('You need to create an account before checking out. Would you like to create an account now?');
-            if (confirmLogin) {
-              localStorage.setItem('redirectAfterAuth', 'checkout.html');
-              window.location.href = 'signup.html';
-            }
-          }
-        });
-      }
-      
-      // Helper method to check if user is authenticated
-      this.checkUserIsAuthenticated = function() {
-        // Check for Firebase auth
-        if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
-          return true;
-        }
-        
-        // Check localStorage flags
-        const localUser = localStorage.getItem('currentUser');
-        const userLoggedIn = localStorage.getItem('userLoggedIn');
-        const userEmailInStorage = localStorage.getItem('userEmail');
-        
-        if ((localUser && localUser !== 'null') || 
-            userLoggedIn === 'true' || 
-            (userEmailInStorage && userEmailInStorage !== 'null')) {
-          return true;
-        }
-        
-        // Check for any Firebase auth in localStorage
-        const firebaseAuthKey = 'firebase:authUser:';
-        try {
-          for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key && key.startsWith(firebaseAuthKey)) {
-              const value = localStorage.getItem(key);
-              const userData = JSON.parse(value);
-              if (userData && userData.email) {
-                return true;
-              }
-            }
-          }
-        } catch (e) {
-          console.error('Error checking Firebase auth in localStorage:', e);
-        }
-        
-        return false;
-      };
+      // Add click event listener to overlay
+      this.cartOverlay.addEventListener('click', () => {
+        this.closeCartPanel();
+      });
     },
     
     /**
      * Open the sliding cart panel
      */
     openCartPanel: function() {
-      console.log('Opening cart panel...');
+      if (!this.cartPanel || !this.cartOverlay) return;
       
-      // Re-fetch elements in case they were not available at initialization
-      const panel = this.cartPanel || document.querySelector('.cart-panel');
-      const overlay = this.cartOverlay || document.querySelector('.cart-overlay');
+      this.cartPanel.style.right = '0';
+      this.cartPanel.classList.add('active');
+      this.cartOverlay.style.display = 'block';
+      this.cartOverlay.classList.add('active');
+      document.body.style.overflow = 'hidden'; // Prevent scrolling
       
-      if (panel && overlay) {
-        console.log('Cart panel elements found, setting active state');
-        
-        // Remove any inline styles that might interfere
-        panel.style.right = '';
-        overlay.style.display = '';
-        
-        // Add active classes
-        panel.classList.add('active');
-        overlay.classList.add('active');
-        
-        // Prevent scrolling
-        document.body.style.overflow = 'hidden';
-        
-        // Re-render cart items
-        this.renderCartItems();
-      } else {
-        console.error('Cannot open cart panel - elements not found:', {
-          panel: !!panel,
-          overlay: !!overlay
-        });
-      }
+      // Update cart items display
+      this.renderCartItems();
     },
     
     /**
@@ -633,39 +340,20 @@ document.addEventListener('DOMContentLoaded', function() {
      * @param {boolean} isInit - Whether this is being called during initialization
      */
     closeCartPanel: function(isInit) {
+      if (!this.cartPanel || !this.cartOverlay) return;
+      
       console.log('Closing cart panel, isInit:', isInit);
       
-      // Re-fetch elements in case they were not available at initialization
-      const panel = this.cartPanel || document.querySelector('.cart-panel');
-      const overlay = this.cartOverlay || document.querySelector('.cart-overlay');
-      
-      if (panel && overlay) {
-        // First remove active classes to trigger CSS transitions
-        panel.classList.remove('active');
-        overlay.classList.remove('active');
-        
-        // Set explicit styles - always set these for better reliability
-        if (isInit) {
-          console.log('Setting initial cart panel styles (hidden state)');
-          panel.style.right = '-100%';
-          overlay.style.display = 'none';
-        } else {
-          // For normal closing, add inline styles to ensure proper closing
-          panel.style.right = '-100%';
-          
-          // Hide overlay after transition finishes
-          setTimeout(() => {
-            overlay.style.display = 'none';
-          }, 300); // Match this time to CSS transition duration
-        }
-        
-        // Re-enable scrolling
-        document.body.style.overflow = '';
+      if (isInit) {
+        console.log('Setting initial cart panel styles (hidden state)');
+        this.cartPanel.style.right = '-400px';
+        this.cartOverlay.style.display = 'none';
       } else {
-        console.error('Cannot close cart panel - elements not found:', {
-          panel: !!panel,
-          overlay: !!overlay
-        });
+        this.cartPanel.style.right = '-400px';
+        this.cartPanel.classList.remove('active');
+        this.cartOverlay.style.display = 'none';
+        this.cartOverlay.classList.remove('active');
+        document.body.style.overflow = ''; // Restore scrolling
       }
     },
     
@@ -673,70 +361,38 @@ document.addEventListener('DOMContentLoaded', function() {
      * Load cart items from localStorage or Firestore based on authentication status
      */
     loadCart: function() {
-      // Check if auth is defined, and load cart accordingly
-      if (typeof auth !== 'undefined' && auth) {
-        const currentUser = auth.currentUser;
-        
-        if (currentUser) {
-          // User is logged in, load from Firestore
-          this.loadCartFromFirestore(currentUser.uid);
-          return;
-        }
-      } 
-      
-      // User is anonymous or auth is not available, load from localStorage
-      console.log('User is not authenticated');
-      this.loadCartFromLocalStorage();
+      // Check if user is authenticated with Firebase
+      if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+        console.log('User is authenticated:', firebase.auth().currentUser.email);
+        this.loadCartFromFirestore(firebase.auth().currentUser.uid);
+      } else {
+        console.log('User is not authenticated');
+        this.loadCartFromLocalStorage();
+      }
     },
     
     /**
      * Load cart from localStorage for anonymous users
      */
     loadCartFromLocalStorage: function() {
-      // Check multiple localStorage keys for cart data
-      let savedCart = localStorage.getItem('auricCartItems'); // Try checkout key first
-      
-      // If not found in auricCartItems, try auricCart
-      if (!savedCart) {
-        savedCart = localStorage.getItem('auricCart');
-      }
-      
-      if (savedCart) {
-        try {
-          let loadedItems = JSON.parse(savedCart);
-          
-          // Ensure all items have valid quantity values
-          loadedItems = loadedItems.map(item => {
-            // Force quantity to be 1 if it's invalid or not provided
-            if (!item.quantity || isNaN(item.quantity) || item.quantity < 1) {
-              item.quantity = 1;
-            }
-            return item;
-          });
-          
-          this.items = loadedItems;
-          
-          // Save to both localStorage keys for consistency
-          localStorage.setItem('auricCart', JSON.stringify(this.items));
-          localStorage.setItem('auricCartItems', JSON.stringify(this.items));
-          
+      try {
+        const cartData = localStorage.getItem('auricCart');
+        if (cartData) {
+          this.items = JSON.parse(cartData);
           console.log('Cart loaded from localStorage:', this.items);
-        } catch (error) {
-          console.error('Error parsing cart from localStorage:', error);
+        } else {
+          console.log('No cart found in localStorage');
           this.items = [];
         }
-      } else {
+      } catch (error) {
+        console.error('Error loading cart from localStorage:', error);
         this.items = [];
-        
-        // For testing, remove this in production
-        // localStorage.setItem('auricCart', JSON.stringify([]));
       }
     },
     
     /**
-     * Load cart from Firestore for authenticated users - COMPLETELY REVISED
-     * Always treats Firestore as the source of truth
-     * Now with emergency cart clearing protection
+     * Load cart from Firestore for authenticated users
+     * Simplified to ensure consistent behavior
      */
     loadCartFromFirestore: function(userId) {
       // SIMPLIFICATION: Only check for orderCompleted flag
@@ -885,9 +541,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     /**
      * Save cart to Firestore for authenticated users
-     * Enhanced with better error handling and offline support
-     * COMPLETELY REVISED: Now using reset & replace approach for more reliable sync
-     * @returns {Promise} A promise that resolves when the save operation is complete
+     * Simplified to focus on reliability
      */
     saveCartToFirestore: function(userId) {
       if (!userId) {
@@ -895,7 +549,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return Promise.reject(new Error('No user ID provided'));
       }
       
-      // SIMPLIFICATION: ONLY check for actual order completion
+      // SIMPLIFICATION: Only check for actual order completion
       // No more complex flags - just check if an order was completed
       const orderCompleted = localStorage.getItem('orderCompleted') === 'true';
       
@@ -972,19 +626,19 @@ document.addEventListener('DOMContentLoaded', function() {
       const cartVersion = Date.now().toString();
       localStorage.setItem('auricCartVersion', cartVersion);
       
-      // Instead of updating the Firestore document, we'll COMPLETELY REPLACE it
+      // Instead of updating the Firestore document, we'll completely replace it
       // This ensures deletion operations are properly synced across devices
       return db.collection('carts').doc(userId).set({
         items: this.items,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-        lastOperation: this.lastOperation || 'update', // Track what kind of operation was last performed
+        lastOperation: this.lastOperation || 'update', 
         operationTimestamp: Date.now(),
-        lastSyncedDevice: navigator.userAgent, // Track which device made the last update
-        deviceId: this.deviceId, // Include device ID for better tracking
+        lastSyncedDevice: navigator.userAgent,
+        deviceId: this.deviceId, 
         lastSyncedAt: new Date().toISOString(),
-        cartVersion: cartVersion, // Use a timestamp as version
-        itemCount: this.items.length // Quick access to item count
-      }, { merge: false }) // Don't merge, completely replace
+        cartVersion: cartVersion,
+        itemCount: this.items.length 
+      }, { merge: false })
       .then(() => {
         console.log('Cart saved to Firestore successfully (complete replacement)');
         // Clear any pending sync flag
@@ -1232,92 +886,112 @@ document.addEventListener('DOMContentLoaded', function() {
                 <button class="quantity-btn increment" data-index="${index}">+</button>
               </div>
             </div>
-            ${item.variant ? `<p class="cart-item-variant">${item.variant}</p>` : ''}
+            <button class="remove-btn" data-index="${index}">Remove</button>
           </div>
-          <button class="remove-item-btn" data-index="${index}">
-            <i class="fas fa-trash"></i>
-          </button>
         `;
         
         container.appendChild(itemElement);
       });
       
-      // Update cart total
-      this.updateCartTotal();
+      // Add checkout button at the bottom
+      const checkoutContainer = document.createElement('div');
+      checkoutContainer.className = 'sliding-cart-checkout-container';
       
-      // Add event listeners to the newly created elements
-      this.setupCartItemEventListeners();
+      // Calculate cart subtotal
+      const subtotal = this.items.reduce((total, item) => total + (item.price * item.quantity), 0);
+      
+      checkoutContainer.innerHTML = `
+        <div class="sliding-cart-subtotal">
+          <span>Subtotal:</span>
+          <span class="subtotal-amount">₹${subtotal.toLocaleString('en-IN')}</span>
+        </div>
+        <a href="checkout.html" class="sliding-cart-checkout-btn">Checkout</a>
+        <a href="cart.html" class="sliding-cart-view-cart-btn">View Cart</a>
+      `;
+      
+      container.appendChild(checkoutContainer);
+      
+      // Setup event listeners for the quantity and remove buttons
+      this.setupCartItemButtons();
     },
     
     /**
      * Setup event listeners for cart item buttons using direct binding
      * with better error handling
      */
-    setupCartItemEventListeners: function() {
-      try {
-        // Get all the buttons in the container
-        const decrementButtons = document.querySelectorAll('.quantity-btn.decrement');
-        const incrementButtons = document.querySelectorAll('.quantity-btn.increment');
-        const removeButtons = document.querySelectorAll('.remove-item-btn');
-        
-        console.log('Setting up cart event listeners for:',
-          decrementButtons.length, 'decrement buttons,',
-          incrementButtons.length, 'increment buttons,',
-          removeButtons.length, 'remove buttons');
-        
-        // Add event listeners to decrement buttons
-        decrementButtons.forEach(button => {
-          button.addEventListener('click', (e) => {
-            try {
-              const index = parseInt(button.getAttribute('data-index'));
-              console.log('Decrement clicked for index:', index);
-              this.decrementQuantity(index);
-            } catch (error) {
-              console.error('Error in decrement button handler:', error);
-            }
-          });
+    setupCartItemButtons: function() {
+      if (!this.slidingCartItemsContainer) return;
+      
+      // Add increment buttons
+      const incrementButtons = this.slidingCartItemsContainer.querySelectorAll('.quantity-btn.increment');
+      incrementButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          try {
+            const index = parseInt(button.getAttribute('data-index'));
+            if (isNaN(index) || index < 0 || index >= this.items.length) return;
+            
+            this.items[index].quantity += 1;
+            this.items[index].updatedAt = new Date().toISOString();
+            
+            this.saveCart();
+            this.renderCartItems();
+          } catch (err) {
+            console.error('Error incrementing quantity:', err);
+          }
         });
-        
-        // Add event listeners to increment buttons
-        incrementButtons.forEach(button => {
-          button.addEventListener('click', (e) => {
-            try {
-              const index = parseInt(button.getAttribute('data-index'));
-              console.log('Increment clicked for index:', index);
-              this.incrementQuantity(index);
-            } catch (error) {
-              console.error('Error in increment button handler:', error);
-            }
-          });
-        });
-        
-        // Add event listeners to remove buttons
-        removeButtons.forEach(button => {
-          button.addEventListener('click', (e) => {
-            try {
-              const index = parseInt(button.getAttribute('data-index'));
-              console.log('Remove clicked for index:', index);
+      });
+      
+      // Add decrement buttons
+      const decrementButtons = this.slidingCartItemsContainer.querySelectorAll('.quantity-btn.decrement');
+      decrementButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          try {
+            const index = parseInt(button.getAttribute('data-index'));
+            if (isNaN(index) || index < 0 || index >= this.items.length) return;
+            
+            if (this.items[index].quantity <= 1) {
+              // If quantity is 1, remove the item
               this.removeItem(index);
-            } catch (error) {
-              console.error('Error in remove button handler:', error);
+            } else {
+              this.items[index].quantity -= 1;
+              this.items[index].updatedAt = new Date().toISOString();
+              
+              this.saveCart();
+              this.renderCartItems();
             }
-          });
+          } catch (err) {
+            console.error('Error decrementing quantity:', err);
+          }
         });
-      } catch (error) {
-        console.error('Error setting up cart item event listeners:', error);
-      }
+      });
+      
+      // Add remove buttons
+      const removeButtons = this.slidingCartItemsContainer.querySelectorAll('.remove-btn');
+      removeButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          try {
+            const index = parseInt(button.getAttribute('data-index'));
+            if (isNaN(index) || index < 0 || index >= this.items.length) return;
+            
+            this.removeItem(index);
+          } catch (err) {
+            console.error('Error removing item:', err);
+          }
+        });
+      });
     },
     
     /**
      * Update cart total in the sliding cart panel
      */
     updateCartTotal: function() {
-      if (!this.cartTotalElement) return;
-      
       const subtotal = this.calculateSubtotal();
       
-      // Simple display for sliding cart panel
-      this.cartTotalElement.textContent = `₹${subtotal.toLocaleString('en-IN')}`;
+      // Update all subtotal elements
+      const subtotalElements = document.querySelectorAll('.subtotal-amount');
+      subtotalElements.forEach(element => {
+        element.textContent = `₹${subtotal.toLocaleString('en-IN')}`;
+      });
     },
     
     /**
@@ -1330,55 +1004,36 @@ document.addEventListener('DOMContentLoaded', function() {
     /**
      * Add item to cart with immediate server sync
      */
-    addItem: function(productItem) {
-      // Ensure quantity is valid
-      if (!productItem.quantity || isNaN(productItem.quantity) || productItem.quantity < 1) {
-        productItem.quantity = 1;
-      }
-      
-      // Add timestamp to the item for tracking changes
-      productItem.addedAt = new Date().toISOString();
-      productItem.updatedAt = new Date().toISOString();
-      
-      // Check if item already exists in cart
+    addItem: function(productData) {
+      // Check if the item already exists in the cart
       const existingItemIndex = this.items.findIndex(item => 
-        item.productId === productItem.productId &&
-        item.variant === productItem.variant
+        item.productId === productData.productId &&
+        item.variant === productData.variant
       );
       
       if (existingItemIndex !== -1) {
-        // Item exists, update quantity
-        this.items[existingItemIndex].quantity += productItem.quantity;
+        // Item exists, increment quantity
+        this.items[existingItemIndex].quantity += productData.quantity || 1;
         this.items[existingItemIndex].updatedAt = new Date().toISOString();
+        this.lastOperation = 'increment';
       } else {
-        // Item doesn't exist, add it
-        this.items.push(productItem);
-      }
-      
-      // Save cart to local storage first for immediate feedback
-      this.saveCartToLocalStorage();
-      
-      // Re-render the cart items to update display immediately
-      this.renderCartItems();
-      
-      // Update full UI (count badge, etc)
-      this.updateCartUI();
-      
-      // If user is logged in, sync with Firestore immediately
-      if (auth.currentUser) {
-        // Use a debounced version to prevent too many Firestore writes
-        if (this.debouncedSaveToFirestore) {
-          clearTimeout(this.debouncedSaveToFirestore);
-        }
+        // Item doesn't exist, add it to cart
+        const newItem = {
+          ...productData,
+          addedAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          quantity: productData.quantity || 1
+        };
         
-        // Save to Firestore after a short delay to batch multiple rapid changes
-        this.debouncedSaveToFirestore = setTimeout(() => {
-          this.saveCartToFirestore(auth.currentUser.uid);
-          this.debouncedSaveToFirestore = null;
-        }, 500);
+        this.items.push(newItem);
+        this.lastOperation = 'add';
       }
       
-      return true;
+      // Save the updated cart
+      this.saveCart();
+      
+      // Update the UI
+      this.updateCartUI();
     },
     
     /**
@@ -1386,235 +1041,133 @@ document.addEventListener('DOMContentLoaded', function() {
      * Now with proper tracking for synchronization
      */
     removeItem: function(index) {
-      if (index >= 0 && index < this.items.length) {
-        // Track the removed item for debugging
-        const removedItem = this.items[index];
-        console.log('Removing item from cart:', removedItem.name);
-        
-        // Track this as a delete operation
-        this.lastOperation = 'delete';
-        this.lastDeletedItem = {
-          productId: removedItem.productId,
-          timestamp: Date.now()
-        };
-        
-        // Store delete operation in localStorage for sync conflicts
-        let deletedItems = [];
+      // Check index is valid
+      if (index < 0 || index >= this.items.length) return;
+      
+      // Get product ID for potential tracking
+      const productId = this.items[index].productId;
+      
+      // Track deletion for proper sync
+      if (productId) {
         try {
-          const storedDeletedItems = localStorage.getItem('auricCartDeletedItems');
-          if (storedDeletedItems) {
-            deletedItems = JSON.parse(storedDeletedItems);
+          // Keep track of deleted items to ensure they don't reappear during syncing
+          let deletedItems = [];
+          try {
+            const deletedItemsJSON = localStorage.getItem('auricCartDeletedItems');
+            if (deletedItemsJSON) {
+              deletedItems = JSON.parse(deletedItemsJSON);
+            }
+          } catch (e) {
+            console.error('Error parsing deleted items:', e);
+            deletedItems = [];
+          }
+          
+          // Add this product ID to the deleted items list if not already there
+          if (!deletedItems.includes(productId)) {
+            deletedItems.push(productId);
+            localStorage.setItem('auricCartDeletedItems', JSON.stringify(deletedItems));
           }
         } catch (e) {
-          console.error('Error parsing deleted items:', e);
+          console.error('Error tracking deleted item:', e);
         }
-        
-        // Add to deleted items list with timestamp
-        deletedItems.push({
-          productId: removedItem.productId, 
-          timestamp: Date.now(),
-          name: removedItem.name
-        });
-        
-        // Save deleted items list (keep last 10 only)
-        if (deletedItems.length > 10) {
-          deletedItems = deletedItems.slice(-10);
-        }
-        localStorage.setItem('auricCartDeletedItems', JSON.stringify(deletedItems));
-        
-        // Remove item at the specified index
-        this.items.splice(index, 1);
-        
-        // Save to localStorage first for immediate feedback
-        this.saveCartToLocalStorage();
-        
-        // Re-render the cart items to update display immediately
-        this.renderCartItems();
-        
-        // Update full UI (count badge, etc)
-        this.updateCartUI();
-        
-        // If user is logged in, sync with Firestore IMMEDIATELY 
-        // For deletions, we prioritize immediate sync without debouncing
-        if (auth.currentUser) {
-          // Cancel any pending debounced saves
-          if (this.debouncedSaveToFirestore) {
-            clearTimeout(this.debouncedSaveToFirestore);
-            this.debouncedSaveToFirestore = null;
-          }
-          
-          // Save immediately to Firestore, overwriting the entire cart
-          this.saveCartToFirestore(auth.currentUser.uid);
-          
-          console.log('Item deletion synced to Firestore immediately');
-        } else {
-          console.log('User not logged in, item deletion saved only to localStorage');
-        }
-        
-        return true;
       }
       
-      return false;
+      // Remove the item
+      this.items.splice(index, 1);
+      this.lastOperation = 'remove';
+      
+      // Save the updated cart
+      this.saveCart();
+      
+      // Update the UI
+      this.updateCartUI();
     },
     
     /**
      * Increment item quantity
      */
-    incrementQuantity: function(index) {
-      if (index >= 0 && index < this.items.length) {
-        // Increment quantity, max 10
-        this.items[index].quantity = Math.min(10, this.items[index].quantity + 1);
-        
-        // Update the item's timestamp
-        this.items[index].updatedAt = new Date().toISOString();
-        
-        // Save to localStorage first for immediate feedback
-        this.saveCartToLocalStorage();
-        
-        // Re-render the cart items to update display immediately
-        this.renderCartItems();
-        
-        // Update full UI (count badge, etc)
-        this.updateCartUI();
-        
-        // If user is logged in, sync with Firestore immediately
-        if (auth.currentUser) {
-          // Use a debounced version to prevent too many Firestore writes
-          if (this.debouncedSaveToFirestore) {
-            clearTimeout(this.debouncedSaveToFirestore);
-          }
-          
-          // Save to Firestore after a short delay to batch multiple rapid changes
-          this.debouncedSaveToFirestore = setTimeout(() => {
-            this.saveCartToFirestore(auth.currentUser.uid);
-            this.debouncedSaveToFirestore = null;
-          }, 500);
-        }
-        
-        return true;
-      }
+    incrementItemQuantity: function(index) {
+      if (index < 0 || index >= this.items.length) return;
       
-      return false;
+      this.items[index].quantity += 1;
+      this.items[index].updatedAt = new Date().toISOString();
+      this.lastOperation = 'increment';
+      
+      this.saveCart();
+      this.updateCartUI();
     },
     
     /**
      * Decrement item quantity
      */
-    decrementQuantity: function(index) {
-      if (index >= 0 && index < this.items.length) {
-        // Decrement quantity, min 1
-        this.items[index].quantity = Math.max(1, this.items[index].quantity - 1);
-        
-        // Update the item's timestamp
-        this.items[index].updatedAt = new Date().toISOString();
-        
-        // Save to localStorage first for immediate feedback
-        this.saveCartToLocalStorage();
-        
-        // Re-render the cart items to update display immediately
-        this.renderCartItems();
-        
-        // Update full UI (count badge, etc)
-        this.updateCartUI();
-        
-        // If user is logged in, sync with Firestore immediately
-        if (auth.currentUser) {
-          // Use a debounced version to prevent too many Firestore writes
-          if (this.debouncedSaveToFirestore) {
-            clearTimeout(this.debouncedSaveToFirestore);
-          }
-          
-          // Save to Firestore after a short delay to batch multiple rapid changes
-          this.debouncedSaveToFirestore = setTimeout(() => {
-            this.saveCartToFirestore(auth.currentUser.uid);
-            this.debouncedSaveToFirestore = null;
-          }, 500);
-        }
-        
-        return true;
-      }
+    decrementItemQuantity: function(index) {
+      if (index < 0 || index >= this.items.length) return;
       
-      return false;
+      if (this.items[index].quantity <= 1) {
+        // If quantity is 1, remove the item
+        this.removeItem(index);
+      } else {
+        this.items[index].quantity -= 1;
+        this.items[index].updatedAt = new Date().toISOString();
+        this.lastOperation = 'decrement';
+        
+        this.saveCart();
+        this.updateCartUI();
+      }
     },
     
     /**
      * Save cart to storage (localStorage or Firestore)
      */
     saveCart: function() {
-      const currentUser = auth.currentUser;
-      
-      if (currentUser) {
-        // User is logged in, save to Firestore
-        this.saveCartToFirestore(currentUser.uid);
-      }
-      
-      // Always save to localStorage as backup
+      // Always save to localStorage first (for anonymous users and backup)
       this.saveCartToLocalStorage();
+      
+      // If user is authenticated, also save to Firestore
+      if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+        this.saveCartToFirestore(firebase.auth().currentUser.uid);
+      }
     },
     
     /**
      * Setup event listeners for cart functionality
      */
     setupEventListeners: function() {
-      // Add to cart buttons
-      if (this.addToCartButtons) {
-        this.addToCartButtons.forEach(button => {
-          button.addEventListener('click', this.handleAddToCart.bind(this));
-        });
-      }
+      // Add event listeners for add to cart buttons on product list
+      document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+        button.addEventListener('click', this.handleAddToCartClick.bind(this));
+      });
       
-      // Small add to cart buttons in recommended products section
-      const smallAddToCartButtons = document.querySelectorAll('.add-to-cart-btn-small');
-      if (smallAddToCartButtons) {
-        smallAddToCartButtons.forEach(button => {
-          button.addEventListener('click', this.handleAddToCart.bind(this));
-        });
-      }
-      
-      // Individual product page add to cart button
-      const productAddToCartBtn = document.querySelector('.product-detail-info .add-to-cart-btn');
-      if (productAddToCartBtn) {
-        productAddToCartBtn.addEventListener('click', this.handleProductPageAddToCart.bind(this));
+      // Add event listener for add to cart button on product detail
+      const detailAddToCartBtn = document.getElementById('addToCartBtn');
+      if (detailAddToCartBtn) {
+        detailAddToCartBtn.addEventListener('click', this.handleDetailAddToCartClick.bind(this));
       }
     },
     
     /**
      * Handle add to cart button click on product listing
      */
-    handleAddToCart: function(e) {
-      e.preventDefault();
+    handleAddToCartClick: function(event) {
+      event.preventDefault();
       
-      // Check if this is a small cart button click
-      const isSmallButton = e.target.classList.contains('add-to-cart-btn-small');
+      const productElement = event.target.closest('.product');
+      if (!productElement) return;
       
-      // Get product information from the closest product item
-      const productItem = e.target.closest('.product-item');
-      if (!productItem) return;
+      // Get product data from the element
+      const productId = productElement.getAttribute('data-product-id');
+      const name = productElement.querySelector('.product-name')?.textContent || 'Unknown Product';
+      const price = parseFloat(productElement.getAttribute('data-price') || '0');
+      const image = productElement.querySelector('img')?.src || '';
       
-      const productId = productItem.getAttribute('data-product-id') || 'unknown-product';
-      const name = productItem.querySelector('.product-name')?.textContent || 'Product';
-      const price = parseFloat(productItem.querySelector('.current-price')?.textContent.replace(/[^0-9.]/g, '')) || 0;
-      const image = productItem.querySelector('.product-image img')?.src || '';
-      
-      // Log the product details for debugging
-      console.log('Adding item to cart:', {
-        productId,
-        name,
-        price,
-        isSmallButton
-      });
-      
-      // Create item object
-      const item = {
+      // Add product to cart
+      this.addItem({
         productId,
         name,
         price,
         image,
         quantity: 1
-      };
-      
-      // Add to cart
-      this.addItem(item);
+      });
       
       // Show confirmation
       this.showAddToCartConfirmation(name);
@@ -1623,33 +1176,34 @@ document.addEventListener('DOMContentLoaded', function() {
     /**
      * Handle add to cart button click on product detail page
      */
-    handleProductPageAddToCart: function(e) {
-      e.preventDefault();
+    handleDetailAddToCartClick: function(event) {
+      event.preventDefault();
       
-      // Get product information from the product detail page
-      const productDetailContainer = document.querySelector('.product-detail-container');
-      if (!productDetailContainer) return;
+      // Get product data from the detail page
+      const productDetailElement = document.querySelector('.product-detail');
+      if (!productDetailElement) return;
       
-      const productId = productDetailContainer.getAttribute('data-product-id') || 
-                         document.querySelector('.meta-item .meta-value:last-child')?.textContent || 'unknown-product';
-      const name = document.querySelector('.product-title')?.textContent || 'Product';
-      const priceText = document.querySelector('.price-value')?.textContent || '0';
-      const price = parseFloat(priceText.replace(/[^0-9.]/g, '')) || 0;
-      const image = document.querySelector('.main-product-image')?.src || '';
-      const quantityInput = document.querySelector('.quantity-input');
-      const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
+      const productId = productDetailElement.getAttribute('data-product-id');
+      const name = document.querySelector('.product-title')?.textContent || 'Unknown Product';
+      const priceStr = document.querySelector('.product-price')?.textContent || '₹0';
+      const price = parseFloat(priceStr.replace(/[^\d.]/g, ''));
+      const image = document.querySelector('.product-main-image img')?.src || '';
+      const quantityInput = document.getElementById('quantity');
+      const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
       
-      // Create item object
-      const item = {
+      // Get selected variant if applicable
+      const variantSelect = document.getElementById('variant');
+      const variant = variantSelect ? variantSelect.value : null;
+      
+      // Add product to cart
+      this.addItem({
         productId,
         name,
         price,
         image,
-        quantity
-      };
-      
-      // Add to cart
-      this.addItem(item);
+        quantity,
+        variant
+      });
       
       // Show confirmation
       this.showAddToCartConfirmation(name);
@@ -1659,51 +1213,35 @@ document.addEventListener('DOMContentLoaded', function() {
      * Show confirmation message after adding to cart
      */
     showAddToCartConfirmation: function(productName) {
-      // Check if there's an existing confirmation
-      let confirmationElement = document.querySelector('.add-to-cart-confirmation');
-      
-      if (!confirmationElement) {
-        // Create confirmation element
-        confirmationElement = document.createElement('div');
-        confirmationElement.className = 'add-to-cart-confirmation';
-        document.body.appendChild(confirmationElement);
+      // Create confirmation element if it doesn't exist
+      let confirmation = document.getElementById('add-to-cart-confirmation');
+      if (!confirmation) {
+        confirmation = document.createElement('div');
+        confirmation.id = 'add-to-cart-confirmation';
+        confirmation.style.cssText = 'position: fixed; bottom: 20px; right: 20px; background-color: #4CAF50; color: white; padding: 16px; border-radius: 4px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); z-index: 9999; transition: opacity 0.3s ease; display: none;';
+        document.body.appendChild(confirmation);
       }
       
-      // Update confirmation message
-      confirmationElement.innerHTML = `
-        <div class="confirmation-content">
-          <i class="fas fa-check-circle"></i>
-          <p>${productName} added to cart</p>
-          <a href="#" class="view-cart-btn">View Cart</a>
+      // Update text
+      confirmation.innerHTML = `
+        <div>${productName} added to cart</div>
+        <div style="margin-top: 8px;">
+          <a href="cart.html" style="color: white; text-decoration: underline; margin-right: 16px;">View Cart</a>
+          <a href="checkout.html" style="color: white; text-decoration: underline;">Checkout</a>
         </div>
-        <button class="close-confirmation">&times;</button>
       `;
       
       // Show confirmation
-      confirmationElement.classList.add('active');
+      confirmation.style.display = 'block';
+      confirmation.style.opacity = '1';
       
-      // Add close button functionality
-      const closeButton = confirmationElement.querySelector('.close-confirmation');
-      if (closeButton) {
-        closeButton.addEventListener('click', () => {
-          confirmationElement.classList.remove('active');
-        });
-      }
-      
-      // Add view cart button functionality
-      const viewCartButton = confirmationElement.querySelector('.view-cart-btn');
-      if (viewCartButton) {
-        viewCartButton.addEventListener('click', (e) => {
-          e.preventDefault();
-          confirmationElement.classList.remove('active');
-          this.openCartPanel();
-        });
-      }
-      
-      // Auto-hide after 5 seconds
+      // Hide after 3 seconds
       setTimeout(() => {
-        confirmationElement.classList.remove('active');
-      }, 5000);
+        confirmation.style.opacity = '0';
+        setTimeout(() => {
+          confirmation.style.display = 'none';
+        }, 300);
+      }, 3000);
     },
     
     /**
@@ -1736,8 +1274,7 @@ document.addEventListener('DOMContentLoaded', function() {
             this.syncCartOnLogin(user.uid);
           }, 1000);
           
-          // Set up periodic background sync for logged in users
-          // This helps ensure cart data stays consistent across devices
+          // Set up real-time Firestore listener for critical updates
           this.startPeriodicSync(user.uid);
         } else {
           // User has signed out, load from localStorage
@@ -1765,18 +1302,6 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Log that we're only using the Firestore listener now
       console.log('Using real-time Firestore listener only - periodic polling disabled');
-    },
-              // Update UI
-              this.updateCartUI();
-              this.renderCartItems();
-              
-              console.log('Cart synced with data from another device');
-            }
-          }
-        })
-        .catch(error => {
-          console.error('Error checking for remote changes:', error);
-        });
     },
     
     /**
@@ -1954,8 +1479,6 @@ document.addEventListener('DOMContentLoaded', function() {
     localStorage.setItem('pendingCartClear', 'true');
     localStorage.setItem('cartClearTime', Date.now().toString());
     
-    // NUCLEAR CART CLEARING STRATEGY
-    
     try {
       // 0. Unsubscribe from any real-time listeners first to prevent re-syncing
       if (AuricCart && AuricCart.firestoreUnsubscribe) {
@@ -2021,7 +1544,6 @@ document.addEventListener('DOMContentLoaded', function() {
           // Generate a uniquely identifiable device ID for this emergency clear
           const deviceId = `emergency_clear_${Date.now()}_${Math.random().toString(36).substr(2, 10)}`;
           const timestamp = Date.now();
-          const veryHighPriorityVersion = (9999999999999 + timestamp).toString(); // Ensures this always wins version conflicts
           
           console.log('EMERGENCY CLEARING Firestore cart for user:', userId);
           
@@ -2032,73 +1554,32 @@ document.addEventListener('DOMContentLoaded', function() {
             AuricCart.isUpdatingFirestore = true;
           }
           
-          // Use a transaction for maximum reliability
-          db.runTransaction(async (transaction) => {
-            const cartRef = db.collection('carts').doc(userId);
-            
-            // Get current document to check its version
-            const currentDoc = await transaction.get(cartRef);
-            
-            // Set absolutely empty cart with emergency clear flags that can't be ignored
-            transaction.set(cartRef, {
-              items: [],
-              updatedAt: new Date().toISOString(),
-              device: deviceId,
-              operation: 'emergency_clear', 
-              version: veryHighPriorityVersion,
-              clear_timestamp: timestamp,
-              emergency_cleared: true,
-              emergency_clear_timestamp: timestamp,
-              ignore_sync: true, // Signal to ignore future syncs
-              max_priority: true // Signal this should never be overridden
-            });
-            
-            return Promise.resolve();
+          db.collection('carts').doc(userId).set({
+            items: [],
+            updatedAt: new Date().toISOString(),
+            device: deviceId,
+            operation: 'emergency_clear',
+            version: timestamp.toString(),
+            clear_timestamp: timestamp,
+            emergency_cleared: true,
+            emergency_clear_timestamp: timestamp,
+            ignore_sync: true,
+            max_priority: true
           }).then(() => {
-            console.log('Firestore cart EMERGENCY cleared successfully via transaction');
+            console.log('Firestore cart EMERGENCY cleared successfully');
             
             // Reset isUpdatingFirestore after a delay
             setTimeout(() => {
               if (AuricCart) {
                 AuricCart.isUpdatingFirestore = false;
               }
-            }, 5000); // 5 seconds should be enough for the operation to complete fully
-            
+            }, 5000);
           }).catch(err => {
-            console.error('Transaction failed during EMERGENCY clear:', err);
+            console.error('CRITICAL: Error clearing Firestore cart:', err);
             
-            // Fallback to direct update with even higher timestamp if transaction fails
-            const fallbackTimestamp = Date.now();
-            const fallbackVersion = (99999999999999 + fallbackTimestamp).toString();
-            
-            db.collection('carts').doc(userId).set({
-              items: [],
-              updatedAt: new Date().toISOString(),
-              device: `fallback_emergency_${fallbackTimestamp}_${Math.random().toString(36).substr(2, 10)}`,
-              operation: 'fallback_emergency_clear',
-              version: fallbackVersion,
-              clear_timestamp: fallbackTimestamp,
-              emergency_cleared: true,
-              fallback_cleared: true,
-              ignore_sync: true,
-              max_priority: true
-            }).then(() => {
-              console.log('Firestore cart EMERGENCY cleared via fallback direct update');
-              
-              // Reset isUpdatingFirestore after a delay
-              setTimeout(() => {
-                if (AuricCart) {
-                  AuricCart.isUpdatingFirestore = false;
-                }
-              }, 5000);
-              
-            }).catch(innerErr => {
-              console.error('CRITICAL: Both transaction and fallback clear failed:', innerErr);
-              
-              if (AuricCart) {
-                AuricCart.isUpdatingFirestore = false;
-              }
-            });
+            if (AuricCart) {
+              AuricCart.isUpdatingFirestore = false;
+            }
           });
         }
       } catch (err) {
@@ -2122,84 +1603,14 @@ document.addEventListener('DOMContentLoaded', function() {
         AuricCart.pendingFirestoreSync = false;
         AuricCart.isUpdatingFirestore = false;
         
-        // Force a complete UI refresh - DIRECT DOM MANIPULATIONS
-        try {
-          // Clear the cart container - try different selectors for maximum coverage
-          const cartContainers = [
-            document.getElementById('cartItems'),
-            document.querySelector('.cart-items'),
-            document.querySelector('.shopping-cart-items')
-          ];
-          
-          cartContainers.forEach(container => {
-            if (container) {
-              container.innerHTML = '<p class="empty-cart-message">Your cart is empty</p>';
-            }
-          });
-          
-          // Reset ALL possible cart count badges
-          const cartCountBadges = [
-            document.querySelector('.cart-count'),
-            document.querySelector('.cart-badge'),
-            document.querySelector('.cart-item-count')
-          ];
-          
-          cartCountBadges.forEach(badge => {
-            if (badge) {
-              badge.textContent = '0';
-              badge.style.display = 'none';
-            }
-          });
-          
-          // Reset ALL possible cart totals
-          const cartTotals = [
-            document.getElementById('cartTotal'),
-            document.querySelector('.cart-total-amount'),
-            document.querySelector('.cart-subtotal')
-          ];
-          
-          cartTotals.forEach(total => {
-            if (total) {
-              total.textContent = '₹0';
-            }
-          });
-          
-          // Call ALL update methods in case they exist
-          if (typeof AuricCart.updateCartUI === 'function') AuricCart.updateCartUI();
-          if (typeof AuricCart.renderCartItems === 'function') AuricCart.renderCartItems();
-          if (typeof AuricCart.updateCartTotal === 'function') AuricCart.updateCartTotal();
-        } catch (uiErr) {
-          console.error('Error updating UI during emergency clear:', uiErr);
-        }
-      } else {
-        console.log('AuricCart object not available - performing direct DOM manipulation');
-        
-        // Direct DOM manipulation as fallback
-        const cartElements = [
-          document.getElementById('cartItems'),
-          document.querySelector('.cart-items'),
-          document.querySelector('.cart-count'),
-          document.getElementById('cartTotal')
-        ];
-        
-        cartElements.forEach(el => {
-          if (el) {
-            if (el.classList.contains('cart-count')) {
-              el.textContent = '0';
-              el.style.display = 'none';
-            } else if (el.id === 'cartTotal') {
-              el.textContent = '₹0';
-            } else {
-              el.innerHTML = '<p>Your cart is empty</p>';
-            }
-          }
-        });
+        // Update UI
+        AuricCart.updateCartUI();
       }
-    } catch (cartObjectError) {
-      console.error('Error resetting cart object:', cartObjectError);
+    } catch (cartResetError) {
+      console.error('Error resetting cart object:', cartResetError);
     }
     
-    console.log('!!! CART EMERGENCY CLEARED SUCCESSFULLY !!!');
-    return true;
+    // Return a promise that resolves after all operations are complete
+    return Promise.resolve(true);
   };
 });
