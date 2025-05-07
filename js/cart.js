@@ -739,19 +739,20 @@ document.addEventListener('DOMContentLoaded', function() {
      * Now with emergency cart clearing protection
      */
     loadCartFromFirestore: function(userId) {
-      // Only check for this flag set by explicit order completion
-      // DO NOT check all flags on normal page loads as that would clear the cart
-      if (window.FORCE_CART_CLEAR_NEEDED === true) {
-        console.log('Ignoring Firestore update - emergency clear is active');
+      // SIMPLIFICATION: Only check for orderCompleted flag
+      // No need for complex window flags
+      const orderCompleted = localStorage.getItem('orderCompleted') === 'true';
+      
+      if (orderCompleted) {
+        console.log('Order was completed - clearing cart');
         
         // Clear our cart
         this.items = [];
         
-        // Force clear localStorage as well (redundancy)
+        // Clear localStorage
         localStorage.removeItem('auricCart');
         localStorage.removeItem('auricCartItems');
         localStorage.setItem('auricCart', JSON.stringify([]));
-        localStorage.setItem('auricCartItems', JSON.stringify([]));
         
         // Cancel the loading process
         this.isLoadingFromFirestore = false;
@@ -763,18 +764,17 @@ document.addEventListener('DOMContentLoaded', function() {
         return false;
       }
       
-      console.log('Loading cart from Firestore - server is source of truth');
+      console.log('Loading cart from Firestore');
       
       // Set a loading flag to prevent race conditions
       this.isLoadingFromFirestore = true;
       
-      // Always use Firestore as the source of truth when user is logged in
+      // Use Firestore as the source of truth when user is logged in
       db.collection('carts').doc(userId).get()
         .then((doc) => {
-          // Only check for the explicit FORCE_CART_CLEAR_NEEDED flag
-          // Do not check for other flags, as they could be stale from previous sessions
-          if (window.FORCE_CART_CLEAR_NEEDED === true) {
-            console.log('Forced cart clear needed - not loading from Firestore');
+          // Double-check order completion flag in case it changed
+          if (localStorage.getItem('orderCompleted') === 'true') {
+            console.log('Order was completed - clearing cart');
             this.items = [];
             this.isLoadingFromFirestore = false;
             this.updateCartUI();
@@ -895,23 +895,14 @@ document.addEventListener('DOMContentLoaded', function() {
         return Promise.reject(new Error('No user ID provided'));
       }
       
-      // CRITICAL: ONLY check the forced cart clear flag to ensure cart persistence
-      // This ensures we don't accidentally clear the cart during normal page navigation
-      const forceClearNeeded = window.FORCE_CART_CLEAR_NEEDED === true;
+      // SIMPLIFICATION: ONLY check for actual order completion
+      // No more complex flags - just check if an order was completed
+      const orderCompleted = localStorage.getItem('orderCompleted') === 'true';
       
-      // Only check stale flags if a forced clear is explicitly requested
-      const flags = {
-        orderCompleted: localStorage.getItem('orderCompleted') === 'true',
-        orderJustPlaced: localStorage.getItem('orderJustPlaced') === 'true',
-        cartEmergencyCleared: localStorage.getItem('cartEmergencyCleared') === 'true',
-        pendingCartClear: localStorage.getItem('pendingCartClear') === 'true',
-        razorpaySuccessful: localStorage.getItem('razorpaySuccessfulPayment') === 'true'
-      };
-      
-      // Only clear if force flag is set - this maintains cart persistence across sessions
-      if (forceClearNeeded) {
+      // CRITICAL: Only clear cart if an order was actually completed
+      if (orderCompleted) {
         console.log('EMERGENCY DETECTED: Using forced empty cart in saveCartToFirestore');
-        console.log('Flags status:', flags);
+        console.log('Order completed - clearing cart');
         
         // Set flag to prevent our own writes from triggering a sync loop
         this.isUpdatingFirestore = true;
@@ -933,11 +924,7 @@ document.addEventListener('DOMContentLoaded', function() {
           itemCount: 0,
           emergencyClear: true,
           emergencyClearTime: Date.now(),
-          emergencyClearReason: flags.orderCompleted ? 'order_completed' :
-                               flags.orderJustPlaced ? 'order_just_placed' :
-                               flags.cartEmergencyCleared ? 'cart_emergency_cleared' :
-                               flags.pendingCartClear ? 'pending_cart_clear' :
-                               flags.razorpaySuccessful ? 'razorpay_payment_successful' : 'force_flag_set'
+          emergencyClearReason: 'order_completed'
         }, { merge: false })
         .then(() => {
           console.log('EMERGENCY CLEAR: Empty cart saved to Firestore successfully');
@@ -1861,28 +1848,18 @@ document.addEventListener('DOMContentLoaded', function() {
         this.firestoreUnsubscribe = null;
       }
       
-      // Check emergency cart clear flags - expanded version for more reliable detection
-      const emergencyFlags = [
-        window.FORCE_CART_CLEAR_NEEDED === true,
-        localStorage.getItem('orderCompleted') === 'true',
-        localStorage.getItem('cartEmergencyCleared') === 'true',
-        localStorage.getItem('pendingCartClear') === 'true',
-        localStorage.getItem('razorpaySuccessfulPayment') === 'true'
-      ];
+      // SIMPLIFICATION: Only check if an order was completed
+      const orderCompleted = localStorage.getItem('orderCompleted') === 'true';
       
-      const emergencyClearTime = parseInt(localStorage.getItem('cartEmergencyClearTime') || 
-                                           localStorage.getItem('cartClearTime') || '0');
-      const timeSinceClear = Date.now() - emergencyClearTime;
-      
-      // If any emergency flag is active and it's recent (within 10 minutes), skip listener setup
-      if (emergencyFlags.some(flag => flag === true) && timeSinceClear < 10 * 60 * 1000) {
-        console.log('Skipping Firestore listener setup - emergency clear active');
+      // If an order was just completed, skip listener setup and ensure cart is cleared
+      if (orderCompleted) {
+        console.log('Skipping Firestore listener setup - order was completed');
         
-        // Create a device ID with emergency flag for special identification
-        const emergencyDeviceId = 'emergency_clear_' + Date.now() + '_' + 
-                                 Math.random().toString(36).substring(2, 15);
-        this.deviceId = emergencyDeviceId;
-        localStorage.setItem('auricCartDeviceId', emergencyDeviceId);
+        // Create a device ID with order completion flag for identification
+        const orderCompletionDeviceId = 'order_completed_' + Date.now() + '_' + 
+                                       Math.random().toString(36).substring(2, 15);
+        this.deviceId = orderCompletionDeviceId;
+        localStorage.setItem('auricCartDeviceId', orderCompletionDeviceId);
         
         // Ensure the cart is cleared in memory
         this.items = [];
