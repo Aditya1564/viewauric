@@ -11,19 +11,22 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;500;700&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
     
-    <!-- Direct Cart Clear Script -->
-    <!-- This script runs immediately to prevent any flickering of cart items after checkout -->
+    <!-- Cart Persistence Script -->
     <script>
-        // Direct check for cart clearing flags from checkout
+        // Modified cart check to never clear cart on page load
         (function() {
+            console.log('Cart persistence enabled: Cart will not be cleared on page reload');
+            
+            // Only check for this flag when explicitly navigating from checkout after order
             function checkCartShouldBeCleared() {
-                if (localStorage.getItem('orderCompleted') === 'true' || 
-                    localStorage.getItem('cartEmergencyCleared') === 'true' ||
-                    localStorage.getItem('pendingCartClear') === 'true') {
-                    
-                    console.log('*** EMERGENCY DETECTED: Cart needs to be cleared immediately ***');
+                // Only clear if explicit flag is set by checkout.js
+                const forceClear = window.FORCE_CART_CLEAR_NEEDED === true;
+                
+                if (forceClear) {
+                    console.log('Order was just completed - clearing cart is appropriate');
                     return true;
                 }
+                
                 return false;
             }
             
