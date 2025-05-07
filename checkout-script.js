@@ -1014,22 +1014,33 @@ document.addEventListener('DOMContentLoaded', function() {
             // CRITICAL: Set special flags to indicate order completion and prevent cart resync
             console.log('Order processed successfully - setting order completion flags');
             
+            // Set the global force clear flag to trigger cart clearing across all pages
+            window.FORCE_CART_CLEAR_NEEDED = true;
+            
             // Set these flags BEFORE clearing cart to ensure listeners respect them
             localStorage.setItem('orderCompleted', 'true');
             localStorage.setItem('orderCompletedTime', Date.now().toString());
             localStorage.setItem('orderJustPlaced', 'true');
+            localStorage.setItem('razorpaySuccessfulPayment', 'true');
             localStorage.setItem('cartEmergencyCleared', 'true');
             localStorage.setItem('cartEmergencyClearTime', Date.now().toString());
             
-            // Set a timeout to clear the "just placed" flag after 2 minutes
+            // Set a timeout to clear the flags after specific intervals
             setTimeout(() => {
                 localStorage.setItem('orderJustPlaced', 'false');
-            }, 2 * 60 * 1000);
+                localStorage.setItem('razorpaySuccessfulPayment', 'false');
+            }, 2 * 60 * 1000); // 2 minutes
             
-            // Set a timeout to clear the "completed" flag after 5 minutes
             setTimeout(() => {
                 localStorage.setItem('orderCompleted', 'false');
-            }, 5 * 60 * 1000);
+            }, 5 * 60 * 1000); // 5 minutes
+            
+            // Reset the FORCE_CART_CLEAR_NEEDED flag after a short delay 
+            // to allow other pages to detect it if navigation happens
+            setTimeout(() => {
+                window.FORCE_CART_CLEAR_NEEDED = false;
+                console.log('Cart clear flag reset after timeout');
+            }, 30 * 1000); // 30 seconds
             
             console.log('Order completion flags set, now clearing cart data');
             

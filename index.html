@@ -11,12 +11,11 @@
     <link rel="stylesheet" href="css/navbar.css?v=1.1.1">
     <link rel="stylesheet" href="css/cart.css?v=1.0.1">
     
-    <!-- Direct Cart Clear Script -->
-    <!-- This script runs immediately to prevent any flickering of cart items after checkout -->
+    <!-- Cart Persistence Script -->
     <script>
-        // Direct check for cart clearing flags from checkout
+        // Modified cart check to never clear cart on page load
         (function() {
-            // Check stale flags, but don't reset flags that might cause cart clearing
+            // Reset stale flags - but never clear cart data
             function resetStaleFlags() {
                 // Don't reset any flags - the cart should persist across page reloads
                 console.log('Flag check: Preserving cart data across page reloads');
@@ -25,30 +24,13 @@
             // Run this reset immediately
             resetStaleFlags();
             
+            // Only check for this flag when explicitly navigating from checkout after order
             function checkCartShouldBeCleared() {
-                // Only check within the first 10 minutes after order completion
-                const orderCompleted = localStorage.getItem('orderCompleted') === 'true';
-                const orderCompletedTime = parseInt(localStorage.getItem('orderCompletedTime') || '0');
-                const orderJustCompleted = orderCompleted && 
-                    (Date.now() - orderCompletedTime < 10 * 60 * 1000); // Within 10 minutes
+                // Only clear if explicit flag is set by checkout.js
+                const forceClear = window.FORCE_CART_CLEAR_NEEDED === true;
                 
-                // Check emergency clear flags with strict time limit
-                const cartEmergencyCleared = localStorage.getItem('cartEmergencyCleared') === 'true';
-                const cartEmergencyClearTime = parseInt(localStorage.getItem('cartEmergencyClearTime') || '0');
-                const emergencyClearJustHappened = cartEmergencyCleared && 
-                    (Date.now() - cartEmergencyClearTime < 5 * 60 * 1000); // Within 5 minutes
-                
-                // Pending cart clear flag
-                const pendingCartClear = localStorage.getItem('pendingCartClear') === 'true';
-                
-                // Only clear if one of the flags is set AND it happened recently
-                if (orderJustCompleted || emergencyClearJustHappened || pendingCartClear) {
-                    console.log('*** EMERGENCY DETECTED: Cart needs to be cleared immediately ***');
-                    console.log('Conditions:', {
-                        orderJustCompleted,
-                        emergencyClearJustHappened,
-                        pendingCartClear
-                    });
+                if (forceClear) {
+                    console.log('Order was just completed - clearing cart is appropriate');
                     return true;
                 }
                 
