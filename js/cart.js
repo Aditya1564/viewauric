@@ -9,7 +9,17 @@
  * - Sync localStorage cart to Firestore when user logs in
  * - Sliding cart panel for easier access
  * - Display cart items and totals
+ * - Persistent cart across page loads and sessions
+ * - Clear cart only after successful order completion
  */
+
+// Initialize the forced cart clear needed flag
+// This flag is used across the entire site to coordinate cart clearing
+// It should only be set to true when an order is successfully completed
+if (typeof window.FORCE_CART_CLEAR_NEEDED === 'undefined') {
+  window.FORCE_CART_CLEAR_NEEDED = false;
+  console.log('Flag check: Preserving cart data across page reloads');
+}
 
 // For development/testing - Debug function to reset the cart completely
 // Cart debugging functions
@@ -885,23 +895,23 @@ document.addEventListener('DOMContentLoaded', function() {
         return Promise.reject(new Error('No user ID provided'));
       }
       
-      // CRITICAL: Check for order completion or emergency clear flags FIRST
-      const orderCompleted = localStorage.getItem('orderCompleted') === 'true';
-      const orderJustPlaced = localStorage.getItem('orderJustPlaced') === 'true';
-      const cartEmergencyCleared = localStorage.getItem('cartEmergencyCleared') === 'true';
-      const pendingCartClear = localStorage.getItem('pendingCartClear') === 'true';
-      const razorpaySuccessful = localStorage.getItem('razorpaySuccessfulPayment') === 'true';
+      // CRITICAL: ONLY check the forced cart clear flag to ensure cart persistence
+      // This ensures we don't accidentally clear the cart during normal page navigation
+      const forceClearNeeded = window.FORCE_CART_CLEAR_NEEDED === true;
       
-      // If any emergency flag is set, we need to send an empty cart to Firestore
-      if (orderCompleted || orderJustPlaced || cartEmergencyCleared || pendingCartClear || razorpaySuccessful) {
+      // Only check stale flags if a forced clear is explicitly requested
+      const flags = {
+        orderCompleted: localStorage.getItem('orderCompleted') === 'true',
+        orderJustPlaced: localStorage.getItem('orderJustPlaced') === 'true',
+        cartEmergencyCleared: localStorage.getItem('cartEmergencyCleared') === 'true',
+        pendingCartClear: localStorage.getItem('pendingCartClear') === 'true',
+        razorpaySuccessful: localStorage.getItem('razorpaySuccessfulPayment') === 'true'
+      };
+      
+      // Only clear if force flag is set - this maintains cart persistence across sessions
+      if (forceClearNeeded) {
         console.log('EMERGENCY DETECTED: Using forced empty cart in saveCartToFirestore');
-        console.log('Flags status:', {
-          orderCompleted,
-          orderJustPlaced,
-          cartEmergencyCleared,
-          pendingCartClear,
-          razorpaySuccessful
-        });
+        console.log('Flags status:', flags);
         
         // Set flag to prevent our own writes from triggering a sync loop
         this.isUpdatingFirestore = true;
@@ -923,11 +933,11 @@ document.addEventListener('DOMContentLoaded', function() {
           itemCount: 0,
           emergencyClear: true,
           emergencyClearTime: Date.now(),
-          emergencyClearReason: orderCompleted ? 'order_completed' :
-                               orderJustPlaced ? 'order_just_placed' :
-                               cartEmergencyCleared ? 'cart_emergency_cleared' :
-                               pendingCartClear ? 'pending_cart_clear' :
-                               razorpaySuccessful ? 'razorpay_payment_successful' : 'unknown'
+          emergencyClearReason: flags.orderCompleted ? 'order_completed' :
+                               flags.orderJustPlaced ? 'order_just_placed' :
+                               flags.cartEmergencyCleared ? 'cart_emergency_cleared' :
+                               flags.pendingCartClear ? 'pending_cart_clear' :
+                               flags.razorpaySuccessful ? 'razorpay_payment_successful' : 'force_flag_set'
         }, { merge: false })
         .then(() => {
           console.log('EMERGENCY CLEAR: Empty cart saved to Firestore successfully');
