@@ -16,28 +16,10 @@
     <script>
         // Direct check for cart clearing flags from checkout
         (function() {
-            // IMPORTANT: Reset any stale flags immediately to fix issues
+            // Check stale flags, but don't reset flags that might cause cart clearing
             function resetStaleFlags() {
-                // Get the current timestamp
-                const now = Date.now();
-                
-                // Always reset these flags on page load to prevent persistent cart clearing
-                localStorage.setItem('orderCompleted', 'false');
-                console.log('Explicitly resetting orderCompleted flag to false');
-                
-                localStorage.setItem('cartEmergencyCleared', 'false');
-                console.log('Explicitly resetting cartEmergencyCleared flag to false');
-                
-                localStorage.setItem('pendingCartClear', 'false');
-                console.log('Explicitly resetting pendingCartClear flag to false');
-                
-                localStorage.setItem('razorpaySuccessfulPayment', 'false');
-                console.log('Explicitly resetting razorpaySuccessfulPayment flag to false');
-                
-                localStorage.setItem('orderJustPlaced', 'false');
-                console.log('Explicitly resetting orderJustPlaced flag to false');
-                
-                console.log('All cart flags have been reset to prevent unexpected cart clearing');
+                // Don't reset any flags - the cart should persist across page reloads
+                console.log('Flag check: Preserving cart data across page reloads');
             }
             
             // Run this reset immediately

@@ -729,16 +729,9 @@ document.addEventListener('DOMContentLoaded', function() {
      * Now with emergency cart clearing protection
      */
     loadCartFromFirestore: function(userId) {
-      // EMERGENCY CART CLEAR CHECK - Skip loading if emergency clear was triggered
-      const emergencyFlags = [
-        window.FORCE_CART_CLEAR_NEEDED,
-        localStorage.getItem('orderCompleted') === 'true',
-        localStorage.getItem('cartEmergencyCleared') === 'true',
-        localStorage.getItem('pendingCartClear') === 'true',
-        localStorage.getItem('razorpaySuccessfulPayment') === 'true'
-      ];
-      
-      if (emergencyFlags.some(flag => flag === true)) {
+      // Only check for this flag set by explicit order completion
+      // DO NOT check all flags on normal page loads as that would clear the cart
+      if (window.FORCE_CART_CLEAR_NEEDED === true) {
         console.log('Ignoring Firestore update - emergency clear is active');
         
         // Clear our cart
@@ -768,11 +761,10 @@ document.addEventListener('DOMContentLoaded', function() {
       // Always use Firestore as the source of truth when user is logged in
       db.collection('carts').doc(userId).get()
         .then((doc) => {
-          // Check emergency flags again, in case they were set during the async call
-          if (localStorage.getItem('orderCompleted') === 'true' || 
-              localStorage.getItem('cartEmergencyCleared') === 'true' ||
-              localStorage.getItem('pendingCartClear') === 'true') {
-            console.log('Emergency cart clear flag detected during Firestore load - aborting');
+          // Only check for the explicit FORCE_CART_CLEAR_NEEDED flag
+          // Do not check for other flags, as they could be stale from previous sessions
+          if (window.FORCE_CART_CLEAR_NEEDED === true) {
+            console.log('Forced cart clear needed - not loading from Firestore');
             this.items = [];
             this.isLoadingFromFirestore = false;
             this.updateCartUI();
