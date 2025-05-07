@@ -7,6 +7,74 @@ document.addEventListener('DOMContentLoaded', function() {
     window.isUserAuthenticated = false;
     window.cartLoadedForCheckout = false;
     
+    // Global cart flag for coordination across all files
+    window.FORCE_CART_CLEAR_NEEDED = false;
+    
+    // Nuclear cart clearing function that can be called during checkout
+    window.clearCart = function() {
+        console.log('!!! EMERGENCY CART CLEARING FUNCTION CALLED !!!');
+        
+        // Set global flag first - this is checked by all cart persistence functions
+        window.FORCE_CART_CLEAR_NEEDED = true;
+        console.log('Setting global flag: FORCE_CART_CLEAR_NEEDED = true');
+        
+        // Clear all localStorage directly as a failsafe
+        try {
+            localStorage.removeItem('auricCart');
+            localStorage.removeItem('auricCartItems');
+            localStorage.removeItem('cartItems');
+            localStorage.removeItem('cart');
+            localStorage.removeItem('checkout-cart');
+            localStorage.removeItem('auric-cart-data');
+            console.log('Cleared cart data from localStorage');
+            
+            // Reset synchronization metadata
+            localStorage.removeItem('auricCartDeviceId');
+            localStorage.removeItem('auricCartVersion');
+            localStorage.removeItem('auricCartLastSync');
+            console.log('Reset cart synchronization metadata');
+            
+            // Reset the actual cart objects if they exist
+            if (typeof window.AuricCart !== 'undefined') {
+                window.AuricCart.items = [];
+                console.log('FORCE RESETTING cart object');
+            }
+            
+            // Direct DOM manipulation for immediate visual feedback
+            try {
+                document.querySelectorAll('#cartItems, #sliding-cart-items').forEach(el => {
+                    if (el) {
+                        el.innerHTML = '<p class="empty-cart-message">Your cart is empty</p>';
+                        console.log('Successfully cleared ' + el.id);
+                    }
+                });
+                
+                document.querySelectorAll('.cart-count, .cart-badge').forEach(el => {
+                    if (el) {
+                        el.textContent = '0';
+                        el.style.display = 'none';
+                        console.log('Successfully cleared badge');
+                    }
+                });
+                
+                document.querySelectorAll('.subtotal-amount, #cartTotal').forEach(el => {
+                    if (el) {
+                        el.textContent = '₹0';
+                        console.log('Successfully cleared total');
+                    }
+                });
+                
+                console.log('Direct DOM manipulation complete');
+            } catch (e) {
+                console.error('Error during DOM manipulation:', e);
+            }
+            
+            console.log('!!! CART EMERGENCY CLEARED SUCCESSFULLY !!!');
+        } catch (e) {
+            console.error('Error during cart clearing:', e);
+        }
+    };
+    
     // Get referrer for later checks
     const referrer = document.referrer;
     
