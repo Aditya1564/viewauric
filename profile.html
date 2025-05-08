@@ -11,91 +11,104 @@
     <link rel="stylesheet" href="css/navbar.css?v=1.1.1">
     <link rel="stylesheet" href="css/auth.css">
     <link rel="stylesheet" href="css/cart.css?v=1.0.1">
-    
-    <!-- Direct Cart Clear Script -->
-    <!-- This script runs immediately to prevent any flickering of cart items after checkout -->
-    <script>
-        // Direct check for cart clearing flags from checkout
-        (function() {
-            function checkCartShouldBeCleared() {
-                if (localStorage.getItem('orderCompleted') === 'true' || 
-                    localStorage.getItem('cartEmergencyCleared') === 'true' ||
-                    localStorage.getItem('pendingCartClear') === 'true') {
-                    
-                    console.log('*** EMERGENCY DETECTED: Cart needs to be cleared immediately ***');
-                    return true;
-                }
-                return false;
-            }
-            
-            if (checkCartShouldBeCleared()) {
-                // Set a global flag to indicate we need to force clear the cart
-                window.FORCE_CART_CLEAR_NEEDED = true;
-                console.log('Setting global flag: FORCE_CART_CLEAR_NEEDED = true');
-                
-                // Clear cart data in localStorage immediately
-                localStorage.removeItem('auricCart');
-                localStorage.removeItem('auricCartItems');
-                localStorage.removeItem('cartItems');
-                localStorage.removeItem('cart');
-                console.log('Cleared cart data from localStorage');
-                
-                // Set timeout to clear cart DOM elements as soon as possible
-                setTimeout(function() {
-                    try {
-                        // Add event listener for earliest possible DOM access 
-                        if (document.readyState === "loading") {
-                            console.log('Document still loading, adding DOMContentLoaded listener');
-                            document.addEventListener('DOMContentLoaded', clearCartDOMElements);
-                        } else {
-                            console.log('Document already loaded, executing cart clear immediately');
-                            clearCartDOMElements();
-                        }
-                    } catch (e) {
-                        console.error('Error in early cart check:', e);
-                    }
-                }, 0);
-            }
-            
-            function clearCartDOMElements() {
-                console.log('Cart clear DOM handler executed');
-                
-                setTimeout(function() {
-                    console.log('Attempting direct DOM manipulation of cart elements');
-                    
-                    // Clear all cart-related DOM elements
-                    var elements = [
-                        { selector: '#cartItems', action: 'innerHTML', value: '<p class="empty-cart-message">Your cart is empty</p>' },
-                        { selector: '#sliding-cart-items', action: 'innerHTML', value: '<p class="empty-cart-message">Your cart is empty</p>' },
-                        { selector: '.cart-count', action: 'textContent', value: '0' },
-                        { selector: '.cart-count', action: 'style.display', value: 'none' },
-                        { selector: '.subtotal-amount', action: 'textContent', value: '₹0.00' },
-                        { selector: '#cartTotal', action: 'textContent', value: '₹0' }
-                    ];
-                    
-                    elements.forEach(function(item) {
-                        try {
-                            var el = document.querySelector(item.selector);
-                            if (el) {
-                                if (item.action === 'innerHTML') {
-                                    el.innerHTML = item.value;
-                                } else if (item.action === 'textContent') {
-                                    el.textContent = item.value;
-                                } else if (item.action === 'style.display') {
-                                    el.style.display = item.value;
-                                }
-                                console.log('Successfully cleared ' + item.selector);
-                            }
-                        } catch(err) {
-                            console.error('Error clearing ' + item.selector + ': ' + err.message);
-                        }
-                    });
-                    
-                    console.log('Direct DOM manipulation complete');
-                }, 100);
-            }
-        })();
-    </script>
+
+      <!-- Cart Persistence Script -->
+      <script>
+          // Modified cart check to never clear cart on page load
+          (function() {
+              // Reset stale flags - but never clear cart data
+              function resetStaleFlags() {
+                  // Don't reset any flags - the cart should persist across page reloads
+                  console.log('Flag check: Preserving cart data across page reloads');
+              }
+
+              // Run this reset immediately
+              resetStaleFlags();
+
+              // Only check for this flag when explicitly navigating from checkout after order
+              function checkCartShouldBeCleared() {
+                  // Only clear if explicit flag is set by checkout.js
+                  const forceClear = window.FORCE_CART_CLEAR_NEEDED === true;
+
+                  if (forceClear) {
+                      console.log('Order was just completed - clearing cart is appropriate');
+                      return true;
+                  }
+
+                  return false;
+              }
+
+              if (checkCartShouldBeCleared()) {
+                  // Set a global flag to indicate we need to force clear the cart
+                  window.FORCE_CART_CLEAR_NEEDED = true;
+                  console.log('Setting global flag: FORCE_CART_CLEAR_NEEDED = true');
+
+                  // Clear cart data in localStorage immediately
+                  localStorage.removeItem('auricCart');
+                  localStorage.removeItem('auricCartItems');
+                  localStorage.removeItem('cartItems');
+                  localStorage.removeItem('cart');
+                  console.log('Cleared cart data from localStorage');
+
+                  // Set timeout to clear cart DOM elements as soon as possible
+                  setTimeout(function() {
+                      try {
+                          // Add event listener for earliest possible DOM access 
+                          if (document.readyState === "loading") {
+                              console.log('Document still loading, adding DOMContentLoaded listener');
+                              document.addEventListener('DOMContentLoaded', clearCartDOMElements);
+                          } else {
+                              console.log('Document already loaded, executing cart clear immediately');
+                              clearCartDOMElements();
+                          }
+                      } catch (e) {
+                          console.error('Error in early cart check:', e);
+                      }
+                  }, 0);
+              }
+
+              function clearCartDOMElements() {
+                  console.log('Cart clear DOM handler executed');
+
+                  setTimeout(function() {
+                      console.log('Attempting direct DOM manipulation of cart elements');
+
+                      // Clear all cart-related DOM elements
+                      var elements = [
+                          { selector: '#cartItems', action: 'innerHTML', value: '<p class="empty-cart-message">Your cart is empty</p>' },
+                          { selector: '#sliding-cart-items', action: 'innerHTML', value: '<p class="empty-cart-message">Your cart is empty</p>' },
+                          { selector: '.cart-count', action: 'textContent', value: '0' },
+                          { selector: '.cart-count', action: 'style.display', value: 'none' },
+                          { selector: '.subtotal-amount', action: 'textContent', value: '₹0.00' },
+                          { selector: '#cartTotal', action: 'textContent', value: '₹0' }
+                      ];
+
+                      elements.forEach(function(item) {
+                          try {
+                              var el = document.querySelector(item.selector);
+                              if (el) {
+                                  if (item.action === 'innerHTML') {
+                                      el.innerHTML = item.value;
+                                  } else if (item.action === 'textContent') {
+                                      el.textContent = item.value;
+                                  } else if (item.action === 'style.display') {
+                                      el.style.display = item.value;
+                                  }
+                                  console.log('Successfully cleared ' + item.selector);
+                              }
+                          } catch(err) {
+                              console.error('Error clearing ' + item.selector + ': ' + err.message);
+                          }
+                      });
+
+                      console.log('Direct DOM manipulation complete');
+
+                      // Reset the pendingCartClear flag after successfully clearing
+                      localStorage.setItem('pendingCartClear', 'false');
+                  }, 100);
+              }
+          })();
+      </script>
     <style>
       .profile-container {
         max-width: 1000px;
