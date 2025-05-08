@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
   console.log('Cart Panel module loaded');
   
   // Create a dedicated global function to clear the cart panel contents
-  // This function will completely empty the cart panel without relying on localStorage or Firestore
+  // This function will completely empty the cart panel without any data persistence
   window.forceEmptyCartPanel = function() {
     console.log('EMERGENCY CART PANEL CONTENT CLEAR INITIATED');
     

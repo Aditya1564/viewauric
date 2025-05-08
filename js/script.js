@@ -1,64 +1,46 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Check for pending cart clear from checkout page
-    if (localStorage.getItem('pendingCartClear') === 'true') {
-        console.log('DETECTED PENDING CART CLEAR FROM CHECKOUT!');
-        const clearTime = parseInt(localStorage.getItem('cartClearTime') || '0');
-        const timeSinceClear = Date.now() - clearTime;
+    // Simplified initialization without localStorage
+    console.log('Main script initialized - no storage dependencies');
+    
+    // Check if we need to clear the cart (using window variable instead of localStorage)
+    if (window.FORCE_CART_CLEAR_NEEDED) {
+        console.log('Cart clear needed - clearing cart');
         
-        // Only execute if it's recent (within last 5 minutes)
-        if (timeSinceClear < 5 * 60 * 1000) {
-            try {
-                console.log('Executing pending cart clear script from checkout page');
-                
-                // Get the script content
-                const scriptContent = localStorage.getItem('cartClearScript');
-                
-                // Execute the script using eval (in a controlled manner)
-                if (scriptContent) {
-                    const safeExec = Function(scriptContent);
-                    safeExec();
-                    console.log('Cart clear script executed successfully');
-                }
-                
-                // Also manually force empty cart panel
-                if (typeof forceEmptyCartPanel === 'function') {
-                    setTimeout(() => {
-                        forceEmptyCartPanel();
-                        console.log('Directly called forceEmptyCartPanel');
-                    }, 1000); // Delay slightly to ensure DOM is ready
-                }
-                
-                // Brute force direct DOM manipulation for cart panel
-                setTimeout(() => {
-                    // Clear the cart items container
-                    const cartItems = document.getElementById('cartItems');
-                    if (cartItems) {
-                        cartItems.innerHTML = '<p class="empty-cart-message">Your cart is empty</p>';
-                    }
-                    
-                    // Reset the cart count badge
-                    const countBadges = document.querySelectorAll('.cart-count, .cart-badge, .cart-item-count');
-                    countBadges.forEach(badge => {
-                        badge.textContent = '0';
-                        badge.style.display = 'none'; 
-                    });
-                    
-                    // Reset the cart total
-                    const totals = document.querySelectorAll('#cartTotal, .cart-total-amount, .cart-subtotal');
-                    totals.forEach(total => {
-                        total.textContent = '₹0';
-                    });
-                }, 1500);
-                
-                // Clear the pending flag to avoid repeated execution
-                localStorage.setItem('pendingCartClear', 'false');
-            } catch (error) {
-                console.error('Error executing post-checkout cart clear script:', error);
-            }
-        } else {
-            console.log('Pending cart clear too old, ignoring');
-            localStorage.setItem('pendingCartClear', 'false');
+        // Reset the cart directly
+        window.cart = [];
+        
+        // Also manually force empty cart panel if function exists
+        if (typeof forceEmptyCartPanel === 'function') {
+            setTimeout(() => {
+                forceEmptyCartPanel();
+                console.log('Directly called forceEmptyCartPanel');
+            }, 1000); // Delay slightly to ensure DOM is ready
         }
+        
+        // Brute force direct DOM manipulation for cart panel
+        setTimeout(() => {
+            // Clear the cart items container
+            const cartItems = document.getElementById('cartItems');
+            if (cartItems) {
+                cartItems.innerHTML = '<p class="empty-cart-message">Your cart is empty</p>';
+            }
+            
+            // Reset the cart count badge
+            const countBadges = document.querySelectorAll('.cart-count, .cart-badge, .cart-item-count');
+            countBadges.forEach(badge => {
+                badge.textContent = '0';
+                badge.style.display = 'none'; 
+            });
+            
+            // Reset the cart total
+            const totals = document.querySelectorAll('#cartTotal, .cart-total-amount, .cart-subtotal');
+            totals.forEach(total => {
+                total.textContent = '₹0';
+            });
+        }, 1500);
+        
+        // Reset the flag
+        window.FORCE_CART_CLEAR_NEEDED = false;
     }
     
     // Menu Toggle Elements
