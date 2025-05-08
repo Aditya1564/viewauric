@@ -49,7 +49,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load cart items from localStorage
     function loadCartItems() {
         console.log('Loading cart items for checkout');
-        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        // Use in-memory cart instead of localStorage
+        const cart = window.cart || [];
         
         if (cart.length === 0) {
             // Redirect to cart page if cart is empty
@@ -108,8 +109,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Generate a unique order reference
             const orderRef = generateOrderReference();
             
-            // Get cart items
-            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            // Get cart items from in-memory cart
+            const cart = window.cart || [];
             
             // Create order summary HTML for email
             const orderSummaryHTML = createOrderSummaryHTML(cart);
@@ -153,11 +154,11 @@ document.addEventListener('DOMContentLoaded', function() {
             // Send notification email to shop owner
             await sendOwnerNotificationEmail(templateParams);
             
-            // Store order in localStorage
-            saveOrderToStorage(orderRef, cart, templateParams);
+            // Store order in memory only for this session
+            console.log('Order created:', orderRef);
             
             // Clear cart after successful order
-            localStorage.setItem('cart', JSON.stringify([]));
+            window.cart = [];
             
             // Display confirmation modal with order details
             showOrderConfirmation(orderRef, cart, total);
@@ -291,35 +292,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return html;
     }
     
-    // Save order to localStorage
-    function saveOrderToStorage(orderRef, cart, orderDetails) {
-        // Get existing orders from localStorage
-        const orders = JSON.parse(localStorage.getItem('orders')) || [];
-        
-        // Create new order object
-        const newOrder = {
-            id: orderRef,
-            date: new Date().toISOString(),
-            items: cart,
-            customer: {
-                name: orderDetails.from_name,
-                email: orderDetails.to_email,
-                phone: orderDetails.phone,
-                address: orderDetails.address
-            },
-            payment: orderDetails.payment_method,
-            notes: orderDetails.notes,
-            total: orderDetails.order_total
-        };
-        
-        // Add new order to orders array
-        orders.push(newOrder);
-        
-        // Save updated orders to localStorage
-        localStorage.setItem('orders', JSON.stringify(orders));
-        
-        console.log('Order saved to localStorage:', newOrder);
-    }
+    // No storage function needed - we're not persisting data
     
     // Show order confirmation modal
     function showOrderConfirmation(orderRef, cart, total) {
