@@ -20,10 +20,6 @@
             
             // Only check for this flag when explicitly navigating from checkout after order
             function checkCartShouldBeCleared() {
-                // Only clear if explicit flag is set from a VERY recent order completion
-                const orderCompletedTime = parseInt(localStorage.getItem('orderCompletedTime') || '0');
-                const isVeryRecent = (Date.now() - orderCompletedTime) < 30 * 1000; // 30 seconds
-                
                 // This will only be true if coming directly from checkout after order completion
                 // and ONLY if the global flag was set by checkout.js
                 return window.FORCE_CART_CLEAR_NEEDED === true;
