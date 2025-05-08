@@ -35,12 +35,9 @@
                 window.FORCE_CART_CLEAR_NEEDED = true;
                 console.log('Setting global flag: FORCE_CART_CLEAR_NEEDED = true');
                 
-                // Clear cart data in localStorage immediately
-                localStorage.removeItem('auricCart');
-                localStorage.removeItem('auricCartItems');
-                localStorage.removeItem('cartItems');
-                localStorage.removeItem('cart');
-                console.log('Cleared cart data from localStorage');
+                // Clear cart data immediately
+                window.cart = [];
+                console.log('Cleared cart data from memory');
                 
                 // Set timeout to clear cart DOM elements as soon as possible
                 setTimeout(function() {
@@ -314,28 +311,22 @@
         </div>
     </footer>
 
-    <!-- Firebase SDK (compat version) -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    
+    <!-- Simple Network Monitoring -->
     <script>
-      // Firebase configuration
-      const firebaseConfig = {
-        apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
-        authDomain: "auric-a0c92.firebaseapp.com",
-        projectId: "auric-a0c92",
-        appId: "1:878979958342:web:e6092f7522488d21eaec47"
-      };
-      
-      // Initialize Firebase
-      firebase.initializeApp(firebaseConfig);
-      const auth = firebase.auth();
-      const db = firebase.firestore();
+      // Network status monitoring
+      let isOnline = navigator.onLine;
+      window.addEventListener('online', () => {
+        console.log('Network connection restored');
+        isOnline = true;
+      });
+      window.addEventListener('offline', () => {
+        console.log('Network connection lost');
+        isOnline = false;
+      });
     </script>
 
-    <script src="js/direct-auth.js"></script>
-    <script src="js/cart.js"></script>
+    <script src="js/cart-panel.js?v=1.0.0"></script>
+    <script src="js/simplified-cart.js?v=1.0.0"></script>
     <script src="js/navigation.js?v=1.0.3"></script>
     <script src="js/banner-rotator.js?v=1.0.0"></script>
 </body>
