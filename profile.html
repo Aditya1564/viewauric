@@ -471,28 +471,11 @@
                 });
             });
             
-            // Log out functionality (this is also handled in direct-auth.js but we'll keep it here for redundancy)
+            // Simple logout functionality
             document.getElementById('logout-button').addEventListener('click', function() {
-                auth.signOut()
-                    .then(() => {
-                        console.log('User signed out from profile page');
-                        window.location.href = 'login.html';
-                    })
-                    .catch((error) => {
-                        console.error('Error signing out:', error);
-                        // Fall back to redirect anyway even if there's an error
-                        window.location.href = 'login.html';
-                    });
+                console.log('User signed out from profile page');
+                window.location.href = 'login.html';
             });
-            
-            // Check if user is authenticated (this is handled by direct-auth.js but we'll add a fallback)
-            setTimeout(function() {
-                const currentUser = auth.currentUser;
-                if (!currentUser && window.location.pathname.includes('profile.html')) {
-                    console.log('No user detected after timeout, redirecting');
-                    window.location.href = 'login.html';
-                }
-            }, 3000); // Give Firebase auth a chance to initialize
         });
     </script>
   </body>

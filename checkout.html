@@ -206,41 +206,10 @@
     
     <!-- JavaScripts -->
     <script>
-        // Create auth stub if not defined 
-        if (typeof auth === 'undefined') {
-            console.log("Creating auth stub for checkout");
-            window.auth = {
-                onAuthStateChanged: function(callback) {
-                    callback(null); // Pass null user to indicate not logged in
-                    return function() {}; // Return dummy unsubscribe function
-                }
-            };
-        }
-        
-        // Make cart.js functions available if loaded separately
-        if (typeof window.clearCart !== 'function') {
-            window.clearCart = function() {
-                console.log("Using fallback clearCart function");
-                localStorage.removeItem('auricCart');
-                localStorage.removeItem('auricCartItems');
-                localStorage.removeItem('cartItems');
-                
-                // Update any cart UI that might be on the checkout page
-                const cartItemsContainer = document.getElementById('cartItems');
-                if (cartItemsContainer) {
-                    cartItemsContainer.innerHTML = '<p class="empty-cart-message">Your cart is empty</p>';
-                }
-                
-                const cartTotal = document.getElementById('cartTotal');
-                if (cartTotal) {
-                    cartTotal.textContent = '$0.00';
-                }
-            };
-        }
+        console.log("Using simplified checkout without storage dependencies");
     </script>
-    <script src="js/direct-auth.js?v=1.0.1"></script>
     <script src="js/cart-panel.js?v=1.0.0"></script>
-    <script src="js/cart.js?v=1.0.4"></script>
-    <script src="checkout-script.js"></script>
+    <script src="js/simplified-cart.js?v=1.0.0"></script>
+    <script src="checkout-script-simplified.js"></script>
 </body>
 </html>
