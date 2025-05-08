@@ -163,43 +163,89 @@
     </section>
 
     <!-- Footer Section (Add your existing footer here) -->
-
-    <!-- Firebase SDK (compat version) -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
     <script>
-      // Firebase configuration
-      const firebaseConfig = {
-        apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
-        authDomain: "auric-a0c92.firebaseapp.com",
-        projectId: "auric-a0c92",
-        appId: "1:878979958342:web:e6092f7522488d21eaec47"
-      };
-      
-      // Initialize Firebase
-      firebase.initializeApp(firebaseConfig);
-      const auth = firebase.auth();
-      const db = firebase.firestore();
-      
-      // Enable offline data persistence
-      db.enablePersistence({synchronizeTabs: true})
-        .catch((err) => {
-          if (err.code === 'failed-precondition') {
-            // Multiple tabs open, persistence can only be enabled in one tab at a time
-            console.log('Firestore persistence not enabled: Multiple tabs open');
-          } else if (err.code === 'unimplemented') {
-            // The current browser does not support all of the features required for persistence
-            console.log('Firestore persistence not supported by this browser');
-          } else {
-            console.error('Error enabling Firestore persistence:', err);
+      // Simple auth simulation
+      document.addEventListener('DOMContentLoaded', function() {
+        const signupForm = document.getElementById('signup-form');
+        const errorMessageEl = document.getElementById('error-message');
+        const successMessageEl = document.getElementById('success-message');
+        
+        if (signupForm) {
+          signupForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            
+            if (!name || !email || !password) {
+              showError('Please fill in all required fields');
+              return;
+            }
+            
+            if (password !== confirmPassword) {
+              showError('Passwords do not match');
+              return;
+            }
+            
+            // Simple signup simulation
+            showSuccess('Account created successfully!');
+            
+            // Redirect to index page
+            setTimeout(() => {
+              window.location.href = 'index.html';
+            }, 1000);
+          });
+        }
+        
+        const googleSignupBtn = document.getElementById('google-signup');
+        if (googleSignupBtn) {
+          googleSignupBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Simple Google signup simulation
+            showSuccess('Google sign up successful!');
+            
+            // Redirect to index page
+            setTimeout(() => {
+              window.location.href = 'index.html';
+            }, 1000);
+          });
+        }
+        
+        function showError(message) {
+          if (errorMessageEl) {
+            errorMessageEl.textContent = message;
+            errorMessageEl.style.display = 'block';
+            
+            if (successMessageEl) {
+              successMessageEl.style.display = 'none';
+            }
+            
+            setTimeout(() => {
+              errorMessageEl.style.display = 'none';
+            }, 5000);
           }
-        });
+        }
+        
+        function showSuccess(message) {
+          if (successMessageEl) {
+            successMessageEl.textContent = message;
+            successMessageEl.style.display = 'block';
+            
+            if (errorMessageEl) {
+              errorMessageEl.style.display = 'none';
+            }
+            
+            setTimeout(() => {
+              successMessageEl.style.display = 'none';
+            }, 3000);
+          }
+        }
+      });
     </script>
-    
-    <!-- Auth scripts -->
-    <script src="js/direct-auth.js"></script>
     
     <!-- Navigation script -->
     <script src="js/navigation.js?v=1.0.3"></script>
