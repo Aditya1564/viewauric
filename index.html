@@ -641,15 +641,16 @@
     <script src="js/auto-slider.js?v=1.0.1"></script>
     <script src="js/banner-rotator.js?v=1.0.1"></script>
     
-    <!-- Cart System Scripts -->
-    <script src="js/cart-local-storage.js?v=1.0.0"></script>
-    <script src="js/firebase/firebase-cart-manager.js?v=1.0.0"></script>
-    <script src="js/cart-manager.js?v=1.0.1"></script>
-    
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    
+    <!-- Cart System Scripts -->
+    <script src="js/firebase/firebase-auth.js"></script>
+    <script src="js/cart-local-storage.js?v=1.0.0"></script>
+    <script src="js/firebase/firebase-cart-manager.js?v=1.0.0"></script>
+    <script src="js/cart-manager.js?v=1.0.1"></script>
     
     <!-- Initialize Firebase -->
     <script>
@@ -669,8 +670,9 @@
     </script>
 
     <!-- Firebase Authentication Check -->
-    <script type="module">
-      import * as FirebaseAuth from "/js/firebase/firebase-auth.js";
+    <script>
+      // Use the already loaded firebase-auth.js
+      const FirebaseAuth = window.FirebaseAuth;
       
       // Handle user authentication state
       document.addEventListener('DOMContentLoaded', () => {

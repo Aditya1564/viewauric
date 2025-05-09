@@ -11,7 +11,32 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;500;700&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
     
-    <!-- Direct Cart Clear Script -->
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Config -->
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
+            authDomain: "auric-a0c92.firebaseapp.com",
+            projectId: "auric-a0c92",
+            storageBucket: "auric-a0c92.appspot.com",
+            messagingSenderId: "878979958342",
+            appId: "1:878979958342:web:e6092f7522488d21eaec47",
+            measurementId: "G-ZYZ750JHMB"
+        };
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Using Firebase configuration for cart persistence');
+            
+            // Initialize Firebase
+            firebase.initializeApp(firebaseConfig);
+        });
+    </script>
+    
     <!-- Cart Persistence Script -->
     <script>
         // Modified cart check to never clear cart on page load
@@ -451,6 +476,7 @@
     <script src="js/product-gallery.js?v=1.0.1"></script>
     
     <!-- New Cart System -->
+    <script src="js/firebase/firebase-auth.js"></script>
     <script src="js/cart-local-storage.js?v=1.0.0"></script>
     <script src="js/firebase/firebase-cart-manager.js?v=1.0.0"></script>
     <script src="js/cart-manager.js?v=1.0.1"></script>
