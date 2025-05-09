@@ -391,15 +391,11 @@
     <script src="js/navigation.js?v=1.0.3"></script>
     <script src="js/banner-rotator.js?v=1.0.1"></script>
     
-    <!-- Firebase scripts -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js" type="module"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js" type="module"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js" type="module"></script>
+    <!-- Firebase SDK (imported via our simplified module) -->
     
     <!-- Profile Script -->
     <script type="module">
-      import * as AuthManager from "/js/firebase/auth-manager.js";
-      import { doc, setDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+      import * as FirebaseAuth from "/js/firebase-auth.js";
       
       // DOM elements for profile sections
       const profileName = document.getElementById('profileName');
@@ -412,7 +408,7 @@
       // Main initialization
       document.addEventListener('DOMContentLoaded', () => {
         // First check if we have a current Firebase user
-        const currentUser = AuthManager.auth.currentUser;
+        const currentUser = FirebaseAuth.auth.currentUser;
         
         if (currentUser) {
           console.log("Firebase user is logged in, loading profile:", currentUser.uid);
@@ -434,7 +430,7 @@
           }
           
           // Set up auth state listener
-          const unsubscribe = AuthManager.observeAuthState((user) => {
+          const unsubscribe = FirebaseAuth.observeAuthState((user) => {
             if (user) {
               console.log("Auth state changed: user is signed in:", user.uid);
               unsubscribe(); // Remove listener since we don't need it anymore
