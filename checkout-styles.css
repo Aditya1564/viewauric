@@ -25,22 +25,64 @@
 .quantity-controls {
     display: flex;
     align-items: center;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    overflow: hidden;
+    height: 32px;
+    margin-left: 8px;
 }
 
 .quantity-controls button {
-    width: 30px;
+    width: 28px;
     height: 30px;
     padding: 0;
+    border: none;
+    background-color: #f8f9fa;
+    color: #333;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    font-weight: bold;
+}
+
+.quantity-controls button:hover {
+    background-color: #e9ecef;
+}
+
+.quantity-controls button:active {
+    background-color: #dee2e6;
+}
+
+.btn-quantity-minus, .btn-quantity-plus {
+    font-size: 14px;
 }
 
 .quantity-value {
-    min-width: 20px;
+    min-width: 30px;
     text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+    user-select: none;
+    background-color: white;
+    padding: 0 5px;
+}
+
+/* Style for the cart item in checkout */
+.cart-item {
+    transition: all 0.2s;
+}
+
+.cart-item:hover {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.item-subtotal {
+    color: #198754;
+    font-weight: 600;
+    min-width: 70px;
+    text-align: right;
 }
 
 .order-item-price {

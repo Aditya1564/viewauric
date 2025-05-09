@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
             total += itemTotal;
             
             summaryHTML += `
-                <div class="card mb-2">
+                <div class="card mb-2 cart-item" data-item-id="${item.id}">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
                             <div class="me-3" style="width: 60px; height: 60px; overflow: hidden; border-radius: 4px;">
@@ -61,8 +61,15 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="flex-grow-1">
                                 <h6 class="mb-0">${item.name}</h6>
                                 <div class="d-flex justify-content-between align-items-center mt-2">
-                                    <small class="text-muted">₹${item.price.toFixed(2)} × ${item.quantity}</small>
-                                    <span class="fw-bold">₹${itemTotal.toFixed(2)}</span>
+                                    <div class="d-flex align-items-center">
+                                        <span class="me-2">₹${item.price.toFixed(2)}</span>
+                                        <div class="quantity-controls d-flex align-items-center border rounded">
+                                            <button type="button" class="btn btn-sm btn-quantity-minus" data-item-id="${item.id}">-</button>
+                                            <span class="px-2 quantity-value" data-item-id="${item.id}">${item.quantity}</span>
+                                            <button type="button" class="btn btn-sm btn-quantity-plus" data-item-id="${item.id}">+</button>
+                                        </div>
+                                    </div>
+                                    <span class="fw-bold item-subtotal" data-item-id="${item.id}">₹${itemTotal.toFixed(2)}</span>
                                 </div>
                             </div>
                         </div>
@@ -74,6 +81,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const hiddenItem = document.createElement('input');
             hiddenItem.type = 'hidden';
             hiddenItem.name = 'products[]';
+            hiddenItem.className = 'product-data';
+            hiddenItem.setAttribute('data-item-id', item.id);
             hiddenItem.value = JSON.stringify({
                 id: item.id,
                 name: item.name,
@@ -89,10 +98,115 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (orderSummaryContainer) {
             orderSummaryContainer.innerHTML = summaryHTML;
+            
+            // Add event listeners to quantity buttons
+            setupQuantityControls(items);
         }
         
         if (orderTotalElement) {
             orderTotalElement.textContent = `₹${total.toFixed(2)}`;
+        }
+    }
+    
+    // Set up quantity control buttons
+    function setupQuantityControls(items) {
+        // Save items to the global variable to ensure it's up to date
+        window.checkoutCartItems = items;
+        
+        // Get all plus buttons
+        const plusButtons = document.querySelectorAll('.btn-quantity-plus');
+        plusButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const itemId = this.getAttribute('data-item-id');
+                incrementItemQuantity(itemId, window.checkoutCartItems);
+            });
+        });
+        
+        // Get all minus buttons
+        const minusButtons = document.querySelectorAll('.btn-quantity-minus');
+        minusButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const itemId = this.getAttribute('data-item-id');
+                decrementItemQuantity(itemId, window.checkoutCartItems);
+            });
+        });
+    }
+    
+    // Increment item quantity
+    function incrementItemQuantity(itemId, items) {
+        // Update the items array
+        const itemIndex = items.findIndex(item => item.id === itemId);
+        if (itemIndex !== -1) {
+            items[itemIndex].quantity += 1;
+            
+            // Update the display
+            updateQuantityDisplay(itemId, items[itemIndex]);
+            
+            // Update the localStorage
+            updateLocalStorage(items);
+            
+            // Update order total
+            updateOrderTotal(items);
+        }
+    }
+    
+    // Decrement item quantity
+    function decrementItemQuantity(itemId, items) {
+        // Update the items array
+        const itemIndex = items.findIndex(item => item.id === itemId);
+        if (itemIndex !== -1 && items[itemIndex].quantity > 1) {
+            items[itemIndex].quantity -= 1;
+            
+            // Update the display
+            updateQuantityDisplay(itemId, items[itemIndex]);
+            
+            // Update the localStorage
+            updateLocalStorage(items);
+            
+            // Update order total
+            updateOrderTotal(items);
+        }
+    }
+    
+    // Update quantity display
+    function updateQuantityDisplay(itemId, item) {
+        // Update quantity value
+        const quantityElement = document.querySelector(`.quantity-value[data-item-id="${itemId}"]`);
+        if (quantityElement) {
+            quantityElement.textContent = item.quantity;
+        }
+        
+        // Update subtotal
+        const itemTotal = item.price * item.quantity;
+        const subtotalElement = document.querySelector(`.item-subtotal[data-item-id="${itemId}"]`);
+        if (subtotalElement) {
+            subtotalElement.textContent = `₹${itemTotal.toFixed(2)}`;
+        }
+        
+        // Update hidden input field
+        const hiddenInput = document.querySelector(`.product-data[data-item-id="${itemId}"]`);
+        if (hiddenInput) {
+            const productData = JSON.parse(hiddenInput.value);
+            productData.quantity = item.quantity;
+            productData.total = itemTotal;
+            hiddenInput.value = JSON.stringify(productData);
+        }
+    }
+    
+    // Update order total
+    function updateOrderTotal(items) {
+        const total = calculateTotal(items);
+        if (orderTotalElement) {
+            orderTotalElement.textContent = `₹${total.toFixed(2)}`;
+        }
+    }
+    
+    // Update localStorage with current cart items
+    function updateLocalStorage(items) {
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+        } catch (error) {
+            console.error('Error saving cart to storage:', error);
         }
     }
     
@@ -275,14 +389,17 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Initializing checkout page...');
         
         // Load and display cart items
-        loadCartItems();
+        const cartItems = loadCartItems();
+        
+        // Store cart items in a global variable for quantity controls
+        window.checkoutCartItems = cartItems;
         
         // Set up event listeners
         if (checkoutForm) {
             checkoutForm.addEventListener('submit', handleSubmit);
         }
         
-        console.log('Checkout page initialized');
+        console.log('Checkout page initialized with cart items:', cartItems.length);
     }
     
     // Initialize the page
