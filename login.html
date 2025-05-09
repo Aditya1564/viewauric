@@ -236,14 +236,11 @@
     <!-- Banner rotator script -->
     <script src="js/banner-rotator.js"></script>
     
-    <!-- Firebase scripts -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js" type="module"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js" type="module"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js" type="module"></script>
+    <!-- Firebase SDK (imported via our simplified module) -->
     
     <!-- Login Script -->
     <script type="module">
-      import * as AuthManager from "/js/firebase/auth-manager.js";
+      import * as FirebaseAuth from "/js/firebase-auth.js";
       
       // DOM elements for login page
       const loginForm = document.getElementById('login-form');
@@ -253,13 +250,13 @@
       const loginButton = document.getElementById('login-button');
       
       // Check if user is already logged in
-      if (AuthManager.isLoggedIn()) {
+      if (FirebaseAuth.isLoggedIn()) {
         console.log("User is already logged in, redirecting to home page...");
         window.location.href = 'index.html';
       }
       
       // Also set up auth state observer to catch auth changes
-      AuthManager.observeAuthState((user) => {
+      FirebaseAuth.observeAuthState((user) => {
         if (user) {
           console.log("Auth state changed - user is signed in:", user.uid);
           window.location.href = 'index.html';
@@ -285,8 +282,8 @@
           setLoadingState(true);
           
           try {
-            // Attempt to sign in using our auth manager
-            const result = await AuthManager.loginWithEmail(email, password);
+            // Attempt to sign in using our simplified auth module
+            const result = await FirebaseAuth.loginWithEmail(email, password);
             
             if (result.success) {
               showSuccess('Login successful!');
@@ -319,8 +316,8 @@
           googleLoginBtn.innerHTML = '<span class="spinner"></span> Connecting...';
           
           try {
-            // Sign in with Google using our auth manager
-            const result = await AuthManager.loginWithGoogle();
+            // Sign in with Google using our simplified auth module
+            const result = await FirebaseAuth.loginWithGoogle();
             
             if (result.success) {
               showSuccess('Google sign-in successful!');
