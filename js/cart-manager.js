@@ -1,24 +1,17 @@
 /**
  * Auric Cart Manager
- * A comprehensive cart management system with local storage persistence and Firebase sync
- * This file handles all cart-related functionality including:
- * - Adding/removing items
- * - Updating quantities
- * - Saving/loading from local storage
- * - Cart UI updates
- * - Firebase synchronization (when user is logged in)
+ * 
+ * A simplified cart management system that handles both local storage and Firebase.
+ * - Uses local storage when user is not logged in
+ * - Uses Firebase when user is logged in
+ * - Automatically switches between storage methods on login/logout
+ * - Firebase cart data is stored at path: users/{userId}/carts/current
  */
-
-// ======================================================
-// SECTION 1: INITIALIZATION AND CORE FUNCTIONALITY
-// ======================================================
 
 const CartManager = (function() {
     // Private cart data storage
     let cartItems = [];
-    const STORAGE_KEY = 'auric_cart_items';
-    let firebaseCartSync = null;
-    let isFirebaseEnabled = false;
+    let isAuthListenerSet = false;
     
     /**
      * Initialize the cart system
@@ -27,149 +20,179 @@ const CartManager = (function() {
     function init() {
         console.log('Initializing cart system...');
         
-        // Load cart data from local storage
-        loadCartFromStorage();
+        // Load cart data initially
+        loadCart();
         
         // Set up cart UI elements
         setupCartPanel();
         
-        // Set up event listeners for add to cart buttons
+        // Set up event listeners
         setupEventListeners();
         
-        // Update UI to match current cart state
-        updateCartUI();
-        
-        // Try to import Firebase cart functionality
-        initializeFirebaseCartSync();
+        // Set up authentication listener
+        setupAuthListener();
         
         console.log('Cart system initialized with', cartItems.length, 'items');
     }
     
     /**
-     * Import Firebase cart module and set up sync if available
-     * This keeps the code loosely coupled - will still work if Firebase module is not available
+     * Set up authentication state listener
+     * This handles switching between local storage and Firebase on login/logout
      */
-    function initializeFirebaseCartSync() {
-        try {
-            // Check if Firebase Auth is already loaded and user is logged in
-            if (typeof firebase !== 'undefined' && firebase.auth) {
-                import('/js/firebase/firebase-cart.js')
-                    .then(module => {
-                        console.log('Firebase cart module loaded');
-                        firebaseCartSync = module;
-                        isFirebaseEnabled = true;
-                        
-                        // Setup auth state listener for cart syncing
-                        firebaseCartSync.observeAuthStateForCartSync(
-                            () => cartItems, // Getter for local cart items
-                            updateCartItemsAndStorage // Function to update local cart
-                        );
-                        
-                        // Initial sync if user is logged in
-                        if (firebase.auth().currentUser) {
-                            syncWithFirebase();
-                        }
-                    })
-                    .catch(err => {
-                        console.error('Failed to load Firebase cart module:', err);
-                    });
-            }
-        } catch (error) {
-            console.error('Error initializing Firebase cart sync:', error);
-        }
-    }
-    
-    /**
-     * Sync local cart with Firebase
-     * This function is called when user logs in/out or when cart changes
-     */
-    async function syncWithFirebase() {
-        if (!isFirebaseEnabled || !firebaseCartSync) return;
+    function setupAuthListener() {
+        if (isAuthListenerSet) return;
         
-        try {
-            const user = firebase.auth().currentUser;
-            if (user) {
-                console.log('Syncing cart with Firebase...');
-                const syncedItems = await firebaseCartSync.syncCartWithFirebase(cartItems, updateCartItemsAndStorage);
-                updateCartItemsAndStorage(syncedItems);
-            }
-        } catch (error) {
-            console.error('Error syncing with Firebase:', error);
-        }
-    }
-    
-    /**
-     * Helper function to update cart items array and storage
-     * Used for syncing with Firebase
-     */
-    function updateCartItemsAndStorage(items) {
-        if (Array.isArray(items)) {
-            cartItems = items;
-            saveCartToStorage();
-            updateCartUI();
-        }
-    }
-    
-    /**
-     * Load saved cart items from localStorage
-     */
-    function loadCartFromStorage() {
-        try {
-            const savedCart = localStorage.getItem(STORAGE_KEY);
-            if (savedCart) {
-                cartItems = JSON.parse(savedCart);
-                console.log('Cart loaded from storage:', cartItems);
-            }
-        } catch (error) {
-            console.error('Error loading cart from storage:', error);
-            cartItems = [];
-        }
-    }
-    
-    /**
-     * Save current cart items to localStorage
-     * Also syncs with Firebase if enabled and user is logged in
-     */
-    function saveCartToStorage() {
-        try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(cartItems));
-            console.log('Cart saved to storage');
-            
-            // If Firebase sync is enabled and user is logged in, save to Firebase too
-            if (isFirebaseEnabled && firebaseCartSync && firebase.auth().currentUser) {
-                firebaseCartSync.saveCartToFirebase(cartItems)
-                    .then(result => {
-                        if (result.success) {
-                            console.log('Cart saved to Firebase');
+        // Only setup if Firebase is available
+        if (typeof firebase !== 'undefined' && firebase.auth) {
+            firebase.auth().onAuthStateChanged(async (user) => {
+                if (user) {
+                    console.log('User logged in, switching to Firebase storage');
+                    // First try to get items from Firebase
+                    const result = await FirebaseCartManager.getItems();
+                    
+                    if (result.success) {
+                        // If user had items in local storage, we need to handle the merge
+                        const localItems = LocalStorageCart.getItems();
+                        
+                        if (localItems.length > 0 && result.items.length > 0) {
+                            console.log('Merging local and Firebase carts');
+                            // Merge carts, preferring the higher quantity for duplicate items
+                            const mergedItems = mergeCartItems(localItems, result.items);
+                            cartItems = mergedItems;
+                            
+                            // Save merged cart to Firebase (local storage will be cleared)
+                            await FirebaseCartManager.saveItems(mergedItems);
+                        } else if (localItems.length > 0) {
+                            console.log('Moving local cart to Firebase');
+                            // User has items in local storage but not in Firebase
+                            cartItems = localItems;
+                            await FirebaseCartManager.saveItems(localItems);
                         } else {
-                            console.warn('Failed to save cart to Firebase:', result.error);
+                            console.log('Using existing Firebase cart');
+                            // User has items in Firebase but not in local storage
+                            cartItems = result.items;
                         }
-                    })
-                    .catch(err => {
-                        console.error('Error saving to Firebase:', err);
-                    });
-            }
-        } catch (error) {
-            console.error('Error saving cart to storage:', error);
+                        
+                        // Clear local storage as we're now using Firebase
+                        LocalStorageCart.clearItems();
+                    } else {
+                        console.warn('Failed to load cart from Firebase:', result.error);
+                    }
+                } else {
+                    console.log('User logged out, switching to local storage');
+                    // Load from local storage on logout
+                    cartItems = LocalStorageCart.getItems();
+                }
+                
+                // Update UI after login/logout
+                updateCartUI();
+            });
+            
+            isAuthListenerSet = true;
         }
     }
     
+    /**
+     * Merge two cart arrays, preserving the higher quantity for duplicate items
+     * @param {Array} cart1 - First cart array
+     * @param {Array} cart2 - Second cart array
+     * @returns {Array} Merged cart array
+     */
+    function mergeCartItems(cart1, cart2) {
+        const mergedMap = new Map();
+        
+        // Add all items from first cart
+        cart1.forEach(item => {
+            mergedMap.set(item.id, {...item});
+        });
+        
+        // Merge with second cart, taking higher quantity
+        cart2.forEach(item => {
+            if (mergedMap.has(item.id)) {
+                const existingItem = mergedMap.get(item.id);
+                existingItem.quantity = Math.max(existingItem.quantity, item.quantity);
+            } else {
+                mergedMap.set(item.id, {...item});
+            }
+        });
+        
+        return Array.from(mergedMap.values());
+    }
+    
+    /**
+     * Load cart data from the appropriate storage
+     * Uses Firebase if logged in, otherwise local storage
+     */
+    async function loadCart() {
+        if (isUserLoggedIn()) {
+            console.log('User logged in, loading cart from Firebase');
+            try {
+                const result = await FirebaseCartManager.getItems();
+                if (result.success) {
+                    cartItems = result.items;
+                } else {
+                    console.warn('Failed to load cart from Firebase:', result.error);
+                    cartItems = [];
+                }
+            } catch (error) {
+                console.error('Error loading cart from Firebase:', error);
+                cartItems = [];
+            }
+        } else {
+            console.log('User not logged in, loading cart from local storage');
+            cartItems = LocalStorageCart.getItems();
+        }
+        
+        // Update UI after loading
+        updateCartUI();
+    }
+    
+    /**
+     * Save cart data to the appropriate storage
+     * Uses Firebase if logged in, otherwise local storage
+     */
+    async function saveCart() {
+        if (isUserLoggedIn()) {
+            console.log('User logged in, saving cart to Firebase');
+            try {
+                await FirebaseCartManager.saveItems(cartItems);
+            } catch (error) {
+                console.error('Error saving cart to Firebase:', error);
+            }
+        } else {
+            console.log('User not logged in, saving cart to local storage');
+            LocalStorageCart.saveItems(cartItems);
+        }
+        
+        // Update UI after saving
+        updateCartUI();
+    }
+    
+    /**
+     * Check if user is currently logged in
+     * @returns {Boolean} True if user is logged in
+     */
+    function isUserLoggedIn() {
+        return typeof FirebaseCartManager !== 'undefined' && 
+               FirebaseCartManager.isUserLoggedIn();
+    }
+    
     // ======================================================
-    // SECTION 2: CART DATA OPERATIONS
+    // SECTION: CART OPERATIONS
     // ======================================================
     
     /**
-     * Add an item to the cart
-     * @param {Object} product - The product to add
+     * Add a product to the cart
+     * @param {Object} product - Product to add
      * @param {Number} quantity - Quantity to add (default: 1)
      */
-    function addToCart(product, quantity = 1) {
+    async function addToCart(product, quantity = 1) {
         if (!product || !product.id) {
             console.error('Invalid product', product);
             return;
         }
         
-        // Check if item already exists in cart
+        // Check if the item already exists in the cart
         const existingItemIndex = cartItems.findIndex(item => item.id === product.id);
         
         if (existingItemIndex >= 0) {
@@ -188,103 +211,76 @@ const CartManager = (function() {
             console.log('Added new item to cart:', product.name);
         }
         
-        // Save to storage and update UI
-        saveCartToStorage();
-        updateCartUI();
-        
-        // Explicitly force Firebase sync if user is logged in
-        syncWithFirebase();
+        // Save cart
+        await saveCart();
         
         // Show the cart panel
         openCartPanel();
     }
     
     /**
-     * Remove an item from the cart
+     * Remove a product from the cart
      * @param {String} productId - ID of the product to remove
      */
-    function removeFromCart(productId) {
+    async function removeFromCart(productId) {
         const initialLength = cartItems.length;
         cartItems = cartItems.filter(item => item.id !== productId);
         
         if (cartItems.length !== initialLength) {
             console.log('Item removed from cart');
-            saveCartToStorage();
-            updateCartUI();
-            
-            // Explicitly force Firebase sync if user is logged in
-            syncWithFirebase();
+            await saveCart();
         }
     }
     
     /**
-     * Update quantity of an item in the cart
+     * Update the quantity of a product in the cart
      * @param {String} productId - ID of the product to update
      * @param {Number} newQuantity - New quantity (must be > 0)
      */
-    function updateQuantity(productId, newQuantity) {
+    async function updateQuantity(productId, newQuantity) {
         const item = cartItems.find(item => item.id === productId);
         
         if (item) {
             // Ensure quantity is at least 1
             item.quantity = Math.max(1, newQuantity);
             console.log('Updated quantity for', item.name, 'to', item.quantity);
-            saveCartToStorage();
-            updateCartUI();
-            
-            // Explicitly force Firebase sync if user is logged in
-            syncWithFirebase();
+            await saveCart();
         }
     }
     
     /**
-     * Increment quantity of an item
+     * Increment the quantity of a product in the cart
      * @param {String} productId - ID of the product to increment
      */
-    function incrementQuantity(productId) {
+    async function incrementQuantity(productId) {
         const item = cartItems.find(item => item.id === productId);
         if (item) {
-            updateQuantity(productId, item.quantity + 1);
+            await updateQuantity(productId, item.quantity + 1);
         }
     }
     
     /**
-     * Decrement quantity of an item
+     * Decrement the quantity of a product in the cart
      * @param {String} productId - ID of the product to decrement
      */
-    function decrementQuantity(productId) {
+    async function decrementQuantity(productId) {
         const item = cartItems.find(item => item.id === productId);
         if (item && item.quantity > 1) {
-            updateQuantity(productId, item.quantity - 1);
+            await updateQuantity(productId, item.quantity - 1);
         }
     }
     
     /**
      * Clear all items from the cart
      */
-    function clearCart() {
+    async function clearCart() {
         cartItems = [];
-        saveCartToStorage();
-        updateCartUI();
-        
-        // Explicitly clear Firebase cart if user is logged in
-        if (isFirebaseEnabled && firebaseCartSync && firebase.auth().currentUser) {
-            firebaseCartSync.clearFirebaseCart()
-                .then(result => {
-                    if (result.success) {
-                        console.log('Cart cleared from Firebase');
-                    }
-                })
-                .catch(err => {
-                    console.error('Error clearing Firebase cart:', err);
-                });
-        }
-        
         console.log('Cart cleared');
+        await saveCart();
     }
     
     /**
-     * Calculate total price of all items in cart
+     * Calculate the total price of all items in the cart
      * @returns {Number} Total price
      */
     function calculateTotal() {
@@ -294,7 +290,7 @@ const CartManager = (function() {
     }
     
     /**
-     * Calculate total number of items in cart
+     * Get the total number of items in the cart
      * @returns {Number} Total item count
      */
     function getItemCount() {
@@ -302,7 +298,7 @@ const CartManager = (function() {
     }
     
     // ======================================================
-    // SECTION 3: UI INTERACTION
+    // SECTION: UI OPERATIONS
     // ======================================================
     
     /**
@@ -448,17 +444,11 @@ const CartManager = (function() {
                     removeFromCart(productId);
                 }
             }
-            
-            // Continue shopping button click (close cart)
-            if (e.target.closest('.view-cart-btn')) {
-                e.preventDefault();
-                closeCartPanel();
-            }
         });
     }
     
     /**
-     * Update all cart UI elements to reflect current cart state
+     * Update all cart UI elements
      */
     function updateCartUI() {
         // Update cart count display
@@ -562,22 +552,21 @@ const CartManager = (function() {
         }
     }
     
-    // ======================================================
-    // SECTION 4: PUBLIC API
-    // ======================================================
-    
-    // Return public methods that will be accessible outside
+    // Public API
     return {
         init: init,
         addToCart: addToCart,
         removeFromCart: removeFromCart,
         updateQuantity: updateQuantity,
+        incrementQuantity: incrementQuantity,
+        decrementQuantity: decrementQuantity,
         clearCart: clearCart,
         getCartItems: () => [...cartItems], // Return copy of items array
         getItemCount: getItemCount,
         calculateTotal: calculateTotal,
         openCartPanel: openCartPanel,
-        closeCartPanel: closeCartPanel
+        closeCartPanel: closeCartPanel,
+        toggleCartPanel: toggleCartPanel
     };
 })();
 
