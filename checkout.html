@@ -24,15 +24,86 @@
     <script>
         // Firebase configuration
         const firebaseConfig = {
-            apiKey: process.env.VITE_FIREBASE_API_KEY,
-            authDomain: process.env.VITE_FIREBASE_PROJECT_ID + '.firebaseapp.com',
-            projectId: process.env.VITE_FIREBASE_PROJECT_ID,
-            storageBucket: process.env.VITE_FIREBASE_PROJECT_ID + '.appspot.com',
-            appId: process.env.VITE_FIREBASE_APP_ID
+            apiKey: "",
+            authDomain: "",
+            projectId: "",
+            storageBucket: "",
+            appId: ""
         };
         
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
+        // Script will update configuration values from environment variables
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for environment variables
+            if (typeof VITE_FIREBASE_API_KEY !== 'undefined') {
+                firebaseConfig.apiKey = VITE_FIREBASE_API_KEY;
+                firebaseConfig.projectId = VITE_FIREBASE_PROJECT_ID;
+                firebaseConfig.authDomain = VITE_FIREBASE_PROJECT_ID + '.firebaseapp.com';
+                firebaseConfig.storageBucket = VITE_FIREBASE_PROJECT_ID + '.appspot.com';
+                firebaseConfig.appId = VITE_FIREBASE_APP_ID;
+                
+                console.log('Firebase config loaded from environment variables');
+            }
+            
+            // Initialize Firebase
+            firebase.initializeApp(firebaseConfig);
+            
+            // Check if user is logged in
+            firebase.auth().onAuthStateChanged(function(user) {
+                console.log('Auth state changed:', user ? 'Logged in' : 'Not logged in');
+                // Update UI based on auth state
+                updateAuthUI(user);
+            });
+        });
+        
+        function updateAuthUI(user) {
+            // Add login status indicator to the header
+            const header = document.querySelector('.simple-header .container');
+            
+            if (!document.getElementById('authStatus')) {
+                const authStatus = document.createElement('div');
+                authStatus.id = 'authStatus';
+                authStatus.classList.add('auth-status');
+                authStatus.style.marginLeft = 'auto';
+                authStatus.style.marginRight = '15px';
+                
+                header.insertBefore(authStatus, header.lastElementChild);
+            }
+            
+            const authStatusElement = document.getElementById('authStatus');
+            
+            if (user) {
+                // User is signed in
+                authStatusElement.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-success me-2">Logged In</span>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                ${user.email}
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item" href="profile.html">Profile</a></li>
+                                <li><a class="dropdown-item" href="#" id="logoutButton">Log Out</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+                
+                // Add event listener to logout button
+                document.getElementById('logoutButton').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    firebase.auth().signOut();
+                });
+            } else {
+                // No user is signed in
+                authStatusElement.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-secondary me-2">Not Logged In</span>
+                        <a href="login.html" class="btn btn-sm btn-outline-primary me-2">Login</a>
+                        <a href="signup.html" class="btn btn-sm btn-primary">Sign Up</a>
+                    </div>
+                `;
+            }
+        }
     </script>
 </head>
 <body>
@@ -162,6 +233,36 @@
         </div>
     </div>
 
+    <!-- Authentication Required Modal -->
+    <div class="modal fade" id="createAccountModal" tabindex="-1" aria-labelledby="createAccountModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createAccountModalLabel">Authentication Required</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        You need to create an account or sign in to complete your purchase.
+                    </div>
+                    <p>Please create an account or sign in to complete your order. Creating an account allows you to:</p>
+                    <ul>
+                        <li>Track your order status</li>
+                        <li>Save your delivery information for future purchases</li>
+                        <li>View your order history</li>
+                        <li>Receive exclusive offers and discounts</li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <a href="login.html" class="btn btn-outline-primary">Sign In</a>
+                    <a href="signup.html" class="btn btn-primary">Create Account</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Order Confirmation Modal -->
     <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
