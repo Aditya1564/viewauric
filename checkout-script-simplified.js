@@ -32,6 +32,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         firebaseCartModule = module;
                         
                         // Check if user is logged in, if so, reload cart from Firebase
+                        if (firebase.auth().currentUser) {
+                            loadCartFromFirebase();
+                        }
                     })
                     .catch(err => {
                         console.error('Failed to load Firebase cart module:', err);
@@ -101,20 +104,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         return true;
-    }
-                        if (firebase.auth().currentUser) {
-                            loadCartFromFirebase();
-                        }
-                    })
-                    .catch(err => {
-                        console.error('Failed to load Firebase cart module:', err);
-                    });
-            } else {
-                console.log('Firebase not available, using local storage only');
-            }
-        } catch (error) {
-            console.error('Error initializing Firebase integration:', error);
-        }
     }
     
     // Load cart items from Firebase for logged in users
@@ -600,6 +589,30 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Show error modal
     function showErrorModal(message) {
+        // Create error modal if it doesn't exist
+        if (!document.getElementById('errorModal')) {
+            const modalHTML = `
+                <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header bg-danger text-white">
+                                <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p id="errorMessage"></p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+        
         const errorMessageElement = document.getElementById('errorMessage');
         if (errorMessageElement) {
             errorMessageElement.textContent = message;
@@ -611,6 +624,35 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Show order confirmation modal
     function showOrderConfirmation(orderData) {
+        // Create confirmation modal if it doesn't exist
+        if (!document.getElementById('confirmationModal')) {
+            const modalHTML = `
+                <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header bg-success text-white">
+                                <h5 class="modal-title" id="confirmationModalLabel">Order Confirmed</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-success" role="alert">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    Your order has been placed successfully!
+                                </div>
+                                <p><strong>Order Reference:</strong> <span id="orderReference"></span></p>
+                                <div id="orderDetails"></div>
+                            </div>
+                            <div class="modal-footer">
+                                <a href="index.html" class="btn btn-primary">Continue Shopping</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+        
         const orderReferenceElement = document.getElementById('orderReference');
         const orderDetailsElement = document.getElementById('orderDetails');
         
@@ -640,7 +682,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <hr>
                             <div class="d-flex justify-content-between">
                                 <strong>Total</strong>
-                                <strong>₹${orderData.total.toFixed(2)}</strong>
+                                <strong>₹${orderData.orderTotal.toFixed(2)}</strong>
                             </div>
                         </div>
                     </div>
@@ -652,7 +694,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             <p><strong>Email:</strong> ${orderData.customer.email}</p>
                             <p><strong>Phone:</strong> ${orderData.customer.phone}</p>
                             <p><strong>Address:</strong> ${orderData.customer.address}</p>
-                            <p><strong>Payment Method:</strong> ${orderData.paymentMethod}</p>
                         </div>
                     </div>
                 </div>
@@ -661,20 +702,11 @@ document.addEventListener('DOMContentLoaded', function() {
             orderDetailsElement.innerHTML = detailsHTML;
         }
         
-        // Show the confirmation modal
         const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
         confirmationModal.show();
-        
-        // Set up the close button to redirect to homepage
-        const closeButton = document.getElementById('closeConfirmationBtn');
-        if (closeButton) {
-            closeButton.addEventListener('click', function() {
-                window.location.href = 'index.html';
-            });
-        }
     }
     
-    // Initialize checkout page
+    // Initialize the page
     function init() {
         console.log('Initializing checkout page...');
         
@@ -689,7 +721,7 @@ document.addEventListener('DOMContentLoaded', function() {
             checkoutForm.addEventListener('submit', handleSubmit);
         }
         
-        console.log('Checkout page initialized with cart items:', cartItems.length);
+        console.log('Checkout page initialized with cart items:', cartItems?.length || 0);
     }
     
     // Initialize the page
