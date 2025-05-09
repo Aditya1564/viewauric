@@ -443,7 +443,7 @@
           });
           
           // Also check if we have a session, if not redirect immediately
-          const session = AuthManager.getSession();
+          const session = FirebaseAuth.getSession();
           if (!session || !session.uid) {
             console.log("No session found, redirecting to login page");
             window.location.href = "login.html";
@@ -454,7 +454,7 @@
       // Load user profile data
       async function loadUserProfile() {
         // Get session data (already checked above)
-        const session = AuthManager.getSession();
+        const session = FirebaseAuth.getSession();
         
         if (!session || !session.uid) {
           console.error("No valid session found");
@@ -466,7 +466,7 @@
         
         try {
           // Get user profile from auth manager
-          const profileResult = await AuthManager.getUserProfile(session.uid);
+          const profileResult = await FirebaseAuth.getUserProfile(session.uid);
           
           if (profileResult.success) {
             // Display user information
@@ -494,7 +494,7 @@
             
             // This shouldn't normally happen with our new auth manager,
             // but handling it just in case
-            const user = AuthManager.auth.currentUser;
+            const user = firebase.auth().currentUser;
             
             if (user) {
               // Create a default profile
@@ -511,7 +511,8 @@
               };
               
               // Create user profile in Firestore
-              await setDoc(doc(AuthManager.db, "users", user.uid), userData);
+              // Store user data in Firestore at path: users/{userId}
+              await firebase.firestore().collection("users").doc(user.uid).set(userData);
               
               // Display the profile that was just created
               console.log("Successfully created user profile");
@@ -576,7 +577,15 @@
         
         try {
           // Get orders from auth manager
-          const ordersResult = await AuthManager.getUserOrders(userId);
+          // Get orders from Firestore at path: users/{userId}/orders
+          const ordersSnapshot = await firebase.firestore().collection("users").doc(userId).collection("orders").get();
+          const ordersResult = {
+            success: true,
+            orders: ordersSnapshot.docs.map(doc => ({
+              id: doc.id,
+              ...doc.data()
+            }))
+          };
           
           // Clear container and add heading
           ordersContainer.innerHTML = '<h2>My Orders</h2>';
@@ -758,12 +767,12 @@
       // Logout function
       async function logoutUser() {
         try {
-          const result = await AuthManager.logoutUser();
+          const result = await FirebaseAuth.logoutUser();
           
-          if (result.success) {
+          if (result) {
             window.location.href = 'login.html';
           } else {
-            console.error("Logout failed:", result.error);
+            console.error("Logout failed");
             showError("Failed to log out. Please try again.");
           }
         } catch (error) {
