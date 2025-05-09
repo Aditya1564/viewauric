@@ -5,7 +5,7 @@
  * - Displaying items in the order summary
  * - Authentication requirement for order placement
  * - Order storage in Firebase under users/{userId}/orders
- * - Order form submission with email notifications
+ * - Order form submission with Nodemailer email notifications via the server
  */
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -454,6 +454,33 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Store the Firebase order ID in the order data
                 orderData.orderId = saveResult.orderId;
                 console.log('Order saved to Firebase with ID:', saveResult.orderId);
+            }
+            
+            // Send order confirmation emails using the Nodemailer server
+            try {
+                console.log('Sending order confirmation emails via Nodemailer server...');
+                const emailServerUrl = window.location.origin + '/api/send-order-email';
+                
+                // Make API call to the email server
+                const emailResponse = await fetch(emailServerUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(orderData)
+                });
+                
+                const emailResult = await emailResponse.json();
+                
+                if (emailResult.success) {
+                    console.log('Order confirmation emails sent successfully:', emailResult);
+                } else {
+                    console.warn('Failed to send order confirmation emails:', emailResult.message);
+                    // Continue with order processing even if email sending fails
+                }
+            } catch (emailError) {
+                console.error('Error sending order emails:', emailError);
+                // Continue with order processing even if email sending fails
             }
             
             // Show order confirmation modal
