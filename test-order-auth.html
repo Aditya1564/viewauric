@@ -18,29 +18,17 @@
     <script>
         // Firebase configuration
         const firebaseConfig = {
-            apiKey: window.__API_KEY__,
-            authDomain: window.__PROJECT_ID__ + '.firebaseapp.com',
-            projectId: window.__PROJECT_ID__,
-            storageBucket: window.__PROJECT_ID__ + '.appspot.com',
-            appId: window.__APP_ID__
+            apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
+            authDomain: "auric-a0c92.firebaseapp.com",
+            projectId: "auric-a0c92",
+            storageBucket: "auric-a0c92.firebasestorage.app",
+            messagingSenderId: "878979958342",
+            appId: "1:878979958342:web:e6092f7522488d21eaec47",
+            measurementId: "G-ZYZ750JHMB"
         };
 
-        // Try to get environment variables from meta tags
         document.addEventListener('DOMContentLoaded', function() {
-            const apiKey = document.querySelector('meta[name="firebase-api-key"]')?.content;
-            const projectId = document.querySelector('meta[name="firebase-project-id"]')?.content;
-            const appId = document.querySelector('meta[name="firebase-app-id"]')?.content;
-            
-            if (apiKey && projectId && appId) {
-                firebaseConfig.apiKey = apiKey;
-                firebaseConfig.authDomain = projectId + '.firebaseapp.com';
-                firebaseConfig.projectId = projectId;
-                firebaseConfig.storageBucket = projectId + '.appspot.com';
-                firebaseConfig.appId = appId;
-                window.__API_KEY__ = apiKey;
-                window.__PROJECT_ID__ = projectId;
-                window.__APP_ID__ = appId;
-            }
+            console.log('Using Firebase configuration for order authentication test');
             
             // Initialize Firebase
             firebase.initializeApp(firebaseConfig);

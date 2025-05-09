@@ -24,25 +24,17 @@
     <script>
         // Firebase configuration
         const firebaseConfig = {
-            apiKey: "",
-            authDomain: "",
-            projectId: "",
-            storageBucket: "",
-            appId: ""
+            apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
+            authDomain: "auric-a0c92.firebaseapp.com",
+            projectId: "auric-a0c92",
+            storageBucket: "auric-a0c92.firebasestorage.app",
+            messagingSenderId: "878979958342",
+            appId: "1:878979958342:web:e6092f7522488d21eaec47",
+            measurementId: "G-ZYZ750JHMB"
         };
         
-        // Script will update configuration values from environment variables
         document.addEventListener('DOMContentLoaded', function() {
-            // Check for environment variables
-            if (typeof VITE_FIREBASE_API_KEY !== 'undefined') {
-                firebaseConfig.apiKey = VITE_FIREBASE_API_KEY;
-                firebaseConfig.projectId = VITE_FIREBASE_PROJECT_ID;
-                firebaseConfig.authDomain = VITE_FIREBASE_PROJECT_ID + '.firebaseapp.com';
-                firebaseConfig.storageBucket = VITE_FIREBASE_PROJECT_ID + '.appspot.com';
-                firebaseConfig.appId = VITE_FIREBASE_APP_ID;
-                
-                console.log('Firebase config loaded from environment variables');
-            }
+            console.log('Using Firebase configuration for authentication and order storage');
             
             // Initialize Firebase
             firebase.initializeApp(firebaseConfig);
