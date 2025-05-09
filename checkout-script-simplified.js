@@ -3,13 +3,16 @@
  * Handles the checkout process, including:
  * - Loading cart items from local storage or Firebase (if user is logged in)
  * - Displaying items in the order summary
- * - Order form submission with account creation popup
+ * - Authentication requirement for order placement
+ * - Order storage in Firebase under users/{userId}/orders
+ * - Order form submission with email notifications
  */
 
 document.addEventListener('DOMContentLoaded', function() {
     // Constants
     const STORAGE_KEY = 'auric_cart_items';
     let firebaseCartModule = null;
+    let firebaseOrdersModule = null;
     
     // DOM Elements
     const orderSummaryContainer = document.getElementById('orderSummary');
@@ -17,17 +20,88 @@ document.addEventListener('DOMContentLoaded', function() {
     const checkoutForm = document.getElementById('checkoutForm');
     const productListContainer = document.getElementById('productList');
     
-    // Try to load Firebase cart module if available
+    // Try to load Firebase modules if available
     function initializeFirebaseIntegration() {
         try {
             // Check if Firebase is available
             if (typeof firebase !== 'undefined' && firebase.auth) {
+                // Load Cart Module
                 import('/js/firebase/firebase-cart.js')
                     .then(module => {
                         console.log('Firebase cart module loaded for checkout');
                         firebaseCartModule = module;
                         
                         // Check if user is logged in, if so, reload cart from Firebase
+                    })
+                    .catch(err => {
+                        console.error('Failed to load Firebase cart module:', err);
+                    });
+                
+                // Load Orders Module
+                import('/js/firebase/firebase-orders.js')
+                    .then(module => {
+                        console.log('Firebase orders module loaded for checkout');
+                        firebaseOrdersModule = module;
+                        
+                        // Check auth requirement and update UI accordingly
+                        updateCheckoutButtonState();
+                    })
+                    .catch(err => {
+                        console.error('Failed to load Firebase orders module:', err);
+                    });
+            } else {
+                console.log('Firebase not available, using local storage only');
+            }
+        } catch (error) {
+            console.error('Error initializing Firebase integration:', error);
+        }
+    }
+    
+    /**
+     * Update checkout button state based on authentication
+     * If authentication is required, disable the button for non-authenticated users
+     */
+    function updateCheckoutButtonState() {
+        if (!firebaseOrdersModule) return;
+        
+        const authRequirement = firebaseOrdersModule.checkOrderAuthRequirement();
+        const submitButton = checkoutForm?.querySelector('button[type="submit"]');
+        
+        if (submitButton) {
+            if (authRequirement.requiresAuth && !authRequirement.isAuthenticated) {
+                // User is not authenticated but auth is required
+                submitButton.innerHTML = 'Sign In to Place Order';
+                submitButton.classList.add('auth-required');
+                
+                // Add special click handler for unauthenticated users
+                submitButton.removeEventListener('click', showAuthRequirementModal);
+                submitButton.addEventListener('click', showAuthRequirementModal);
+            } else {
+                // User is authenticated or auth is not required
+                submitButton.innerHTML = 'Place Order';
+                submitButton.classList.remove('auth-required');
+                submitButton.removeEventListener('click', showAuthRequirementModal);
+            }
+        }
+    }
+    
+    // Show modal requiring authentication before order placement
+    function showAuthRequirementModal(e) {
+        if (!firebaseOrdersModule) return;
+        
+        const authRequirement = firebaseOrdersModule.checkOrderAuthRequirement();
+        
+        if (authRequirement.requiresAuth && !authRequirement.isAuthenticated) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Show account creation modal
+            showCreateAccountModal();
+            return false;
+        }
+        
+        return true;
+    }
                         if (firebase.auth().currentUser) {
                             loadCartFromFirebase();
                         }
