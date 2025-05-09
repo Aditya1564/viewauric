@@ -446,6 +446,7 @@
             // Get user profile from Firestore
             const userDoc = await getDoc(doc(db, "users", user.uid));
             
+            // If user document exists, use that data
             if (userDoc.exists()) {
               const userData = userDoc.data();
               
@@ -464,8 +465,39 @@
                 displayPaymentMethods(userData.paymentMethods);
               }
             } else {
-              console.error("User document not found in Firestore");
-              showError("Could not load your profile data. Please try again later.");
+              // If user document doesn't exist, create a new one
+              console.error("User document not found in Firestore. Creating a new one.");
+              
+              // Create default user data
+              const defaultUserData = {
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName || 'User',
+                photoURL: user.photoURL,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                addresses: [],
+                paymentMethods: [],
+                orders: []
+              };
+              
+              // Save to Firestore
+              await setDoc(doc(db, "users", user.uid), defaultUserData);
+              
+              // Display the default data
+              displayUserInfo(defaultUserData);
+              displayUserAddresses([]);
+              displayPaymentMethods([]);
+              
+              // Also display empty orders section
+              const ordersContainer = document.getElementById('orders');
+              if (ordersContainer) {
+                ordersContainer.innerHTML = `
+                  <h2>My Orders</h2>
+                  <p class="empty-section-message">You haven't placed any orders yet.</p>
+                  <a href="index.html" class="shop-now-button">Start Shopping</a>
+                `;
+              }
             }
           } catch (error) {
             console.error("Error loading profile:", error);
