@@ -386,18 +386,108 @@ document.addEventListener('DOMContentLoaded', function() {
     async function handleSubmit(e) {
         e.preventDefault();
         
+        // Check if the Firebase Orders module is loaded
+        if (firebaseOrdersModule) {
+            // Check if authentication is required for placing orders
+            const authRequirement = firebaseOrdersModule.checkOrderAuthRequirement();
+            
+            if (authRequirement.requiresAuth && !authRequirement.isAuthenticated) {
+                console.log('User authentication required for order placement');
+                showCreateAccountModal();
+                return;
+            }
+        }
+        
+        // Load cart items
         const cartItems = await loadCartItemsFromStorage();
         if (cartItems.length === 0) {
             showErrorModal('Your cart is empty. Please add products before placing an order.');
             return;
         }
         
-        // Show account creation popup instead of proceeding with order
-        showCreateAccountModal();
+        // Get form data for the order
+        const formData = new FormData(checkoutForm);
         
-        // For demo/prototype functionality
-        // After order submission, clear cart from both localStorage and Firebase
-        clearCart();
+        // Prepare order data with customer info and products
+        const orderData = {
+            customer: {
+                firstName: formData.get('firstName') || '',
+                lastName: formData.get('lastName') || '',
+                email: formData.get('email') || '',
+                phone: formData.get('phone') || '',
+                address: formData.get('address') || '',
+                city: formData.get('city') || '',
+                state: formData.get('state') || '',
+                postalCode: formData.get('postalCode') || ''
+            },
+            paymentMethod: formData.get('paymentMethod') || 'card',
+            products: cartItems.map(item => ({
+                id: item.id,
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity,
+                total: item.price * item.quantity
+            })),
+            orderTotal: calculateTotal(cartItems),
+            orderReference: generateOrderReference(),
+            orderDate: new Date().toISOString(),
+            notes: formData.get('notes') || ''
+        };
+        
+        // Disable submit button and show loading state
+        const submitButton = checkoutForm.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton.innerHTML;
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+        
+        try {
+            // Save order to Firebase if the module is loaded and user is logged in
+            if (firebaseOrdersModule) {
+                console.log('Saving order to Firebase...');
+                const saveResult = await firebaseOrdersModule.saveOrderToFirebase(orderData);
+                
+                if (!saveResult.success) {
+                    if (saveResult.requiresAuth) {
+                        // Authentication required but user is not logged in
+                        console.log('Authentication required for order placement');
+                        showCreateAccountModal();
+                        
+                        // Reset button state
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = originalButtonText;
+                        return;
+                    } else {
+                        // Other error occurred
+                        throw new Error(saveResult.error || 'Failed to save order to Firebase');
+                    }
+                }
+                
+                // Store the Firebase order ID in the order data
+                orderData.orderId = saveResult.orderId;
+                console.log('Order saved to Firebase with ID:', saveResult.orderId);
+            }
+            
+            // Show order confirmation modal
+            showOrderConfirmation(orderData);
+            
+            // Clear cart after successful order
+            clearCart();
+            
+            // Reset form
+            checkoutForm.reset();
+            
+            // Reset button state
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalButtonText;
+            
+        } catch (error) {
+            console.error('Error processing order:', error);
+            showErrorModal('There was an error processing your order. Please try again later.');
+            
+            // Reset button state
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalButtonText;
+        }
     }
     
     // Clear cart from both localStorage and Firebase
