@@ -6,7 +6,7 @@
  * It's used when the user is logged in
  */
 
-// Access Firebase instances that should be already initialized in the HTML
+// Firebase Cart Manager using IIFE pattern
 const FirebaseCartManager = (function() {
     // Constants
     const CART_COLLECTION = 'carts';
@@ -122,6 +122,7 @@ const FirebaseCartManager = (function() {
             
             const cartRef = getCurrentCartRef();
             console.log('Saving cart to Firebase path:', cartRef.path);
+            console.log('Cart items being saved:', items.length, 'items');
             
             await cartRef.set({
                 items: items,
@@ -266,9 +267,6 @@ const FirebaseCartManager = (function() {
 })();
 
 // Initialize when this script loads
-FirebaseCartManager.init();
-
-// Export for ES module compatibility
-if (typeof exports !== 'undefined') {
-    exports.FirebaseCartManager = FirebaseCartManager;
-}
+document.addEventListener('DOMContentLoaded', function() {
+    FirebaseCartManager.init();
+});

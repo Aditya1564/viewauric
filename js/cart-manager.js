@@ -47,36 +47,75 @@ const CartManager = (function() {
             firebase.auth().onAuthStateChanged(async (user) => {
                 if (user) {
                     console.log('User logged in, switching to Firebase storage');
-                    // First try to get items from Firebase
-                    const result = await FirebaseCartManager.getItems();
                     
-                    if (result.success) {
-                        // If user had items in local storage, we need to handle the merge
-                        const localItems = LocalStorageCart.getItems();
+                    // Make sure FirebaseCartManager is available
+                    if (typeof FirebaseCartManager === 'undefined') {
+                        console.warn('FirebaseCartManager not available, loading module dynamically');
                         
-                        if (localItems.length > 0 && result.items.length > 0) {
-                            console.log('Merging local and Firebase carts');
-                            // Merge carts, preferring the higher quantity for duplicate items
-                            const mergedItems = mergeCartItems(localItems, result.items);
-                            cartItems = mergedItems;
+                        try {
+                            // Dynamically load the Firebase cart manager if not already loaded
+                            const script = document.createElement('script');
+                            script.src = '/js/firebase/firebase-cart-manager.js';
+                            document.head.appendChild(script);
                             
-                            // Save merged cart to Firebase (local storage will be cleared)
-                            await FirebaseCartManager.saveItems(mergedItems);
-                        } else if (localItems.length > 0) {
-                            console.log('Moving local cart to Firebase');
-                            // User has items in local storage but not in Firebase
-                            cartItems = localItems;
-                            await FirebaseCartManager.saveItems(localItems);
-                        } else {
-                            console.log('Using existing Firebase cart');
-                            // User has items in Firebase but not in local storage
-                            cartItems = result.items;
+                            // Wait for script to load
+                            await new Promise((resolve) => {
+                                script.onload = resolve;
+                                script.onerror = () => {
+                                    console.error('Failed to load FirebaseCartManager');
+                                    resolve();
+                                };
+                            });
+                            
+                            // Initialize if loaded
+                            if (typeof FirebaseCartManager !== 'undefined') {
+                                FirebaseCartManager.init();
+                            }
+                        } catch (error) {
+                            console.error('Error loading FirebaseCartManager:', error);
                         }
-                        
-                        // Clear local storage as we're now using Firebase
-                        LocalStorageCart.clearItems();
+                    }
+                    
+                    // Check if FirebaseCartManager is now available
+                    if (typeof FirebaseCartManager !== 'undefined') {
+                        try {
+                            // First try to get items from Firebase
+                            const result = await FirebaseCartManager.getItems();
+                            
+                            if (result.success) {
+                                // If user had items in local storage, we need to handle the merge
+                                const localItems = LocalStorageCart.getItems();
+                                
+                                if (localItems.length > 0 && result.items.length > 0) {
+                                    console.log('Merging local and Firebase carts');
+                                    // Merge carts, preferring the higher quantity for duplicate items
+                                    const mergedItems = mergeCartItems(localItems, result.items);
+                                    cartItems = mergedItems;
+                                    
+                                    // Save merged cart to Firebase (local storage will be cleared)
+                                    await FirebaseCartManager.saveItems(mergedItems);
+                                } else if (localItems.length > 0) {
+                                    console.log('Moving local cart to Firebase');
+                                    // User has items in local storage but not in Firebase
+                                    cartItems = localItems;
+                                    await FirebaseCartManager.saveItems(localItems);
+                                } else {
+                                    console.log('Using existing Firebase cart');
+                                    // User has items in Firebase but not in local storage
+                                    cartItems = result.items;
+                                }
+                                
+                                // Clear local storage as we're now using Firebase
+                                LocalStorageCart.clearItems();
+                            } else {
+                                console.warn('Failed to load cart from Firebase:', result.error);
+                            }
+                        } catch (error) {
+                            console.error('Error during cart synchronization:', error);
+                            // Keep using local storage if sync fails
+                        }
                     } else {
-                        console.warn('Failed to load cart from Firebase:', result.error);
+                        console.warn('FirebaseCartManager still not available after loading attempt');
                     }
                 } else {
                     console.log('User logged out, switching to local storage');
@@ -127,12 +166,18 @@ const CartManager = (function() {
         if (isUserLoggedIn()) {
             console.log('User logged in, loading cart from Firebase');
             try {
-                const result = await FirebaseCartManager.getItems();
-                if (result.success) {
-                    cartItems = result.items;
+                // Make sure FirebaseCartManager is loaded and initialized
+                if (typeof FirebaseCartManager !== 'undefined') {
+                    const result = await FirebaseCartManager.getItems();
+                    if (result.success) {
+                        cartItems = result.items;
+                    } else {
+                        console.warn('Failed to load cart from Firebase:', result.error);
+                        cartItems = [];
+                    }
                 } else {
-                    console.warn('Failed to load cart from Firebase:', result.error);
-                    cartItems = [];
+                    console.warn('FirebaseCartManager not available, falling back to local storage');
+                    cartItems = LocalStorageCart.getItems();
                 }
             } catch (error) {
                 console.error('Error loading cart from Firebase:', error);
@@ -155,9 +200,17 @@ const CartManager = (function() {
         if (isUserLoggedIn()) {
             console.log('User logged in, saving cart to Firebase');
             try {
-                await FirebaseCartManager.saveItems(cartItems);
+                // Make sure FirebaseCartManager is loaded and initialized
+                if (typeof FirebaseCartManager !== 'undefined') {
+                    await FirebaseCartManager.saveItems(cartItems);
+                } else {
+                    console.warn('FirebaseCartManager not available, saving to local storage only');
+                    LocalStorageCart.saveItems(cartItems);
+                }
             } catch (error) {
                 console.error('Error saving cart to Firebase:', error);
+                // Fallback to local storage
+                LocalStorageCart.saveItems(cartItems);
             }
         } else {
             console.log('User not logged in, saving cart to local storage');
@@ -173,8 +226,9 @@ const CartManager = (function() {
      * @returns {Boolean} True if user is logged in
      */
     function isUserLoggedIn() {
-        return typeof FirebaseCartManager !== 'undefined' && 
-               FirebaseCartManager.isUserLoggedIn();
+        return typeof firebase !== 'undefined' && 
+               firebase.auth && 
+               firebase.auth().currentUser !== null;
     }
     
     // ======================================================
