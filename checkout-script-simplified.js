@@ -266,9 +266,26 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Update localStorage with current cart items
+    // Also syncs with Firebase if user is logged in
     function updateLocalStorage(items) {
         try {
+            // Save to localStorage
             localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+            
+            // If Firebase cart module is loaded and user is logged in, also save to Firebase
+            if (firebaseCartModule && firebase.auth && firebase.auth().currentUser) {
+                firebaseCartModule.saveCartToFirebase(items)
+                    .then(result => {
+                        if (result.success) {
+                            console.log('Cart updated in Firebase from checkout page');
+                        } else {
+                            console.warn('Failed to update cart in Firebase:', result.error);
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error updating Firebase cart:', err);
+                    });
+            }
         } catch (error) {
             console.error('Error saving cart to storage:', error);
         }
@@ -292,10 +309,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Handle form submission
-    function handleSubmit(e) {
+    async function handleSubmit(e) {
         e.preventDefault();
         
-        const cartItems = loadCartItemsFromStorage();
+        const cartItems = await loadCartItemsFromStorage();
         if (cartItems.length === 0) {
             showErrorModal('Your cart is empty. Please add products before placing an order.');
             return;
@@ -303,6 +320,35 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Show account creation popup instead of proceeding with order
         showCreateAccountModal();
+        
+        // For demo/prototype functionality
+        // After order submission, clear cart from both localStorage and Firebase
+        clearCart();
+    }
+    
+    // Clear cart from both localStorage and Firebase
+    function clearCart() {
+        try {
+            // Clear localStorage
+            localStorage.removeItem(STORAGE_KEY);
+            
+            // Clear Firebase cart if user is logged in
+            if (firebaseCartModule && firebase.auth && firebase.auth().currentUser) {
+                firebaseCartModule.clearFirebaseCart()
+                    .then(result => {
+                        if (result.success) {
+                            console.log('Cart cleared from Firebase after order submission');
+                        } else {
+                            console.warn('Failed to clear Firebase cart:', result.error);
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error clearing Firebase cart:', err);
+                    });
+            }
+        } catch (error) {
+            console.error('Error clearing cart:', error);
+        }
     }
     
     // Show create account modal
@@ -349,8 +395,24 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Load cart items from storage (utility function)
-    function loadCartItemsFromStorage() {
+    // Checks Firebase first if user is logged in, then falls back to localStorage
+    async function loadCartItemsFromStorage() {
         try {
+            // Try to get cart from Firebase if user is logged in
+            if (firebaseCartModule && firebase.auth && firebase.auth().currentUser) {
+                try {
+                    const result = await firebaseCartModule.loadCartFromFirebase();
+                    if (result.success && result.items.length > 0) {
+                        console.log('Cart loaded from Firebase for order processing');
+                        return result.items;
+                    }
+                } catch (firebaseError) {
+                    console.error('Error loading cart from Firebase:', firebaseError);
+                    // Fall back to localStorage
+                }
+            }
+            
+            // Fall back to localStorage
             const savedCart = localStorage.getItem(STORAGE_KEY);
             return savedCart ? JSON.parse(savedCart) : [];
         } catch (error) {
