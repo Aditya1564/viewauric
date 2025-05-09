@@ -399,6 +399,7 @@
     <!-- Profile Script -->
     <script type="module">
       import * as AuthManager from "/js/firebase/auth-manager.js";
+      import { doc, setDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
       
       // DOM elements for profile sections
       const profileName = document.getElementById('profileName');
@@ -476,22 +477,17 @@
                 orders: []
               };
               
-              // Update user profile
-              const updateResult = await AuthManager.updateUserProfile(user.uid, userData);
+              // Create user profile in Firestore
+              await setDoc(doc(AuthManager.db, "users", user.uid), userData);
               
-              if (updateResult.success) {
-                console.log("Successfully created user profile");
-                displayUserInfo(userData);
-                displayUserAddresses([]);
-                displayPaymentMethods([]);
-                
-                // Display empty orders section
-                displayEmptyOrdersSection();
-              } else {
-                console.error("Failed to create profile:", updateResult.error);
-                showError("Failed to create your profile. Please try logging in again.");
-                logoutUser();
-              }
+              // Display the profile that was just created
+              console.log("Successfully created user profile");
+              displayUserInfo(userData);
+              displayUserAddresses([]);
+              displayPaymentMethods([]);
+              
+              // Display empty orders section
+              displayEmptyOrdersSection();
             } else {
               console.error("Auth state inconsistency - no current user");
               showError("Session error. Please log in again.");

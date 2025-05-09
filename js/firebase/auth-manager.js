@@ -4,7 +4,7 @@
  * It provides methods for login, signup, profile management, and session handling
  */
 
-import { initializeApp } from "firebase/app";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
 import {
   getAuth,
   createUserWithEmailAndPassword,
@@ -13,7 +13,7 @@ import {
   GoogleAuthProvider,
   signOut,
   onAuthStateChanged,
-} from "firebase/auth";
+} from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
 import {
   getFirestore,
   doc,
@@ -25,7 +25,7 @@ import {
   where,
   getDocs,
   orderBy,
-} from "firebase/firestore";
+} from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
 // Firebase configuration
 const firebaseConfig = {
