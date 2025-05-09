@@ -1,11 +1,12 @@
 /**
  * Auric Cart Manager
- * A comprehensive cart management system with local storage persistence
- * This single file handles all cart-related functionality including:
+ * A comprehensive cart management system with local storage persistence and Firebase sync
+ * This file handles all cart-related functionality including:
  * - Adding/removing items
  * - Updating quantities
  * - Saving/loading from local storage
  * - Cart UI updates
+ * - Firebase synchronization (when user is logged in)
  */
 
 // ======================================================
@@ -16,6 +17,8 @@ const CartManager = (function() {
     // Private cart data storage
     let cartItems = [];
     const STORAGE_KEY = 'auric_cart_items';
+    let firebaseCartSync = null;
+    let isFirebaseEnabled = false;
     
     /**
      * Initialize the cart system
@@ -36,7 +39,75 @@ const CartManager = (function() {
         // Update UI to match current cart state
         updateCartUI();
         
+        // Try to import Firebase cart functionality
+        initializeFirebaseCartSync();
+        
         console.log('Cart system initialized with', cartItems.length, 'items');
+    }
+    
+    /**
+     * Import Firebase cart module and set up sync if available
+     * This keeps the code loosely coupled - will still work if Firebase module is not available
+     */
+    function initializeFirebaseCartSync() {
+        try {
+            // Check if Firebase Auth is already loaded and user is logged in
+            if (typeof firebase !== 'undefined' && firebase.auth) {
+                import('/js/firebase/firebase-cart.js')
+                    .then(module => {
+                        console.log('Firebase cart module loaded');
+                        firebaseCartSync = module;
+                        isFirebaseEnabled = true;
+                        
+                        // Setup auth state listener for cart syncing
+                        firebaseCartSync.observeAuthStateForCartSync(
+                            () => cartItems, // Getter for local cart items
+                            updateCartItemsAndStorage // Function to update local cart
+                        );
+                        
+                        // Initial sync if user is logged in
+                        if (firebase.auth().currentUser) {
+                            syncWithFirebase();
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Failed to load Firebase cart module:', err);
+                    });
+            }
+        } catch (error) {
+            console.error('Error initializing Firebase cart sync:', error);
+        }
+    }
+    
+    /**
+     * Sync local cart with Firebase
+     * This function is called when user logs in/out or when cart changes
+     */
+    async function syncWithFirebase() {
+        if (!isFirebaseEnabled || !firebaseCartSync) return;
+        
+        try {
+            const user = firebase.auth().currentUser;
+            if (user) {
+                console.log('Syncing cart with Firebase...');
+                const syncedItems = await firebaseCartSync.syncCartWithFirebase(cartItems, updateCartItemsAndStorage);
+                updateCartItemsAndStorage(syncedItems);
+            }
+        } catch (error) {
+            console.error('Error syncing with Firebase:', error);
+        }
+    }
+    
+    /**
+     * Helper function to update cart items array and storage
+     * Used for syncing with Firebase
+     */
+    function updateCartItemsAndStorage(items) {
+        if (Array.isArray(items)) {
+            cartItems = items;
+            saveCartToStorage();
+            updateCartUI();
+        }
     }
     
     /**
@@ -57,11 +128,27 @@ const CartManager = (function() {
     
     /**
      * Save current cart items to localStorage
+     * Also syncs with Firebase if enabled and user is logged in
      */
     function saveCartToStorage() {
         try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(cartItems));
             console.log('Cart saved to storage');
+            
+            // If Firebase sync is enabled and user is logged in, save to Firebase too
+            if (isFirebaseEnabled && firebaseCartSync && firebase.auth().currentUser) {
+                firebaseCartSync.saveCartToFirebase(cartItems)
+                    .then(result => {
+                        if (result.success) {
+                            console.log('Cart saved to Firebase');
+                        } else {
+                            console.warn('Failed to save cart to Firebase:', result.error);
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error saving to Firebase:', err);
+                    });
+            }
         } catch (error) {
             console.error('Error saving cart to storage:', error);
         }

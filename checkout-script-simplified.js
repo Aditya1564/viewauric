@@ -1,7 +1,7 @@
 /**
  * Auric Checkout Script
  * Handles the checkout process, including:
- * - Loading cart items from local storage
+ * - Loading cart items from local storage or Firebase (if user is logged in)
  * - Displaying items in the order summary
  * - Order form submission with account creation popup
  */
@@ -9,6 +9,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Constants
     const STORAGE_KEY = 'auric_cart_items';
+    let firebaseCartModule = null;
     
     // DOM Elements
     const orderSummaryContainer = document.getElementById('orderSummary');
@@ -16,8 +17,58 @@ document.addEventListener('DOMContentLoaded', function() {
     const checkoutForm = document.getElementById('checkoutForm');
     const productListContainer = document.getElementById('productList');
     
-    // Load and display cart items
-    function loadCartItems() {
+    // Try to load Firebase cart module if available
+    function initializeFirebaseIntegration() {
+        try {
+            // Check if Firebase is available
+            if (typeof firebase !== 'undefined' && firebase.auth) {
+                import('/js/firebase/firebase-cart.js')
+                    .then(module => {
+                        console.log('Firebase cart module loaded for checkout');
+                        firebaseCartModule = module;
+                        
+                        // Check if user is logged in, if so, reload cart from Firebase
+                        if (firebase.auth().currentUser) {
+                            loadCartFromFirebase();
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Failed to load Firebase cart module:', err);
+                    });
+            } else {
+                console.log('Firebase not available, using local storage only');
+            }
+        } catch (error) {
+            console.error('Error initializing Firebase integration:', error);
+        }
+    }
+    
+    // Load cart items from Firebase for logged in users
+    async function loadCartFromFirebase() {
+        try {
+            if (!firebaseCartModule || !firebase.auth().currentUser) {
+                return loadCartFromLocalStorage();
+            }
+            
+            console.log('Loading cart from Firebase...');
+            const result = await firebaseCartModule.loadCartFromFirebase();
+            
+            if (result.success && result.items.length > 0) {
+                console.log('Cart loaded from Firebase:', result.items);
+                displayCartItems(result.items);
+                return result.items;
+            } else {
+                // Fall back to local storage if Firebase cart is empty or error occurs
+                return loadCartFromLocalStorage();
+            }
+        } catch (error) {
+            console.error('Error loading cart from Firebase:', error);
+            return loadCartFromLocalStorage();
+        }
+    }
+    
+    // Load cart items from local storage
+    function loadCartFromLocalStorage() {
         try {
             const savedCart = localStorage.getItem(STORAGE_KEY);
             
@@ -39,6 +90,19 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error loading cart from storage:', error);
             showEmptyCartMessage();
             return [];
+        }
+    }
+    
+    // Load and display cart items - prioritizes Firebase if user is logged in
+    function loadCartItems() {
+        // First check if we need to initialize Firebase
+        initializeFirebaseIntegration();
+        
+        // Use Firebase if available and user is logged in, otherwise use local storage
+        if (firebaseCartModule && firebase.auth().currentUser) {
+            return loadCartFromFirebase();
+        } else {
+            return loadCartFromLocalStorage();
         }
     }
     
