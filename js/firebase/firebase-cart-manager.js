@@ -86,22 +86,49 @@ const FirebaseCartManager = (function() {
             const cartRef = getCurrentCartRef();
             console.log('Loading cart from Firebase path:', cartRef.path);
             
-            const cartDoc = await cartRef.get();
-            
-            if (cartDoc.exists) {
-                const cartData = cartDoc.data();
+            try {
+                // Set a timeout to detect if Firebase is too slow (offline mode)
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('Firebase timeout - likely offline')), 5000);
+                });
                 
-                // Make sure items array exists
-                if (cartData.items && Array.isArray(cartData.items)) {
-                    console.log('Found', cartData.items.length, 'items in Firebase cart');
-                    return { success: true, items: cartData.items };
+                // Race between Firebase request and timeout
+                const cartDoc = await Promise.race([
+                    cartRef.get(),
+                    timeoutPromise
+                ]);
+                
+                if (cartDoc.exists) {
+                    const cartData = cartDoc.data();
+                    
+                    // Make sure items array exists
+                    if (cartData.items && Array.isArray(cartData.items)) {
+                        console.log('Found', cartData.items.length, 'items in Firebase cart');
+                        return { success: true, items: cartData.items };
+                    } else {
+                        console.warn('Firebase cart document exists but items array is missing or invalid');
+                        return { success: true, items: [] };
+                    }
                 } else {
-                    console.warn('Firebase cart document exists but items array is missing or invalid');
+                    console.log('No existing cart in Firebase - document does not exist');
                     return { success: true, items: [] };
                 }
-            } else {
-                console.log('No existing cart in Firebase - document does not exist');
-                return { success: true, items: [] };
+            } catch (timeoutError) {
+                console.warn('Firebase operation timed out or network is offline');
+                
+                // Get last known cart from session storage if available
+                try {
+                    const cachedCart = sessionStorage.getItem('firebase_cart_cache');
+                    if (cachedCart) {
+                        const parsedCart = JSON.parse(cachedCart);
+                        console.log('Using cached cart data from session storage:', parsedCart.length, 'items');
+                        return { success: true, items: parsedCart, fromCache: true };
+                    }
+                } catch (cacheError) {
+                    console.error('Error accessing cache:', cacheError);
+                }
+                
+                return { success: false, items: [], error: 'Firebase is offline, no cached data available' };
             }
         } catch (error) {
             console.error('Error loading cart from Firebase:', error);
@@ -120,18 +147,48 @@ const FirebaseCartManager = (function() {
                 return { success: false, error: 'User not logged in' };
             }
             
+            // Save a cache copy in sessionStorage for offline fallback
+            try {
+                sessionStorage.setItem('firebase_cart_cache', JSON.stringify(items));
+                console.log('Saved cart cache to sessionStorage');
+            } catch (cacheError) {
+                console.warn('Failed to cache cart in sessionStorage:', cacheError);
+            }
+            
             const cartRef = getCurrentCartRef();
             console.log('Saving cart to Firebase path:', cartRef.path);
             console.log('Cart items being saved:', items.length, 'items');
             
-            await cartRef.set({
-                items: items,
-                updatedAt: firebase.firestore.Timestamp.now(),
-                userId: getCurrentUserId()
-            });
-            
-            console.log('Cart saved to Firebase successfully');
-            return { success: true };
+            try {
+                // Set a timeout for Firebase operations
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('Firebase save timeout - likely offline')), 5000);
+                });
+                
+                // Race between Firebase save and timeout
+                await Promise.race([
+                    cartRef.set({
+                        items: items,
+                        updatedAt: firebase.firestore.Timestamp.now(),
+                        userId: getCurrentUserId()
+                    }),
+                    timeoutPromise
+                ]);
+                
+                console.log('Cart saved to Firebase successfully');
+                return { success: true };
+            } catch (timeoutError) {
+                console.warn('Firebase save operation timed out or network is offline');
+                console.log('Using cached cart data instead');
+                
+                // Return success but with an offline flag
+                // The cart is saved in sessionStorage, so data isn't lost
+                return { 
+                    success: true, 
+                    offline: true, 
+                    message: 'Cart saved locally, will sync when online'
+                };
+            }
         } catch (error) {
             console.error('Error saving cart to Firebase:', error);
             return { success: false, error: error.message };

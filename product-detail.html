@@ -454,6 +454,124 @@
     <script src="js/cart-local-storage.js?v=1.0.0"></script>
     <script src="js/firebase/firebase-cart-manager.js?v=1.0.0"></script>
     <script src="js/cart-manager.js?v=1.0.1"></script>
+    
+    <!-- Product Detail Page Cart Integration -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get the product details
+            const productDetails = {
+                id: 'EM-ST-2025', // SKU as ID
+                name: document.querySelector('.product-title').textContent,
+                price: parseFloat(document.querySelector('.price-value').textContent.replace('₹', '').replace(',', '')),
+                image: document.querySelector('.main-image-container img').src,
+            };
+            
+            console.log('Product details loaded:', productDetails);
+            
+            // Get DOM elements
+            const addToCartBtn = document.querySelector('.add-to-cart-btn');
+            const quantityInput = document.querySelector('.quantity-input');
+            const incrementBtn = document.querySelector('.quantity-btn.increment');
+            const decrementBtn = document.querySelector('.quantity-btn.decrement');
+            
+            // Quantity controls
+            incrementBtn.addEventListener('click', function() {
+                let currentQty = parseInt(quantityInput.value);
+                quantityInput.value = currentQty + 1;
+            });
+            
+            decrementBtn.addEventListener('click', function() {
+                let currentQty = parseInt(quantityInput.value);
+                if (currentQty > 1) {
+                    quantityInput.value = currentQty - 1;
+                }
+            });
+            
+            // Add to cart button click handler
+            addToCartBtn.addEventListener('click', async function() {
+                const quantity = parseInt(quantityInput.value);
+                
+                try {
+                    // Check if CartManager is available
+                    if (typeof CartManager !== 'undefined' && CartManager.addToCart) {
+                        console.log('Using CartManager to add product to cart');
+                        await CartManager.addToCart(productDetails, quantity);
+                        showToast('Product added to cart successfully!');
+                    } else {
+                        console.error('CartManager not available');
+                        showToast('Error adding product to cart. Please try again.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error adding product to cart:', error);
+                    showToast('Error adding product to cart. Please try again.', 'error');
+                }
+            });
+            
+            // Toast notification function
+            function showToast(message, type = 'success') {
+                // Create toast container if it doesn't exist
+                let toastContainer = document.querySelector('.toast-container');
+                if (!toastContainer) {
+                    toastContainer = document.createElement('div');
+                    toastContainer.className = 'toast-container';
+                    document.body.appendChild(toastContainer);
+                    
+                    // Add style for toast container
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        .toast-container {
+                            position: fixed;
+                            bottom: 20px;
+                            right: 20px;
+                            z-index: 9999;
+                        }
+                        .toast {
+                            padding: 12px 20px;
+                            color: white;
+                            border-radius: 4px;
+                            margin-bottom: 10px;
+                            min-width: 250px;
+                            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+                            opacity: 0;
+                            animation-fill-mode: forwards;
+                        }
+                        .toast.success {
+                            background-color: #4CAF50;
+                        }
+                        .toast.error {
+                            background-color: #F44336;
+                        }
+                        .toast.info {
+                            background-color: #2196F3;
+                        }
+                        @keyframes fadein {
+                            from {opacity: 0; transform: translateY(20px);}
+                            to {opacity: 1; transform: translateY(0);}
+                        }
+                        @keyframes fadeout {
+                            from {opacity: 1; transform: translateY(0);}
+                            to {opacity: 0; transform: translateY(-20px);}
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+                
+                // Create toast element
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.textContent = message;
+                
+                // Add to container
+                toastContainer.appendChild(toast);
+                
+                // Remove after animation
+                setTimeout(() => {
+                    toast.remove();
+                }, 3000);
+            }
+        });
+    </script>
     <!-- Updated layout version -->
 </body>
 </html>
