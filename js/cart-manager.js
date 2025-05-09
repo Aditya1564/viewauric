@@ -201,7 +201,7 @@ const CartManager = (function() {
     function setupCartPanel() {
         // Create cart panel HTML if it doesn't exist
         if (!document.querySelector('.cart-panel')) {
-            const cartPanelHTML = \`
+            const cartPanelHTML = `
                 <div class="cart-overlay"></div>
                 <div class="cart-panel">
                     <div class="cart-panel-header">
@@ -222,7 +222,7 @@ const CartManager = (function() {
                         </div>
                     </div>
                 </div>
-            \`;
+            `;
             
             document.body.insertAdjacentHTML('beforeend', cartPanelHTML);
         }
@@ -232,14 +232,14 @@ const CartManager = (function() {
         if (navIcons) {
             // Check if cart icon already exists
             if (!navIcons.querySelector('.cart-icon-container')) {
-                const cartIconHTML = \`
+                const cartIconHTML = `
                     <a href="#" class="icon-link cart-toggle">
                         <div class="cart-icon-container">
                             <i class="fas fa-shopping-cart"></i>
                             <span class="cart-count">0</span>
                         </div>
                     </a>
-                \`;
+                `;
                 
                 navIcons.insertAdjacentHTML('beforeend', cartIconHTML);
             }
@@ -374,24 +374,24 @@ const CartManager = (function() {
                 cartItems.forEach(item => {
                     const itemTotal = (item.price * item.quantity).toFixed(2);
                     
-                    cartItemsHTML += \`
-                        <div class="cart-item" data-product-id="\${item.id}">
+                    cartItemsHTML += `
+                        <div class="cart-item" data-product-id="${item.id}">
                             <div class="cart-item-image">
-                                <img src="\${item.image}" alt="\${item.name}">
+                                <img src="${item.image}" alt="${item.name}">
                             </div>
                             <div class="cart-item-details">
-                                <div class="cart-item-name">\${item.name}</div>
-                                <div class="cart-item-price">₹\${item.price.toFixed(2)}</div>
+                                <div class="cart-item-name">${item.name}</div>
+                                <div class="cart-item-price">₹${item.price.toFixed(2)}</div>
                                 <div class="cart-item-quantity">
                                     <button class="quantity-btn decrement">-</button>
-                                    <input type="text" class="quantity-input" value="\${item.quantity}" readonly>
+                                    <input type="text" class="quantity-input" value="${item.quantity}" readonly>
                                     <button class="quantity-btn increment">+</button>
                                 </div>
-                                <div class="cart-item-total">₹\${itemTotal}</div>
+                                <div class="cart-item-total">₹${itemTotal}</div>
                             </div>
                             <button class="remove-item-btn">&times;</button>
                         </div>
-                    \`;
+                    `;
                 });
                 
                 cartItemsContainer.innerHTML = cartItemsHTML;
