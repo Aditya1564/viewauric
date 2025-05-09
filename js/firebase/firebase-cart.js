@@ -35,15 +35,20 @@ export async function saveCartToFirebase(cartItems) {
     
     console.log('Saving cart to Firebase path:', `users/${user.uid}/carts/current`);
     
-    // Save the cart data
-    await cartRef.set({
-      items: cartItems,
-      updatedAt: firebase.firestore.Timestamp.now(),
-      userId: user.uid
-    });
-    
-    console.log('Cart saved to Firebase');
-    return { success: true };
+    // Save the cart data with more detailed error handling
+    try {
+      await cartRef.set({
+        items: cartItems,
+        updatedAt: firebase.firestore.Timestamp.now(),
+        userId: user.uid
+      });
+      
+      console.log('Cart saved to Firebase successfully');
+      return { success: true };
+    } catch (innerError) {
+      console.error('Detailed Firebase save error:', innerError);
+      throw innerError; // Re-throw to be caught by the outer catch
+    }
   } catch (error) {
     console.error('Error saving cart to Firebase:', error);
     return { success: false, error: error.message };
