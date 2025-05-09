@@ -33,7 +33,9 @@ export async function saveCartToFirebase(cartItems) {
     // This matches the exact path requested: users/{userId}/carts
     const cartRef = db.collection('users').doc(user.uid).collection(CART_COLLECTION).doc('current');
     
+    // Debug the cart items being saved
     console.log('Saving cart to Firebase path:', `users/${user.uid}/carts/current`);
+    console.log('Cart items being saved:', JSON.stringify(cartItems));
     
     // Save the cart data with more detailed error handling
     try {
@@ -77,9 +79,18 @@ export async function loadCartFromFirebase() {
     if (cartDoc.exists) {
       const cartData = cartDoc.data();
       console.log('Cart loaded from Firebase');
-      return { success: true, items: cartData.items || [] };
+      console.log('Cart data from Firebase:', JSON.stringify(cartData));
+      
+      // Make sure items array exists
+      if (cartData.items && Array.isArray(cartData.items)) {
+        console.log('Found', cartData.items.length, 'items in Firebase cart');
+        return { success: true, items: cartData.items };
+      } else {
+        console.warn('Firebase cart document exists but items array is missing or invalid');
+        return { success: true, items: [] };
+      }
     } else {
-      console.log('No existing cart in Firebase');
+      console.log('No existing cart in Firebase - document does not exist');
       return { success: true, items: [] };
     }
   } catch (error) {
@@ -313,9 +324,56 @@ export function observeAuthStateForCartSync(getLocalCartItems, updateLocalStorag
       console.log('User signed in, syncing cart with Firebase');
       const localItems = typeof getLocalCartItems === 'function' ? getLocalCartItems() : [];
       await syncCartWithFirebase(localItems, updateLocalStorage);
+      
+      // Test Firebase database connectivity
+      testFirebaseConnection();
     } else {
       // User signed out, nothing to do (keep local cart)
       console.log('User signed out, keeping local cart only');
     }
   });
+}
+
+/**
+ * Test function to verify Firebase Firestore connectivity
+ * This function attempts to write a test document and then read it back
+ * to confirm that Firebase is properly connected and permissions are working
+ */
+async function testFirebaseConnection() {
+  try {
+    console.log('Testing Firebase Firestore connectivity...');
+    const user = auth.currentUser;
+    
+    if (!user) {
+      console.log('No user logged in, cannot test Firebase connection');
+      return;
+    }
+    
+    // Try to write a test document
+    const testDocRef = db.collection('users').doc(user.uid).collection('tests').doc('connection-test');
+    const testData = { 
+      timestamp: firebase.firestore.Timestamp.now(),
+      message: 'Connection test successful',
+      browser: navigator.userAgent
+    };
+    
+    console.log('Writing test document to Firebase...');
+    await testDocRef.set(testData);
+    console.log('Test document successfully written to Firebase!');
+    
+    // Try to read it back
+    console.log('Reading test document from Firebase...');
+    const docSnapshot = await testDocRef.get();
+    
+    if (docSnapshot.exists) {
+      console.log('Test document successfully read from Firebase!');
+      console.log('Test document data:', docSnapshot.data());
+      console.log('✅ Firebase connection is working properly!');
+    } else {
+      console.warn('Test document was written but could not be read back');
+    }
+  } catch (error) {
+    console.error('Firebase connection test failed:', error);
+    console.log('Firebase security rules might be preventing write operations');
+  }
 }
