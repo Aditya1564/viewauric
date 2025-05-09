@@ -3,8 +3,7 @@
  * Handles the checkout process, including:
  * - Loading cart items from local storage
  * - Displaying items in the order summary
- * - Order form submission
- * - Saving order details
+ * - Order form submission with account creation popup
  */
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -124,28 +123,51 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Get form data
-        const formData = new FormData(checkoutForm);
-        const orderData = {
-            customer: {
-                firstName: formData.get('firstName'),
-                lastName: formData.get('lastName'),
-                email: formData.get('email'),
-                phone: formData.get('phone'),
-                address: formData.get('address')
-            },
-            paymentMethod: formData.get('paymentMethod'),
-            notes: formData.get('notes'),
-            products: cartItems,
-            total: calculateTotal(cartItems),
-            orderReference: generateOrderReference()
-        };
+        // Show account creation popup instead of proceeding with order
+        showCreateAccountModal();
+    }
+    
+    // Show create account modal
+    function showCreateAccountModal() {
+        // Create the modal HTML if it doesn't exist
+        if (!document.getElementById('createAccountModal')) {
+            const modalHTML = `
+                <div class="modal fade" id="createAccountModal" tabindex="-1" aria-labelledby="createAccountModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="createAccountModalLabel">Create Account Required</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-info" role="alert">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    You need to create an account to complete your purchase.
+                                </div>
+                                <p>Please create an account or sign in to complete your order. Creating an account allows you to:</p>
+                                <ul>
+                                    <li>Track your order status</li>
+                                    <li>Save your delivery information for future purchases</li>
+                                    <li>View your order history</li>
+                                    <li>Receive exclusive offers and discounts</li>
+                                </ul>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <a href="login.html" class="btn btn-outline-primary">Sign In</a>
+                                <a href="signup.html" class="btn btn-primary">Create Account</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
         
-        // Show confirmation modal
-        showOrderConfirmation(orderData);
-        
-        // Clear cart after successful order
-        localStorage.removeItem(STORAGE_KEY);
+        // Show the modal
+        const createAccountModal = new bootstrap.Modal(document.getElementById('createAccountModal'));
+        createAccountModal.show();
     }
     
     // Load cart items from storage (utility function)
