@@ -387,64 +387,371 @@
 
     <!-- Footer Section (Add your existing footer here) -->
 
-    <!-- Simple User Profile Script -->
-    <script>
-      // Simplified user profile simulation
-      document.addEventListener('DOMContentLoaded', function() {
-        // Display demo user data
-        const profileName = document.getElementById('profileName');
-        const profileEmail = document.getElementById('profileEmail');
-        const profileAvatar = document.getElementById('profileAvatar');
-        
-        if (profileName) profileName.textContent = 'Demo User';
-        if (profileEmail) profileEmail.textContent = 'user@example.com';
-        if (profileAvatar) profileAvatar.textContent = 'D';
-        
-        // Simple network status monitoring
-        let isOnline = navigator.onLine;
-        window.addEventListener('online', () => {
-          console.log('Network connection restored');
-          isOnline = true;
-        });
-        window.addEventListener('offline', () => {
-          console.log('Network connection lost');
-          isOnline = false;
-        });
-      });
-    </script>
-    
     <!-- Navigation script -->
     <script src="js/navigation.js?v=1.0.3"></script>
     <script src="js/banner-rotator.js?v=1.0.1"></script>
     
-    <script>
-        // Profile page script
-        document.addEventListener('DOMContentLoaded', function() {
-            // Profile navigation tabs
-            const profileNavItems = document.querySelectorAll('.profile-nav-item');
-            const profileSections = document.querySelectorAll('.profile-section');
+    <!-- Firebase scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase config script -->
+    <script type="module">
+      // Import Firebase modules
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+      import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+      import { 
+        getFirestore, 
+        doc, 
+        getDoc, 
+        collection, 
+        query, 
+        where, 
+        getDocs, 
+        orderBy 
+      } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+      
+      // Your Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
+        authDomain: "auric-a0c92.firebaseapp.com",
+        projectId: "auric-a0c92",
+        storageBucket: "auric-a0c92.firebasestorage.app",
+        messagingSenderId: "878979958342",
+        appId: "1:878979958342:web:e6092f7522488d21eaec47",
+        measurementId: "G-ZYZ750JHMB"
+      };
+      
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+      
+      // Check if user is authenticated
+      document.addEventListener('DOMContentLoaded', async () => {
+        // Check authentication status
+        auth.onAuthStateChanged(async (user) => {
+          if (!user) {
+            // User is not authenticated, redirect to login page
+            console.log("User not authenticated, redirecting to login page...");
+            window.location.href = "login.html";
+            return;
+          }
+          
+          console.log("User authenticated:", user.uid);
+          
+          try {
+            // Get user profile from Firestore
+            const userRef = doc(db, "users", user.uid);
+            const userDoc = await getDoc(userRef);
             
-            profileNavItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    // Remove active class from all items
-                    profileNavItems.forEach(navItem => navItem.classList.remove('active'));
-                    profileSections.forEach(section => section.classList.remove('active'));
-                    
-                    // Add active class to clicked item
-                    this.classList.add('active');
-                    
-                    // Show corresponding section
-                    const targetSection = document.getElementById(this.dataset.target);
-                    targetSection.classList.add('active');
-                });
-            });
-            
-            // Simple logout functionality
-            document.getElementById('logout-button').addEventListener('click', function() {
-                console.log('User signed out from profile page');
-                window.location.href = 'login.html';
-            });
+            if (userDoc.exists()) {
+              // Display user information
+              displayUserInfo(userDoc.data());
+              
+              // Load user orders
+              await loadUserOrders(user.uid);
+              
+              // Display user addresses if available
+              if (userDoc.data().addresses) {
+                displayUserAddresses(userDoc.data().addresses);
+              }
+              
+              // Display payment methods if available
+              if (userDoc.data().paymentMethods) {
+                displayPaymentMethods(userDoc.data().paymentMethods);
+              }
+            } else {
+              console.error("User document not found in Firestore");
+              alert("Could not load your profile data. Please try again later.");
+            }
+          } catch (error) {
+            console.error("Error loading user profile:", error);
+            alert("An error occurred while loading your profile. Please try again later.");
+          }
+          
+          // Set up profile page functionality
+          setupProfilePage();
         });
+      });
+      
+      // Display user information
+      function displayUserInfo(profile) {
+        const profileName = document.getElementById('profileName');
+        const profileEmail = document.getElementById('profileEmail');
+        const profileAvatar = document.getElementById('profileAvatar');
+        
+        if (profileName) {
+          profileName.textContent = profile.displayName || 'User';
+        }
+        
+        if (profileEmail) {
+          profileEmail.textContent = profile.email || '';
+        }
+        
+        if (profileAvatar) {
+          if (profile.photoURL) {
+            // If user has a photo URL, display it
+            profileAvatar.innerHTML = `<img src="${profile.photoURL}" alt="${profile.displayName}" class="avatar-image">`;
+          } else if (profile.displayName) {
+            // Otherwise show the first letter of their name
+            profileAvatar.textContent = profile.displayName.charAt(0).toUpperCase();
+          } else {
+            // Fallback
+            profileAvatar.textContent = 'U';
+          }
+        }
+      }
+      
+      // Load and display user orders
+      async function loadUserOrders(userId) {
+        const ordersContainer = document.getElementById('orders');
+        if (!ordersContainer) return;
+        
+        try {
+          // Query orders collection for this user
+          const ordersRef = collection(db, "orders");
+          const q = query(
+            ordersRef,
+            where("userId", "==", userId),
+            orderBy("createdAt", "desc")
+          );
+          
+          const querySnapshot = await getDocs(q);
+          const orders = [];
+          
+          querySnapshot.forEach((doc) => {
+            orders.push(doc.data());
+          });
+          
+          if (orders.length > 0) {
+            // Clear any existing content
+            ordersContainer.innerHTML = '<h2>My Orders</h2>';
+            
+            // Display each order
+            orders.forEach(order => {
+              const orderDate = new Date(order.createdAt.seconds * 1000);
+              const formattedDate = orderDate.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              });
+              
+              let orderHTML = `
+                <div class="order-card">
+                  <div class="order-header">
+                    <span class="order-id">Order #${order.orderId}</span>
+                    <span class="order-date">${formattedDate}</span>
+                  </div>
+              `;
+              
+              // Add order items if available
+              if (order.items && order.items.length > 0) {
+                order.items.forEach(item => {
+                  orderHTML += `
+                    <div class="order-item">
+                      <img src="${item.image}" alt="${item.name}" class="order-item-image">
+                      <div class="order-item-details">
+                        <h4>${item.name}</h4>
+                        <span class="order-item-price">₹${parseFloat(item.price).toFixed(2)}</span>
+                      </div>
+                    </div>
+                  `;
+                });
+              }
+              
+              // Add order total and close card
+              orderHTML += `
+                  <div class="order-total">Total: ₹${parseFloat(order.total).toFixed(2)}</div>
+                </div>
+              `;
+              
+              ordersContainer.insertAdjacentHTML('beforeend', orderHTML);
+            });
+          } else {
+            ordersContainer.innerHTML = `
+              <h2>My Orders</h2>
+              <p class="empty-section-message">You haven't placed any orders yet.</p>
+              <a href="index.html" class="shop-now-button">Start Shopping</a>
+            `;
+          }
+        } catch (error) {
+          console.error("Error loading orders:", error);
+          ordersContainer.innerHTML = `
+            <h2>My Orders</h2>
+            <p class="error-message">An error occurred while loading your orders. Please try again later.</p>
+          `;
+        }
+      }
+      
+      // Display user addresses
+      function displayUserAddresses(addresses) {
+        const addressesContainer = document.getElementById('addresses');
+        if (!addressesContainer) return;
+        
+        // Clear any existing content except the heading
+        const heading = addressesContainer.querySelector('h2');
+        addressesContainer.innerHTML = '';
+        addressesContainer.appendChild(heading);
+        
+        if (addresses.length === 0) {
+          addressesContainer.insertAdjacentHTML('beforeend', `
+            <p class="empty-section-message">You haven't added any addresses yet.</p>
+          `);
+        } else {
+          // Display each address
+          addresses.forEach(address => {
+            const addressHTML = `
+              <div class="address-card" data-address-id="${address.id}">
+                <div class="address-header">
+                  <span class="address-title">${address.name}</span>
+                  <div class="address-actions">
+                    <a href="#" class="edit-address" data-address-id="${address.id}">Edit</a>
+                    <a href="#" class="delete-address" data-address-id="${address.id}">Delete</a>
+                  </div>
+                </div>
+                <p>${address.street}<br>${address.city}, ${address.state} ${address.postalCode}<br>${address.country}</p>
+              </div>
+            `;
+            
+            addressesContainer.insertAdjacentHTML('beforeend', addressHTML);
+          });
+        }
+        
+        // Add new address button
+        addressesContainer.insertAdjacentHTML('beforeend', `
+          <button id="add-address-btn" class="btn-primary">Add New Address</button>
+        `);
+      }
+      
+      // Display payment methods
+      function displayPaymentMethods(paymentMethods) {
+        const paymentsContainer = document.getElementById('payments');
+        if (!paymentsContainer) return;
+        
+        // Clear any existing content except the heading
+        const heading = paymentsContainer.querySelector('h2');
+        paymentsContainer.innerHTML = '';
+        paymentsContainer.appendChild(heading);
+        
+        if (paymentMethods.length === 0) {
+          paymentsContainer.insertAdjacentHTML('beforeend', `
+            <p class="empty-section-message">You haven't added any payment methods yet.</p>
+          `);
+        } else {
+          // Display each payment method
+          paymentMethods.forEach(payment => {
+            const paymentHTML = `
+              <div class="payment-card" data-payment-id="${payment.id}">
+                <div class="payment-header">
+                  <span class="payment-title">${payment.type}</span>
+                  <div class="payment-actions">
+                    <a href="#" class="delete-payment" data-payment-id="${payment.id}">Delete</a>
+                  </div>
+                </div>
+                <p>XXXX XXXX XXXX ${payment.last4}<br>Expiry: ${payment.expiryMonth}/${payment.expiryYear}</p>
+              </div>
+            `;
+            
+            paymentsContainer.insertAdjacentHTML('beforeend', paymentHTML);
+          });
+        }
+        
+        // Add new payment method button
+        paymentsContainer.insertAdjacentHTML('beforeend', `
+          <button id="add-payment-btn" class="btn-primary">Add Payment Method</button>
+        `);
+      }
+      
+      // Set up profile page functionality
+      function setupProfilePage() {
+        // Profile navigation tabs
+        const profileNavItems = document.querySelectorAll('.profile-nav-item');
+        const profileSections = document.querySelectorAll('.profile-section');
+        
+        profileNavItems.forEach(item => {
+          item.addEventListener('click', function() {
+            // Remove active class from all items
+            profileNavItems.forEach(navItem => navItem.classList.remove('active'));
+            profileSections.forEach(section => section.classList.remove('active'));
+            
+            // Add active class to clicked item
+            this.classList.add('active');
+            
+            // Show corresponding section
+            const targetSection = document.getElementById(this.dataset.target);
+            if (targetSection) {
+              targetSection.classList.add('active');
+            }
+          });
+        });
+        
+        // Logout functionality
+        const logoutButton = document.getElementById('logout-button');
+        if (logoutButton) {
+          logoutButton.addEventListener('click', async () => {
+            try {
+              // Sign out from Firebase
+              await signOut(auth);
+              
+              // Clear local storage
+              localStorage.removeItem('auric_user_session');
+              
+              // Redirect to login page
+              window.location.href = 'login.html';
+            } catch (error) {
+              console.error("Logout error:", error);
+              alert("An error occurred during logout. Please try again.");
+            }
+          });
+        }
+      }
     </script>
+    
+    <!-- Add spinner and notification styles -->
+    <style>
+      .spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 1s ease-in-out infinite;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      
+      .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: #333;
+        color: white;
+        padding: 15px 25px;
+        border-radius: 4px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        opacity: 0;
+        transform: translateY(-20px);
+        transition: opacity 0.3s, transform 0.3s;
+      }
+      
+      .notification.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      
+      .notification.success {
+        background-color: #4CAF50;
+      }
+      
+      .notification.error {
+        background-color: #F44336;
+      }
+    </style>
   </body>
 </html>
