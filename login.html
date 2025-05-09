@@ -241,38 +241,10 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js" type="module"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js" type="module"></script>
     
-    <!-- Simple Firebase Login Script -->
+    <!-- Login Script -->
     <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-      import { 
-        getAuth, 
-        signInWithEmailAndPassword, 
-        GoogleAuthProvider, 
-        signInWithPopup, 
-        onAuthStateChanged 
-      } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-      import { 
-        getFirestore, 
-        doc, 
-        getDoc, 
-        setDoc 
-      } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
-
-      // Firebase configuration object
-      const firebaseConfig = {
-        apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
-        authDomain: "auric-a0c92.firebaseapp.com",
-        projectId: "auric-a0c92",
-        storageBucket: "auric-a0c92.appspot.com",
-        messagingSenderId: "878979958342",
-        appId: "1:878979958342:web:e6092f7522488d21eaec47"
-      };
+      import * as AuthManager from "/js/firebase/auth-manager.js";
       
-      // Initialize Firebase services
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
-      const db = getFirestore(app);
-
       // DOM elements for login page
       const loginForm = document.getElementById('login-form');
       const googleLoginBtn = document.getElementById('google-login');
@@ -281,19 +253,18 @@
       const loginButton = document.getElementById('login-button');
       
       // Check if user is already logged in
-      onAuthStateChanged(auth, (user) => {
+      if (AuthManager.isLoggedIn()) {
+        console.log("User is already logged in, redirecting to home page...");
+        window.location.href = 'index.html';
+      }
+      
+      // Also set up auth state observer to catch auth changes
+      AuthManager.observeAuthState((user) => {
         if (user) {
-          console.log("User is already signed in:", user.uid);
-          localStorage.setItem('auric_user_session', JSON.stringify({
-            uid: user.uid,
-            email: user.email,
-            displayName: user.displayName || 'User',
-            photoURL: user.photoURL,
-            loggedIn: true
-          }));
-          
-          // Redirect to home page
+          console.log("Auth state changed - user is signed in:", user.uid);
           window.location.href = 'index.html';
+        } else {
+          console.log("Auth state changed - user is signed out");
         }
       });
       
@@ -314,41 +285,24 @@
           setLoadingState(true);
           
           try {
-            // Attempt to sign in
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
+            // Attempt to sign in using our auth manager
+            const result = await AuthManager.loginWithEmail(email, password);
             
-            // Create or update user in Firestore to ensure profile exists
-            await setDoc(doc(db, "users", user.uid), {
-              uid: user.uid,
-              email: user.email,
-              displayName: user.displayName || 'User',
-              photoURL: user.photoURL,
-              updatedAt: new Date().toISOString(),
-              createdAt: new Date().toISOString(),
-              addresses: [],
-              paymentMethods: [],
-              orders: []
-            }, { merge: true });
-            
-            showSuccess('Login successful!');
-            
-            // Save user session data
-            localStorage.setItem('auric_user_session', JSON.stringify({
-              uid: user.uid,
-              email: user.email,
-              displayName: user.displayName || 'User',
-              photoURL: user.photoURL,
-              loggedIn: true
-            }));
-            
-            // Redirect to home page
-            setTimeout(() => {
-              window.location.href = 'index.html';
-            }, 1000);
+            if (result.success) {
+              showSuccess('Login successful!');
+              
+              // Redirect to home page
+              setTimeout(() => {
+                window.location.href = 'index.html';
+              }, 1000);
+            } else {
+              // Handle error
+              console.error("Login failed:", result.error);
+              handleAuthError(result);
+            }
           } catch (error) {
             console.error("Login error:", error);
-            handleAuthError(error);
+            showError('An unexpected error occurred. Please try again.');
           } finally {
             setLoadingState(false);
           }
@@ -365,42 +319,24 @@
           googleLoginBtn.innerHTML = '<span class="spinner"></span> Connecting...';
           
           try {
-            // Sign in with Google
-            const provider = new GoogleAuthProvider();
-            const result = await signInWithPopup(auth, provider);
-            const user = result.user;
+            // Sign in with Google using our auth manager
+            const result = await AuthManager.loginWithGoogle();
             
-            showSuccess('Google sign-in successful!');
-            
-            // Create or update user in Firestore
-            await setDoc(doc(db, "users", user.uid), {
-              uid: user.uid,
-              email: user.email,
-              displayName: user.displayName || 'User',
-              photoURL: user.photoURL,
-              updatedAt: new Date().toISOString(),
-              createdAt: new Date().toISOString(),
-              addresses: [],
-              paymentMethods: [],
-              orders: []
-            }, { merge: true });
-            
-            // Save user session data
-            localStorage.setItem('auric_user_session', JSON.stringify({
-              uid: user.uid,
-              email: user.email,
-              displayName: user.displayName || 'User',
-              photoURL: user.photoURL,
-              loggedIn: true
-            }));
-            
-            // Redirect to home page
-            setTimeout(() => {
-              window.location.href = 'index.html';
-            }, 1000);
+            if (result.success) {
+              showSuccess('Google sign-in successful!');
+              
+              // Redirect to home page
+              setTimeout(() => {
+                window.location.href = 'index.html';
+              }, 1000);
+            } else {
+              // Handle error
+              console.error("Google login failed:", result.error);
+              handleAuthError(result);
+            }
           } catch (error) {
             console.error("Google sign-in error:", error);
-            handleAuthError(error);
+            showError('An unexpected error occurred. Please try again.');
           } finally {
             // Reset Google button state
             googleLoginBtn.disabled = false;
@@ -422,31 +358,33 @@
         }
       }
       
-      function handleAuthError(error) {
+      function handleAuthError(result) {
         let errorMessage = 'Login failed. Please check your credentials and try again.';
         
-        switch(error.code) {
-          case 'auth/user-not-found':
-          case 'auth/wrong-password':
-            errorMessage = 'Incorrect email or password. Please try again.';
-            break;
-          case 'auth/invalid-email':
-            errorMessage = 'Invalid email address format.';
-            break;
-          case 'auth/too-many-requests':
-            errorMessage = 'Too many unsuccessful login attempts. Please try again later.';
-            break;
-          case 'auth/popup-closed-by-user':
-            errorMessage = 'Sign-in window was closed. Please try again.';
-            break;
-          case 'auth/unauthorized-domain':
-            errorMessage = 'Authentication not allowed from this domain.';
-            document.getElementById('debug-instructions').style.display = 'block';
-            break;
-          case 'auth/network-request-failed':
-            errorMessage = 'Network error. Please check your internet connection.';
-            document.getElementById('debug-instructions').style.display = 'block';
-            break;
+        if (result.code) {
+          switch(result.code) {
+            case 'auth/user-not-found':
+            case 'auth/wrong-password':
+              errorMessage = 'Incorrect email or password. Please try again.';
+              break;
+            case 'auth/invalid-email':
+              errorMessage = 'Invalid email address format.';
+              break;
+            case 'auth/too-many-requests':
+              errorMessage = 'Too many unsuccessful login attempts. Please try again later.';
+              break;
+            case 'auth/popup-closed-by-user':
+              errorMessage = 'Sign-in window was closed. Please try again.';
+              break;
+            case 'auth/unauthorized-domain':
+              errorMessage = 'Authentication not allowed from this domain.';
+              document.getElementById('debug-instructions').style.display = 'block';
+              break;
+            case 'auth/network-request-failed':
+              errorMessage = 'Network error. Please check your internet connection.';
+              document.getElementById('debug-instructions').style.display = 'block';
+              break;
+          }
         }
         
         showError(errorMessage);

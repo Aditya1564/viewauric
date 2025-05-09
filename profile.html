@@ -396,83 +396,78 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js" type="module"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js" type="module"></script>
     
-    <!-- Simple Firebase Profile Script -->
+    <!-- Profile Script -->
     <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-      import { 
-        getAuth, 
-        signOut, 
-        onAuthStateChanged 
-      } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-      import { 
-        getFirestore, 
-        doc, 
-        getDoc, 
-        collection, 
-        query, 
-        where, 
-        getDocs, 
-        orderBy 
-      } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
-
-      // Firebase configuration object
-      const firebaseConfig = {
-        apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
-        authDomain: "auric-a0c92.firebaseapp.com",
-        projectId: "auric-a0c92",
-        storageBucket: "auric-a0c92.appspot.com",
-        messagingSenderId: "878979958342",
-        appId: "1:878979958342:web:e6092f7522488d21eaec47"
-      };
+      import * as AuthManager from "/js/firebase/auth-manager.js";
       
-      // Initialize Firebase services
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
-      const db = getFirestore(app);
+      // DOM elements for profile sections
+      const profileName = document.getElementById('profileName');
+      const profileEmail = document.getElementById('profileEmail');
+      const profileAvatar = document.getElementById('profileAvatar');
+      
+      // Check if user is logged in
+      if (!AuthManager.isLoggedIn()) {
+        console.log("User not logged in, redirecting to login page...");
+        window.location.href = "login.html";
+      }
       
       // Main initialization
       document.addEventListener('DOMContentLoaded', () => {
-        // Check if user is authenticated
-        onAuthStateChanged(auth, async (user) => {
-          if (!user) {
-            console.log("User not authenticated, redirecting to login page...");
-            window.location.href = "login.html";
-            return;
-          }
+        loadUserProfile();
+        setupProfilePage();
+      });
+      
+      // Load user profile data
+      async function loadUserProfile() {
+        // Get session data (already checked above)
+        const session = AuthManager.getSession();
+        
+        if (!session || !session.uid) {
+          console.error("No valid session found");
+          window.location.href = "login.html";
+          return;
+        }
+        
+        console.log("Loading profile for user:", session.uid);
+        
+        try {
+          // Get user profile from auth manager
+          const profileResult = await AuthManager.getUserProfile(session.uid);
           
-          console.log("User authenticated:", user.uid);
-          
-          try {
-            // Get user profile from Firestore
-            const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (profileResult.success) {
+            // Display user information
+            const userData = profileResult.profile;
+            displayUserInfo(userData);
             
-            // If user document exists, use that data
-            if (userDoc.exists()) {
-              const userData = userDoc.data();
-              
-              // Display user profile information
-              displayUserInfo(userData);
-              
-              // Display user orders
-              await loadUserOrders(user.uid);
-              
-              // Display addresses and payment methods if they exist
-              if (userData.addresses) {
-                displayUserAddresses(userData.addresses);
-              }
-              
-              if (userData.paymentMethods) {
-                displayPaymentMethods(userData.paymentMethods);
-              }
+            // Load user orders
+            await loadUserOrders(session.uid);
+            
+            // Display addresses and payment methods
+            if (userData.addresses) {
+              displayUserAddresses(userData.addresses);
             } else {
-              // If user document doesn't exist, create a new one
-              console.error("User document not found in Firestore. Creating a new one.");
-              
-              // Create default user data
-              const defaultUserData = {
+              displayUserAddresses([]);
+            }
+            
+            if (userData.paymentMethods) {
+              displayPaymentMethods(userData.paymentMethods);
+            } else {
+              displayPaymentMethods([]);
+            }
+          } else {
+            // Profile not found, but we're authenticated
+            console.log("Creating new user profile in Firestore...");
+            
+            // This shouldn't normally happen with our new auth manager,
+            // but handling it just in case
+            const user = AuthManager.auth.currentUser;
+            
+            if (user) {
+              // Create a default profile
+              const userData = {
                 uid: user.uid,
                 email: user.email,
-                displayName: user.displayName || 'User',
+                displayName: user.displayName || session.displayName || 'User',
                 photoURL: user.photoURL,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
@@ -481,40 +476,48 @@
                 orders: []
               };
               
-              // Save to Firestore
-              await setDoc(doc(db, "users", user.uid), defaultUserData);
+              // Update user profile
+              const updateResult = await AuthManager.updateUserProfile(user.uid, userData);
               
-              // Display the default data
-              displayUserInfo(defaultUserData);
-              displayUserAddresses([]);
-              displayPaymentMethods([]);
-              
-              // Also display empty orders section
-              const ordersContainer = document.getElementById('orders');
-              if (ordersContainer) {
-                ordersContainer.innerHTML = `
-                  <h2>My Orders</h2>
-                  <p class="empty-section-message">You haven't placed any orders yet.</p>
-                  <a href="index.html" class="shop-now-button">Start Shopping</a>
-                `;
+              if (updateResult.success) {
+                console.log("Successfully created user profile");
+                displayUserInfo(userData);
+                displayUserAddresses([]);
+                displayPaymentMethods([]);
+                
+                // Display empty orders section
+                displayEmptyOrdersSection();
+              } else {
+                console.error("Failed to create profile:", updateResult.error);
+                showError("Failed to create your profile. Please try logging in again.");
+                logoutUser();
               }
+            } else {
+              console.error("Auth state inconsistency - no current user");
+              showError("Session error. Please log in again.");
+              logoutUser();
             }
-          } catch (error) {
-            console.error("Error loading profile:", error);
-            showError("An error occurred while loading your profile. Please try again later.");
           }
-          
-          // Set up profile page tabs and logout
-          setupProfilePage();
-        });
-      });
+        } catch (error) {
+          console.error("Error loading profile:", error);
+          showError("An error occurred while loading your profile. Please try again later.");
+        }
+      }
+      
+      // Display empty orders section
+      function displayEmptyOrdersSection() {
+        const ordersContainer = document.getElementById('orders');
+        if (ordersContainer) {
+          ordersContainer.innerHTML = `
+            <h2>My Orders</h2>
+            <p class="empty-section-message">You haven't placed any orders yet.</p>
+            <a href="index.html" class="shop-now-button">Start Shopping</a>
+          `;
+        }
+      }
       
       // Display user information on the profile page
       function displayUserInfo(profile) {
-        const profileName = document.getElementById('profileName');
-        const profileEmail = document.getElementById('profileEmail');
-        const profileAvatar = document.getElementById('profileAvatar');
-        
         if (profileName) {
           profileName.textContent = profile.displayName || 'User';
         }
@@ -543,26 +546,15 @@
         if (!ordersContainer) return;
         
         try {
-          // Query orders collection for this user
-          const ordersQuery = query(
-            collection(db, "orders"),
-            where("userId", "==", userId),
-            orderBy("createdAt", "desc")
-          );
-          
-          const querySnapshot = await getDocs(ordersQuery);
-          const orders = [];
-          
-          querySnapshot.forEach((doc) => {
-            orders.push(doc.data());
-          });
+          // Get orders from auth manager
+          const ordersResult = await AuthManager.getUserOrders(userId);
           
           // Clear container and add heading
           ordersContainer.innerHTML = '<h2>My Orders</h2>';
           
-          if (orders.length > 0) {
+          if (ordersResult.success && ordersResult.orders.length > 0) {
             // Display each order
-            orders.forEach(order => {
+            ordersResult.orders.forEach(order => {
               // Format date for display
               let orderDate;
               if (order.createdAt && order.createdAt.seconds) {
@@ -578,7 +570,7 @@
               let orderHTML = `
                 <div class="order-card">
                   <div class="order-header">
-                    <span class="order-id">Order #${order.orderId || 'N/A'}</span>
+                    <span class="order-id">Order #${order.orderId || order.id || 'N/A'}</span>
                     <span class="order-date">${formattedDate}</span>
                   </div>
               `;
@@ -730,21 +722,24 @@
         // Logout functionality
         const logoutButton = document.getElementById('logout-button');
         if (logoutButton) {
-          logoutButton.addEventListener('click', async () => {
-            try {
-              // Sign out from Firebase
-              await signOut(auth);
-              
-              // Clear local storage
-              localStorage.removeItem('auric_user_session');
-              
-              // Redirect to login page
-              window.location.href = 'login.html';
-            } catch (error) {
-              console.error("Logout error:", error);
-              showError("Failed to log out. Please try again.");
-            }
-          });
+          logoutButton.addEventListener('click', logoutUser);
+        }
+      }
+      
+      // Logout function
+      async function logoutUser() {
+        try {
+          const result = await AuthManager.logoutUser();
+          
+          if (result.success) {
+            window.location.href = 'login.html';
+          } else {
+            console.error("Logout failed:", result.error);
+            showError("Failed to log out. Please try again.");
+          }
+        } catch (error) {
+          console.error("Logout error:", error);
+          showError("An error occurred during logout. Please try again.");
         }
       }
       

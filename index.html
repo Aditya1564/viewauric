@@ -644,58 +644,38 @@
     
     <!-- Firebase Authentication Check -->
     <script type="module">
-      // Import Firebase modules
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-      
-      // Your Firebase configuration
-      const firebaseConfig = {
-        apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
-        authDomain: "auric-a0c92.firebaseapp.com",
-        projectId: "auric-a0c92",
-        storageBucket: "auric-a0c92.firebasestorage.app",
-        messagingSenderId: "878979958342",
-        appId: "1:878979958342:web:e6092f7522488d21eaec47",
-        measurementId: "G-ZYZ750JHMB"
-      };
-      
-      // Initialize Firebase
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
+      import * as AuthManager from "/js/firebase/auth-manager.js";
       
       // Handle user authentication state
       document.addEventListener('DOMContentLoaded', () => {
         const userIcon = document.getElementById('user-icon');
         
         if (userIcon) {
-          // Check auth state
-          onAuthStateChanged(auth, (user) => {
+          // Check if user is logged in
+          if (AuthManager.isLoggedIn()) {
+            // User is logged in according to session
+            console.log("User is logged in from session");
+            userIcon.href = "profile.html";
+            userIcon.classList.add('logged-in');
+          } else {
+            // No session found
+            console.log("No user session found");
+            userIcon.href = "login.html";
+            userIcon.classList.remove('logged-in');
+          }
+          
+          // Also set up auth state observer for real-time updates
+          AuthManager.observeAuthState((user) => {
             if (user) {
               // User is signed in, update icon to go to profile
-              console.log("User is authenticated:", user.uid);
+              console.log("Auth state: User is signed in:", user.uid);
               userIcon.href = "profile.html";
-              
-              // Add visual indicator that user is logged in (optional)
               userIcon.classList.add('logged-in');
-              
-              // Store minimal user data in localStorage for other pages
-              const userData = {
-                uid: user.uid,
-                email: user.email,
-                displayName: user.displayName || 'User',
-                photoURL: user.photoURL,
-                loggedIn: true
-              };
-              
-              localStorage.setItem('auric_user_session', JSON.stringify(userData));
             } else {
               // User is not signed in, keep login link
-              console.log("User is not authenticated");
+              console.log("Auth state: User is signed out");
               userIcon.href = "login.html";
               userIcon.classList.remove('logged-in');
-              
-              // Clear any stored user data
-              localStorage.removeItem('auric_user_session');
             }
           });
         }
