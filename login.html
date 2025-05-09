@@ -154,80 +154,26 @@
 
     <!-- Footer Section (Add your existing footer here) -->
     
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    
+    <!-- Initialize Firebase -->
     <script>
-      // Simple auth simulation
-      document.addEventListener('DOMContentLoaded', function() {
-        const loginForm = document.getElementById('login-form');
-        const errorMessageEl = document.getElementById('error-message');
-        const successMessageEl = document.getElementById('success-message');
-        
-        if (loginForm) {
-          loginForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            if (!email || !password) {
-              showError('Please enter both email and password');
-              return;
-            }
-            
-            // Simple login simulation
-            showSuccess('Login successful!');
-            
-            // Redirect to profile page
-            setTimeout(() => {
-              window.location.href = 'index.html';
-            }, 1000);
-          });
-        }
-        
-        const googleLoginBtn = document.getElementById('google-login');
-        if (googleLoginBtn) {
-          googleLoginBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            // Simple Google login simulation
-            showSuccess('Google sign in successful!');
-            
-            // Redirect to profile page
-            setTimeout(() => {
-              window.location.href = 'index.html';
-            }, 1000);
-          });
-        }
-        
-        function showError(message) {
-          if (errorMessageEl) {
-            errorMessageEl.textContent = message;
-            errorMessageEl.style.display = 'block';
-            
-            if (successMessageEl) {
-              successMessageEl.style.display = 'none';
-            }
-            
-            setTimeout(() => {
-              errorMessageEl.style.display = 'none';
-            }, 5000);
-          }
-        }
-        
-        function showSuccess(message) {
-          if (successMessageEl) {
-            successMessageEl.textContent = message;
-            successMessageEl.style.display = 'block';
-            
-            if (errorMessageEl) {
-              errorMessageEl.style.display = 'none';
-            }
-            
-            setTimeout(() => {
-              successMessageEl.style.display = 'none';
-            }, 3000);
-          }
-        }
-      });
+      // Firebase configuration - you should replace these with your actual Firebase project details
+      const firebaseConfig = {
+        apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
+        authDomain: "auric-a0c92.firebaseapp.com",
+        projectId: "auric-a0c92",
+        storageBucket: "auric-a0c92.appspot.com",
+        messagingSenderId: "878979958342",
+        appId: "1:878979958342:web:e6092f7522488d21eaec47",
+        measurementId: "G-ZYZ750JHMB"
+      };
+      
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
     </script>
     
     <!-- Navigation script -->
@@ -235,8 +181,6 @@
     
     <!-- Banner rotator script -->
     <script src="js/banner-rotator.js"></script>
-    
-    <!-- Firebase SDK (imported via our simplified module) -->
     
     <!-- Login Script -->
     <script type="module">

@@ -391,7 +391,27 @@
     <script src="js/navigation.js?v=1.0.3"></script>
     <script src="js/banner-rotator.js?v=1.0.1"></script>
     
-    <!-- Firebase SDK (imported via our simplified module) -->
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    
+    <!-- Initialize Firebase -->
+    <script>
+      // Firebase configuration - you should replace these with your actual Firebase project details
+      const firebaseConfig = {
+        apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
+        authDomain: "auric-a0c92.firebaseapp.com",
+        projectId: "auric-a0c92",
+        storageBucket: "auric-a0c92.appspot.com",
+        messagingSenderId: "878979958342",
+        appId: "1:878979958342:web:e6092f7522488d21eaec47",
+        measurementId: "G-ZYZ750JHMB"
+      };
+      
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+    </script>
     
     <!-- Profile Script -->
     <script type="module">
@@ -408,7 +428,7 @@
       // Main initialization
       document.addEventListener('DOMContentLoaded', () => {
         // First check if we have a current Firebase user
-        const currentUser = FirebaseAuth.auth.currentUser;
+        const currentUser = firebase.auth().currentUser;
         
         if (currentUser) {
           console.log("Firebase user is logged in, loading profile:", currentUser.uid);
@@ -767,14 +787,14 @@
       // Logout function
       async function logoutUser() {
         try {
-          const result = await FirebaseAuth.logoutUser();
+          // Sign out with Firebase
+          await firebase.auth().signOut();
           
-          if (result) {
-            window.location.href = 'login.html';
-          } else {
-            console.error("Logout failed");
-            showError("Failed to log out. Please try again.");
-          }
+          // Clear session data
+          FirebaseAuth.clearSession();
+          
+          // Redirect to login
+          window.location.href = 'login.html';
         } catch (error) {
           console.error("Logout error:", error);
           showError("An error occurred during logout. Please try again.");
