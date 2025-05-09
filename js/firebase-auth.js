@@ -201,7 +201,7 @@ export async function loginWithGoogle() {
  */
 export async function logoutUser() {
   try {
-    await signOut(auth);
+    await auth.signOut();
     clearSession();
     return { success: true };
   } catch (error) {
@@ -220,10 +220,10 @@ export async function logoutUser() {
 export async function getUserProfile(userId) {
   try {
     // Access the user document at path: users/{userId}
-    const userRef = doc(db, "users", userId);
-    const userDoc = await getDoc(userRef);
+    const userRef = db.collection("users").doc(userId);
+    const userDoc = await userRef.get();
     
-    if (!userDoc.exists()) {
+    if (!userDoc.exists) {
       return { success: false, error: "User profile not found" };
     }
     
@@ -240,5 +240,5 @@ export async function getUserProfile(userId) {
  * @returns {Function} - Unsubscribe function
  */
 export function observeAuthState(callback) {
-  return onAuthStateChanged(auth, callback);
+  return auth.onAuthStateChanged(callback);
 }
