@@ -25,20 +25,62 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             // Check if Firebase is available
             if (typeof firebase !== 'undefined' && firebase.auth) {
-                // Load Cart Module
-                import('/js/firebase/firebase-cart.js')
-                    .then(module => {
-                        console.log('Firebase cart module loaded for checkout');
-                        firebaseCartModule = module;
-                        
-                        // Check if user is logged in, if so, reload cart from Firebase
-                        if (firebase.auth().currentUser) {
-                            loadCartFromFirebase();
+                // First check if FirebaseCartManager is already available globally
+                if (typeof FirebaseCartManager !== 'undefined') {
+                    console.log('Using global FirebaseCartManager for checkout');
+                    // Use the global FirebaseCartManager
+                    firebaseCartModule = {
+                        // Map to the new FirebaseCartManager API
+                        loadCartFromFirebase: async function() {
+                            const result = await FirebaseCartManager.getItems();
+                            return result;
+                        },
+                        saveCartToFirebase: async function(items) {
+                            return await FirebaseCartManager.saveItems(items);
+                        },
+                        clearFirebaseCart: async function() {
+                            return await FirebaseCartManager.clearItems();
                         }
-                    })
-                    .catch(err => {
-                        console.error('Failed to load Firebase cart module:', err);
-                    });
+                    };
+                    
+                    // Check if user is logged in, if so, reload cart from Firebase
+                    if (firebase.auth().currentUser) {
+                        loadCartFromFirebase();
+                    }
+                } else {
+                    // Load Cart Manager Module dynamically
+                    import('/js/firebase/firebase-cart-manager.js')
+                        .then(module => {
+                            console.log('Firebase cart manager module loaded for checkout');
+                            // Create adapter for the new API
+                            firebaseCartModule = {
+                                // Map to the new FirebaseCartManager API
+                                loadCartFromFirebase: async function() {
+                                    const manager = module.FirebaseCartManager || window.FirebaseCartManager;
+                                    const result = await manager.getItems();
+                                    return result;
+                                },
+                                saveCartToFirebase: async function(items) {
+                                    const manager = module.FirebaseCartManager || window.FirebaseCartManager;
+                                    return await manager.saveItems(items);
+                                },
+                                clearFirebaseCart: async function() {
+                                    const manager = module.FirebaseCartManager || window.FirebaseCartManager;
+                                    return await manager.clearItems();
+                                }
+                            };
+                            
+                            // Check if user is logged in, if so, reload cart from Firebase
+                            if (firebase.auth().currentUser) {
+                                loadCartFromFirebase();
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Failed to load Firebase cart manager module:', err);
+                            // Fallback to old module
+                            loadLegacyFirebaseCartModule();
+                        });
+                }
                 
                 // Load Orders Module
                 import('/js/firebase/firebase-orders.js')
@@ -58,6 +100,24 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error('Error initializing Firebase integration:', error);
         }
+    }
+    
+    // Fallback to legacy module if needed
+    function loadLegacyFirebaseCartModule() {
+        // Load old Cart Module
+        import('/js/firebase/firebase-cart.js')
+            .then(module => {
+                console.log('Legacy Firebase cart module loaded for checkout');
+                firebaseCartModule = module;
+                
+                // Check if user is logged in, if so, reload cart from Firebase
+                if (firebase.auth().currentUser) {
+                    loadCartFromFirebase();
+                }
+            })
+            .catch(err => {
+                console.error('Failed to load legacy Firebase cart module:', err);
+            });
     }
     
     /**
@@ -133,10 +193,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load cart items from local storage
     function loadCartFromLocalStorage() {
         try {
-            const savedCart = localStorage.getItem(STORAGE_KEY);
-            
-            if (savedCart) {
-                const cartItems = JSON.parse(savedCart);
+            // Use LocalStorageCart if available, otherwise fall back to direct localStorage access
+            if (typeof LocalStorageCart !== 'undefined') {
+                console.log('Using LocalStorageCart module for checkout');
+                const cartItems = LocalStorageCart.getItems();
                 
                 if (cartItems.length === 0) {
                     showEmptyCartMessage();
@@ -146,8 +206,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 displayCartItems(cartItems);
                 return cartItems;
             } else {
-                showEmptyCartMessage();
-                return [];
+                // Fallback to direct localStorage access
+                console.log('LocalStorageCart not available, using direct access');
+                const savedCart = localStorage.getItem(STORAGE_KEY);
+                
+                if (savedCart) {
+                    const cartItems = JSON.parse(savedCart);
+                    
+                    if (cartItems.length === 0) {
+                        showEmptyCartMessage();
+                        return [];
+                    }
+                    
+                    displayCartItems(cartItems);
+                    return cartItems;
+                } else {
+                    showEmptyCartMessage();
+                    return [];
+                }
             }
         } catch (error) {
             console.error('Error loading cart from storage:', error);
@@ -332,8 +408,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Also syncs with Firebase if user is logged in
     function updateLocalStorage(items) {
         try {
-            // Save to localStorage
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+            // First try to use our new cart modules if available
+            if (typeof LocalStorageCart !== 'undefined' && LocalStorageCart.saveItems) {
+                // Use new LocalStorageCart module
+                LocalStorageCart.saveItems(items);
+                console.log('Cart updated using LocalStorageCart module');
+            } else {
+                // Fallback to direct localStorage
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+                console.log('Cart updated using direct localStorage access');
+            }
             
             // If Firebase cart module is loaded and user is logged in, also save to Firebase
             if (firebaseCartModule && firebase.auth && firebase.auth().currentUser) {
@@ -351,6 +435,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } catch (error) {
             console.error('Error saving cart to storage:', error);
+            
+            // Always try the most basic fallback method on error
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+            } catch (fallbackError) {
+                console.error('Critical error: Failed to save cart with fallback method', fallbackError);
+            }
         }
     }
     
@@ -509,8 +600,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Clear cart from both localStorage and Firebase
     function clearCart() {
         try {
-            // Clear localStorage
-            localStorage.removeItem(STORAGE_KEY);
+            // First try to use our new cart modules if available
+            if (typeof LocalStorageCart !== 'undefined' && LocalStorageCart.clearItems) {
+                // Use new LocalStorageCart module
+                LocalStorageCart.clearItems();
+                console.log('Cart cleared using LocalStorageCart module');
+            } else {
+                // Fallback to direct localStorage
+                localStorage.removeItem(STORAGE_KEY);
+                console.log('Cart cleared using direct localStorage access');
+            }
             
             // Clear Firebase cart if user is logged in
             if (firebaseCartModule && firebase.auth && firebase.auth().currentUser) {
@@ -528,6 +627,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } catch (error) {
             console.error('Error clearing cart:', error);
+            
+            // Always try the most basic fallback method on error
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+            } catch (fallbackError) {
+                console.error('Critical error: Failed to clear cart with fallback method', fallbackError);
+            }
         }
     }
     
@@ -588,12 +694,25 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 } catch (firebaseError) {
                     console.error('Error loading cart from Firebase:', firebaseError);
-                    // Fall back to localStorage
+                    // Fall back to local storage
                 }
             }
             
-            // Fall back to localStorage
+            // Try to use LocalStorageCart if available
+            if (typeof LocalStorageCart !== 'undefined' && LocalStorageCart.getItems) {
+                try {
+                    const cartItems = LocalStorageCart.getItems();
+                    console.log('Cart loaded from LocalStorageCart for order processing');
+                    return cartItems;
+                } catch (localStorageCartError) {
+                    console.error('Error loading cart from LocalStorageCart:', localStorageCartError);
+                    // Fall back to direct localStorage access
+                }
+            }
+            
+            // Fall back to direct localStorage access
             const savedCart = localStorage.getItem(STORAGE_KEY);
+            console.log('Cart loaded from direct localStorage access for order processing');
             return savedCart ? JSON.parse(savedCart) : [];
         } catch (error) {
             console.error('Error loading cart from storage:', error);
