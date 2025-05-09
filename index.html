@@ -105,7 +105,7 @@
                 <!-- Navigation Icons -->
                 <div class="nav-icons">
                     <a href="#" class="icon-link"><i class="fas fa-search"></i></a>
-                    <a href="login.html" class="icon-link"><i class="fas fa-user"></i></a>
+                    <a href="profile.html" class="icon-link" id="user-icon"><i class="fas fa-user"></i></a>
                     <a href="#" class="icon-link"><i class="fas fa-heart"></i></a>
                 </div>
             </div>
@@ -641,5 +641,72 @@
     <script src="js/auto-slider.js?v=1.0.1"></script>
     <script src="js/banner-rotator.js?v=1.0.1"></script>
     <script src="js/cart-manager.js?v=1.0.0"></script>
+    
+    <!-- Firebase Authentication Check -->
+    <script type="module">
+      // Import Firebase modules
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+      
+      // Your Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
+        authDomain: "auric-a0c92.firebaseapp.com",
+        projectId: "auric-a0c92",
+        storageBucket: "auric-a0c92.firebasestorage.app",
+        messagingSenderId: "878979958342",
+        appId: "1:878979958342:web:e6092f7522488d21eaec47",
+        measurementId: "G-ZYZ750JHMB"
+      };
+      
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      
+      // Handle user authentication state
+      document.addEventListener('DOMContentLoaded', () => {
+        const userIcon = document.getElementById('user-icon');
+        
+        if (userIcon) {
+          // Check auth state
+          onAuthStateChanged(auth, (user) => {
+            if (user) {
+              // User is signed in, update icon to go to profile
+              console.log("User is authenticated:", user.uid);
+              userIcon.href = "profile.html";
+              
+              // Add visual indicator that user is logged in (optional)
+              userIcon.classList.add('logged-in');
+              
+              // Store minimal user data in localStorage for other pages
+              const userData = {
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName || 'User',
+                photoURL: user.photoURL,
+                loggedIn: true
+              };
+              
+              localStorage.setItem('auric_user_session', JSON.stringify(userData));
+            } else {
+              // User is not signed in, keep login link
+              console.log("User is not authenticated");
+              userIcon.href = "login.html";
+              userIcon.classList.remove('logged-in');
+              
+              // Clear any stored user data
+              localStorage.removeItem('auric_user_session');
+            }
+          });
+        }
+      });
+    </script>
+    
+    <!-- Add styles for logged-in user icon -->
+    <style>
+      .icon-link.logged-in i.fa-user {
+        color: #c8a97e; /* Gold color to indicate logged in state */
+      }
+    </style>
   </body>
 </html>
