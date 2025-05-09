@@ -406,16 +406,53 @@
       const profileEmail = document.getElementById('profileEmail');
       const profileAvatar = document.getElementById('profileAvatar');
       
-      // Check if user is logged in
-      if (!AuthManager.isLoggedIn()) {
-        console.log("User not logged in, redirecting to login page...");
-        window.location.href = "login.html";
-      }
+      // We'll handle authentication in the DOMContentLoaded event
+      // This will make sure we check both the session AND Firebase auth state
       
       // Main initialization
       document.addEventListener('DOMContentLoaded', () => {
-        loadUserProfile();
-        setupProfilePage();
+        // First check if we have a current Firebase user
+        const currentUser = AuthManager.auth.currentUser;
+        
+        if (currentUser) {
+          console.log("Firebase user is logged in, loading profile:", currentUser.uid);
+          loadUserProfile();
+          setupProfilePage();
+        } else {
+          // No current Firebase user, let's check onAuthStateChanged
+          console.log("No current Firebase user, waiting for auth state change...");
+          
+          // Set up a temporary loading state
+          const profileContent = document.querySelector('.profile-content');
+          if (profileContent) {
+            profileContent.innerHTML = `
+              <div class="loading-container" style="text-align: center; padding: 40px;">
+                <div class="spinner" style="margin: 0 auto;"></div>
+                <p>Loading your profile...</p>
+              </div>
+            `;
+          }
+          
+          // Set up auth state listener
+          const unsubscribe = AuthManager.observeAuthState((user) => {
+            if (user) {
+              console.log("Auth state changed: user is signed in:", user.uid);
+              unsubscribe(); // Remove listener since we don't need it anymore
+              loadUserProfile();
+              setupProfilePage();
+            } else {
+              console.log("Auth state changed: user is signed out, redirecting to login");
+              window.location.href = "login.html";
+            }
+          });
+          
+          // Also check if we have a session, if not redirect immediately
+          const session = AuthManager.getSession();
+          if (!session || !session.uid) {
+            console.log("No session found, redirecting to login page");
+            window.location.href = "login.html";
+          }
+        }
       });
       
       // Load user profile data
