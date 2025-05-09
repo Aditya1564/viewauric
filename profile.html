@@ -398,7 +398,7 @@
     
     <!-- Initialize Firebase -->
     <script>
-      // Firebase configuration - you should replace these with your actual Firebase project details
+      // Firebase configuration
       const firebaseConfig = {
         apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
         authDomain: "auric-a0c92.firebaseapp.com",
@@ -413,9 +413,11 @@
       firebase.initializeApp(firebaseConfig);
     </script>
     
+    <!-- Firebase Auth Global Module -->
+    <script src="js/firebase/firebase-auth.js"></script>
+    
     <!-- Profile Script -->
-    <script type="module">
-      import * as FirebaseAuth from "/js/firebase/firebase-auth.js";
+    <script>
       
       // DOM elements for profile sections
       const profileName = document.getElementById('profileName');
