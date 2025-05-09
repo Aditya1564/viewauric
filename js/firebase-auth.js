@@ -1,45 +1,14 @@
 /**
  * Simplified Firebase Authentication
  * Handles user login, signup, and profile management
+ * 
+ * This module uses Firebase Compat API which is loaded via script tags in the HTML
  */
 
-import { 
-  initializeApp 
-} from "firebase/app";
-import { 
-  getAuth, 
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword, 
-  GoogleAuthProvider,
-  signInWithPopup,
-  signOut,
-  onAuthStateChanged
-} from "firebase/auth";
-import { 
-  getFirestore, 
-  doc, 
-  setDoc, 
-  getDoc, 
-  updateDoc, 
-  Timestamp 
-} from "firebase/firestore";
-
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
-  authDomain: "auric-a0c92.firebaseapp.com",
-  projectId: "auric-a0c92",
-  storageBucket: "auric-a0c92.appspot.com",
-  messagingSenderId: "878979958342",
-  appId: "1:878979958342:web:e6092f7522488d21eaec47",
-  measurementId: "G-ZYZ750JHMB"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const googleProvider = new GoogleAuthProvider();
+// Access the already initialized Firebase
+const auth = firebase.auth();
+const db = firebase.firestore();
+const googleProvider = new firebase.auth.GoogleAuthProvider();
 
 // Session Management
 /**
@@ -89,7 +58,7 @@ export function isLoggedIn() {
 export async function registerWithEmail(email, password, userData) {
   try {
     // Create Firebase Auth user
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
     const user = userCredential.user;
     
     // Create user profile in Firestore at the path: users/{userId}
@@ -97,12 +66,12 @@ export async function registerWithEmail(email, password, userData) {
       uid: user.uid,
       email: user.email,
       displayName: userData.displayName || userData.name || 'User',
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now()
+      createdAt: firebase.firestore.Timestamp.now(),
+      updatedAt: firebase.firestore.Timestamp.now()
     };
     
     // This stores the user data at "users/{user.uid}" path in Firestore
-    await setDoc(doc(db, "users", user.uid), userProfile);
+    await db.collection("users").doc(user.uid).set(userProfile);
     
     // Save session
     saveSession({
@@ -128,20 +97,20 @@ export async function registerWithEmail(email, password, userData) {
 export async function loginWithEmail(email, password) {
   try {
     // Sign in with Firebase Auth
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await auth.signInWithEmailAndPassword(email, password);
     const user = userCredential.user;
     
     // Get or create user profile in Firestore at path: users/{user.uid}
     let userProfile;
-    const userRef = doc(db, "users", user.uid);
-    const userDoc = await getDoc(userRef);
+    const userRef = db.collection("users").doc(user.uid);
+    const userDoc = await userRef.get();
     
-    if (userDoc.exists()) {
+    if (userDoc.exists) {
       // User exists, update last login at users/{user.uid}
       userProfile = userDoc.data();
-      await updateDoc(userRef, { 
-        lastLogin: Timestamp.now(),
-        updatedAt: Timestamp.now()
+      await userRef.update({ 
+        lastLogin: firebase.firestore.Timestamp.now(),
+        updatedAt: firebase.firestore.Timestamp.now()
       });
     } else {
       // User doesn't exist in Firestore, create profile at users/{user.uid}
@@ -149,12 +118,12 @@ export async function loginWithEmail(email, password) {
         uid: user.uid,
         email: user.email,
         displayName: user.displayName || 'User',
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
-        lastLogin: Timestamp.now()
+        createdAt: firebase.firestore.Timestamp.now(),
+        updatedAt: firebase.firestore.Timestamp.now(),
+        lastLogin: firebase.firestore.Timestamp.now()
       };
       // This stores the user data at "users/{user.uid}" path
-      await setDoc(userRef, userProfile);
+      await userRef.set(userProfile);
     }
     
     // Save session
@@ -180,20 +149,20 @@ export async function loginWithEmail(email, password) {
 export async function loginWithGoogle() {
   try {
     // Sign in with Google
-    const result = await signInWithPopup(auth, googleProvider);
+    const result = await auth.signInWithPopup(googleProvider);
     const user = result.user;
     
     // Get or create user profile in Firestore at path: users/{user.uid}
     let userProfile;
-    const userRef = doc(db, "users", user.uid);
-    const userDoc = await getDoc(userRef);
+    const userRef = db.collection("users").doc(user.uid);
+    const userDoc = await userRef.get();
     
-    if (userDoc.exists()) {
+    if (userDoc.exists) {
       // User exists, update last login at users/{user.uid}
       userProfile = userDoc.data();
-      await updateDoc(userRef, { 
-        lastLogin: Timestamp.now(),
-        updatedAt: Timestamp.now()
+      await userRef.update({ 
+        lastLogin: firebase.firestore.Timestamp.now(),
+        updatedAt: firebase.firestore.Timestamp.now()
       });
     } else {
       // User doesn't exist in Firestore, create profile at users/{user.uid}
@@ -202,12 +171,12 @@ export async function loginWithGoogle() {
         email: user.email,
         displayName: user.displayName || 'User',
         photoURL: user.photoURL,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
-        lastLogin: Timestamp.now()
+        createdAt: firebase.firestore.Timestamp.now(),
+        updatedAt: firebase.firestore.Timestamp.now(),
+        lastLogin: firebase.firestore.Timestamp.now()
       };
       // This stores the user data at "users/{user.uid}" path
-      await setDoc(userRef, userProfile);
+      await userRef.set(userProfile);
     }
     
     // Save session

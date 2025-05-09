@@ -642,9 +642,31 @@
     <script src="js/banner-rotator.js?v=1.0.1"></script>
     <script src="js/cart-manager.js?v=1.0.0"></script>
     
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    
+    <!-- Initialize Firebase -->
+    <script>
+      // Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
+        authDomain: "auric-a0c92.firebaseapp.com",
+        projectId: "auric-a0c92",
+        storageBucket: "auric-a0c92.appspot.com",
+        messagingSenderId: "878979958342",
+        appId: "1:878979958342:web:e6092f7522488d21eaec47",
+        measurementId: "G-ZYZ750JHMB"
+      };
+      
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+    </script>
+
     <!-- Firebase Authentication Check -->
     <script type="module">
-      import * as AuthManager from "/js/firebase/auth-manager.js";
+      import * as FirebaseAuth from "/js/firebase-auth.js";
       
       // Handle user authentication state
       document.addEventListener('DOMContentLoaded', () => {
@@ -652,7 +674,7 @@
         
         if (userIcon) {
           // First check current Firebase user
-          const currentUser = AuthManager.auth.currentUser;
+          const currentUser = firebase.auth().currentUser;
           
           if (currentUser) {
             // Firebase user is logged in
@@ -661,7 +683,7 @@
             userIcon.classList.add('logged-in');
           } else {
             // No current Firebase user, check session
-            if (AuthManager.isLoggedIn()) {
+            if (FirebaseAuth.isLoggedIn()) {
               // User is logged in according to session
               console.log("User is logged in from session");
               userIcon.href = "profile.html";
@@ -675,13 +697,13 @@
           }
           
           // Also set up auth state observer for real-time updates
-          AuthManager.observeAuthState((user) => {
+          FirebaseAuth.observeAuthState((user) => {
             if (user) {
               // User is signed in, update icon to go to profile
               console.log("Auth state: User is signed in:", user.uid);
               
               // Save session data in case it was missing
-              AuthManager.saveSession({
+              FirebaseAuth.saveSession({
                 uid: user.uid,
                 email: user.email,
                 displayName: user.displayName || 'User',
@@ -694,7 +716,7 @@
             } else {
               // User is not signed in, keep login link
               console.log("Auth state: User is signed out");
-              AuthManager.clearSession();
+              FirebaseAuth.clearSession();
               userIcon.href = "login.html";
               userIcon.classList.remove('logged-in');
             }
