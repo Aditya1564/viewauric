@@ -192,6 +192,9 @@ const CartManager = (function() {
         saveCartToStorage();
         updateCartUI();
         
+        // Explicitly force Firebase sync if user is logged in
+        syncWithFirebase();
+        
         // Show the cart panel
         openCartPanel();
     }
@@ -208,6 +211,9 @@ const CartManager = (function() {
             console.log('Item removed from cart');
             saveCartToStorage();
             updateCartUI();
+            
+            // Explicitly force Firebase sync if user is logged in
+            syncWithFirebase();
         }
     }
     
@@ -225,6 +231,9 @@ const CartManager = (function() {
             console.log('Updated quantity for', item.name, 'to', item.quantity);
             saveCartToStorage();
             updateCartUI();
+            
+            // Explicitly force Firebase sync if user is logged in
+            syncWithFirebase();
         }
     }
     
@@ -257,6 +266,20 @@ const CartManager = (function() {
         cartItems = [];
         saveCartToStorage();
         updateCartUI();
+        
+        // Explicitly clear Firebase cart if user is logged in
+        if (isFirebaseEnabled && firebaseCartSync && firebase.auth().currentUser) {
+            firebaseCartSync.clearFirebaseCart()
+                .then(result => {
+                    if (result.success) {
+                        console.log('Cart cleared from Firebase');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error clearing Firebase cart:', err);
+                });
+        }
+        
         console.log('Cart cleared');
     }
     

@@ -29,9 +29,11 @@ export async function saveCartToFirebase(cartItems) {
       return { success: false, error: 'User not logged in' };
     }
     
-    // Create a cart document in the user's carts collection
-    // The structure is: users/{userId}/carts/{cartId}
-    const cartRef = db.collection('users').doc(user.uid).collection(CART_COLLECTION).doc('current');
+    // Create a cart document directly in the user collection at path user/{userId}/carts
+    // This matches the exact path requested: user/{userId}/carts
+    const cartRef = db.collection('user').doc(user.uid).collection(CART_COLLECTION).doc('current');
+    
+    console.log('Saving cart to Firebase path:', `user/${user.uid}/carts/current`);
     
     // Save the cart data
     await cartRef.set({
@@ -62,8 +64,9 @@ export async function loadCartFromFirebase() {
       return { success: false, items: [], error: 'User not logged in' };
     }
     
-    // Get the cart document from user's carts collection
-    const cartRef = db.collection('users').doc(user.uid).collection(CART_COLLECTION).doc('current');
+    // Get the cart document from user/{userId}/carts path
+    const cartRef = db.collection('user').doc(user.uid).collection(CART_COLLECTION).doc('current');
+    console.log('Loading cart from Firebase path:', `user/${user.uid}/carts/current`);
     const cartDoc = await cartRef.get();
     
     if (cartDoc.exists) {
