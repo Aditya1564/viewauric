@@ -513,8 +513,16 @@
                 }
             });
             
-            // Add to cart button click handler
+            // Add to cart button click handler - fixed to prevent duplicate adds
+            let isAddingToCart = false; // Flag to prevent multiple simultaneous adds
             addToCartBtn.addEventListener('click', async function() {
+                // Prevent duplicate adds if a click is already being processed
+                if (isAddingToCart) {
+                    console.log('Add to cart operation already in progress');
+                    return;
+                }
+                
+                isAddingToCart = true; // Set flag to prevent duplicates
                 const quantity = parseInt(quantityInput.value);
                 
                 try {
@@ -530,6 +538,9 @@
                 } catch (error) {
                     console.error('Error adding product to cart:', error);
                     showToast('Error adding product to cart. Please try again.', 'error');
+                } finally {
+                    // Always reset the flag when done
+                    isAddingToCart = false;
                 }
             });
             

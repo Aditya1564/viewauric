@@ -423,8 +423,10 @@ const CartManager = (function() {
                 closeCartPanel();
             }
             
-            // Add to cart button click
-            if (e.target.closest('.add-to-cart-btn') || e.target.closest('.add-to-cart-btn-small')) {
+            // Add to cart button click - except on the product detail page (that has its own handler)
+            if ((e.target.closest('.add-to-cart-btn-small') || 
+                (e.target.closest('.add-to-cart-btn') && !document.querySelector('.product-detail-container')))
+            {
                 e.preventDefault();
                 
                 const button = e.target.closest('.add-to-cart-btn') || e.target.closest('.add-to-cart-btn-small');
