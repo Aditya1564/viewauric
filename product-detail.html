@@ -518,6 +518,70 @@
                     }
                 });
                 
+                // Toast notification function
+                function showToast(message, type = 'success') {
+                    // Create toast container if it doesn't exist
+                    let toastContainer = document.querySelector('.toast-container');
+                    if (!toastContainer) {
+                        toastContainer = document.createElement('div');
+                        toastContainer.className = 'toast-container';
+                        document.body.appendChild(toastContainer);
+                        
+                        // Add style for toast container
+                        const style = document.createElement('style');
+                        style.textContent = `
+                            .toast-container {
+                                position: fixed;
+                                bottom: 20px;
+                                right: 20px;
+                                z-index: 9999;
+                            }
+                            .toast {
+                                padding: 12px 20px;
+                                color: white;
+                                border-radius: 4px;
+                                margin-bottom: 10px;
+                                min-width: 250px;
+                                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                                animation: fadein 0.5s, fadeout 0.5s 2.5s;
+                                opacity: 0;
+                                animation-fill-mode: forwards;
+                            }
+                            .toast.success {
+                                background-color: #4CAF50;
+                            }
+                            .toast.error {
+                                background-color: #F44336;
+                            }
+                            .toast.info {
+                                background-color: #2196F3;
+                            }
+                            @keyframes fadein {
+                                from {opacity: 0; transform: translateY(20px);}
+                                to {opacity: 1; transform: translateY(0);}
+                            }
+                            @keyframes fadeout {
+                                from {opacity: 1; transform: translateY(0);}
+                                to {opacity: 0; transform: translateY(-20px);}
+                            }
+                        `;
+                        document.head.appendChild(style);
+                    }
+                    
+                    // Create toast element
+                    const toast = document.createElement('div');
+                    toast.className = `toast ${type}`;
+                    toast.textContent = message;
+                    
+                    // Add to container
+                    toastContainer.appendChild(toast);
+                    
+                    // Remove after animation
+                    setTimeout(() => {
+                        toast.remove();
+                    }, 3000);
+                }
+                
                 // Add to cart button click handler - fixed to prevent duplicate adds
                 let isAddingToCart = false; // Flag to prevent multiple simultaneous adds
                 addToCartBtn.addEventListener('click', async function() {
@@ -548,70 +612,7 @@
                         isAddingToCart = false;
                     }
                 });
-                
-                // Toast notification function
-                function showToast(message, type = 'success') {
-                    // Create toast container if it doesn't exist
-                    let toastContainer = document.querySelector('.toast-container');
-                    if (!toastContainer) {
-                        toastContainer = document.createElement('div');
-                        toastContainer.className = 'toast-container';
-                        document.body.appendChild(toastContainer);
-                        
-                        // Add style for toast container
-                        const style = document.createElement('style');
-                        style.textContent = `
-                        .toast-container {
-                            position: fixed;
-                            bottom: 20px;
-                            right: 20px;
-                            z-index: 9999;
-                        }
-                        .toast {
-                            padding: 12px 20px;
-                            color: white;
-                            border-radius: 4px;
-                            margin-bottom: 10px;
-                            min-width: 250px;
-                            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-                            animation: fadein 0.5s, fadeout 0.5s 2.5s;
-                            opacity: 0;
-                            animation-fill-mode: forwards;
-                        }
-                        .toast.success {
-                            background-color: #4CAF50;
-                        }
-                        .toast.error {
-                            background-color: #F44336;
-                        }
-                        .toast.info {
-                            background-color: #2196F3;
-                        }
-                        @keyframes fadein {
-                            from {opacity: 0; transform: translateY(20px);}
-                            to {opacity: 1; transform: translateY(0);}
-                        }
-                        @keyframes fadeout {
-                            from {opacity: 1; transform: translateY(0);}
-                            to {opacity: 0; transform: translateY(-20px);}
-                        }
-                    `;
-                    document.head.appendChild(style);
-                }
-                
-                // Create toast element
-                const toast = document.createElement('div');
-                toast.className = `toast ${type}`;
-                toast.textContent = message;
-                
-                // Add to container
-                toastContainer.appendChild(toast);
-                
-                // Remove after animation
-                setTimeout(() => {
-                    toast.remove();
-                }, 3000);
-            }
+            }, 500); // 500ms delay to ensure Firebase is loaded
         });
     </script>
     <!-- Updated layout version -->
