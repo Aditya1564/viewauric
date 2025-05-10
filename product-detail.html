@@ -486,78 +486,81 @@
     <!-- Product Detail Page Cart Integration -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Get the product details
-            const productDetails = {
-                id: 'EM-ST-2025', // SKU as ID
-                name: document.querySelector('.product-title').textContent,
-                price: parseFloat(document.querySelector('.price-value').textContent.replace('₹', '').replace(',', '')),
-                image: document.querySelector('.main-image-container img').src,
-            };
-            
-            console.log('Product details loaded:', productDetails);
-            
-            // Get DOM elements
-            const addToCartBtn = document.querySelector('.add-to-cart-btn');
-            const quantityInput = document.querySelector('.quantity-input');
-            const incrementBtn = document.querySelector('.quantity-btn.increment');
-            const decrementBtn = document.querySelector('.quantity-btn.decrement');
-            
-            // Quantity controls
-            incrementBtn.addEventListener('click', function() {
-                let currentQty = parseInt(quantityInput.value);
-                quantityInput.value = currentQty + 1;
-            });
-            
-            decrementBtn.addEventListener('click', function() {
-                let currentQty = parseInt(quantityInput.value);
-                if (currentQty > 1) {
-                    quantityInput.value = currentQty - 1;
-                }
-            });
-            
-            // Add to cart button click handler - fixed to prevent duplicate adds
-            let isAddingToCart = false; // Flag to prevent multiple simultaneous adds
-            addToCartBtn.addEventListener('click', async function() {
-                // Prevent duplicate adds if a click is already being processed
-                if (isAddingToCart) {
-                    console.log('Add to cart operation already in progress');
-                    return;
-                }
+            // Ensure Firebase is initialized before proceeding
+            // Wait a short time to ensure Firebase is properly initialized
+            setTimeout(function() {
+                // Get the product details
+                const productDetails = {
+                    id: 'EM-ST-2025', // SKU as ID
+                    name: document.querySelector('.product-title').textContent,
+                    price: parseFloat(document.querySelector('.price-value').textContent.replace('₹', '').replace(',', '')),
+                    image: document.querySelector('.main-image-container img').src,
+                };
                 
-                isAddingToCart = true; // Set flag to prevent duplicates
-                const quantity = parseInt(quantityInput.value);
+                console.log('Product details loaded:', productDetails);
                 
-                try {
-                    // Check if CartManager is available
-                    if (typeof CartManager !== 'undefined' && CartManager.addToCart) {
-                        console.log('Using CartManager to add product to cart');
-                        await CartManager.addToCart(productDetails, quantity);
-                        showToast('Product added to cart successfully!');
-                    } else {
-                        console.error('CartManager not available');
-                        showToast('Error adding product to cart. Please try again.', 'error');
+                // Get DOM elements
+                const addToCartBtn = document.querySelector('.add-to-cart-btn');
+                const quantityInput = document.querySelector('.quantity-input');
+                const incrementBtn = document.querySelector('.quantity-btn.increment');
+                const decrementBtn = document.querySelector('.quantity-btn.decrement');
+                
+                // Quantity controls
+                incrementBtn.addEventListener('click', function() {
+                    let currentQty = parseInt(quantityInput.value);
+                    quantityInput.value = currentQty + 1;
+                });
+                
+                decrementBtn.addEventListener('click', function() {
+                    let currentQty = parseInt(quantityInput.value);
+                    if (currentQty > 1) {
+                        quantityInput.value = currentQty - 1;
                     }
-                } catch (error) {
-                    console.error('Error adding product to cart:', error);
-                    showToast('Error adding product to cart. Please try again.', 'error');
-                } finally {
-                    // Always reset the flag when done
-                    isAddingToCart = false;
-                }
-            });
-            
-            // Toast notification function
-            function showToast(message, type = 'success') {
-                // Create toast container if it doesn't exist
-                let toastContainer = document.querySelector('.toast-container');
-                if (!toastContainer) {
-                    toastContainer = document.createElement('div');
-                    toastContainer.className = 'toast-container';
-                    document.body.appendChild(toastContainer);
+                });
+                
+                // Add to cart button click handler - fixed to prevent duplicate adds
+                let isAddingToCart = false; // Flag to prevent multiple simultaneous adds
+                addToCartBtn.addEventListener('click', async function() {
+                    // Prevent duplicate adds if a click is already being processed
+                    if (isAddingToCart) {
+                        console.log('Add to cart operation already in progress');
+                        return;
+                    }
                     
-                    // Add style for toast container
-                    const style = document.createElement('style');
-                    style.textContent = `
+                    isAddingToCart = true; // Set flag to prevent duplicates
+                    const quantity = parseInt(quantityInput.value);
+                    
+                    try {
+                        // Check if CartManager is available
+                        if (typeof CartManager !== 'undefined' && CartManager.addToCart) {
+                            console.log('Using CartManager to add product to cart');
+                            await CartManager.addToCart(productDetails, quantity);
+                            showToast('Product added to cart successfully!');
+                        } else {
+                            console.error('CartManager not available');
+                            showToast('Error adding product to cart. Please try again.', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error adding product to cart:', error);
+                        showToast('Error adding product to cart. Please try again.', 'error');
+                    } finally {
+                        // Always reset the flag when done
+                        isAddingToCart = false;
+                    }
+                });
+                
+                // Toast notification function
+                function showToast(message, type = 'success') {
+                    // Create toast container if it doesn't exist
+                    let toastContainer = document.querySelector('.toast-container');
+                    if (!toastContainer) {
+                        toastContainer = document.createElement('div');
+                        toastContainer.className = 'toast-container';
+                        document.body.appendChild(toastContainer);
+                        
+                        // Add style for toast container
+                        const style = document.createElement('style');
+                        style.textContent = `
                         .toast-container {
                             position: fixed;
                             bottom: 20px;
