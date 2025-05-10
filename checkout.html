@@ -36,15 +36,25 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Using Firebase configuration for authentication and order storage');
             
-            // Initialize Firebase
-            firebase.initializeApp(firebaseConfig);
-            
-            // Check if user is logged in
-            firebase.auth().onAuthStateChanged(function(user) {
-                console.log('Auth state changed:', user ? 'Logged in' : 'Not logged in');
-                // Update UI based on auth state
-                updateAuthUI(user);
-            });
+            try {
+                // Only initialize Firebase if it's not already initialized
+                if (!firebase.apps || !firebase.apps.length) {
+                    // Initialize Firebase
+                    firebase.initializeApp(firebaseConfig);
+                    console.log('Firebase initialized successfully');
+                } else {
+                    console.log('Firebase already initialized, using existing app');
+                }
+                
+                // Check if user is logged in
+                firebase.auth().onAuthStateChanged(function(user) {
+                    console.log('Auth state changed:', user ? 'Logged in' : 'Not logged in');
+                    // Update UI based on auth state
+                    updateAuthUI(user);
+                });
+            } catch (error) {
+                console.error('Error initializing Firebase:', error);
+            }
         });
         
         function updateAuthUI(user) {

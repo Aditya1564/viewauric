@@ -921,11 +921,29 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Initializing checkout page...');
         
         try {
-            // Load and display cart items - wait for this to complete
-            const cartItems = await loadCartItems();
+            // Set up auth state listener to handle login changes
+            if (typeof firebase !== 'undefined' && firebase.auth) {
+                firebase.auth().onAuthStateChanged(function(user) {
+                    console.log('Auth state changed on checkout page:', user ? 'Logged in' : 'Not logged in');
+                    
+                    // Update checkout button state based on login status
+                    updateCheckoutButtonState();
+                    
+                    // Reload cart items when auth state changes
+                    loadCartItems().then(items => {
+                        console.log('Reloaded cart after auth change, items:', items?.length || 0);
+                        // Make sure we display the items properly
+                        if (items && items.length > 0) {
+                            displayCartItems(items);
+                        } else {
+                            showEmptyCartMessage();
+                        }
+                    });
+                });
+            }
             
-            // Display the cart items in the order summary
-            displayCartItems(cartItems);
+            // Initial load of cart items
+            const cartItems = await loadCartItems();
             
             // Store cart items in a global variable for quantity controls
             window.checkoutCartItems = cartItems;
