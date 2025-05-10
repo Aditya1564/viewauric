@@ -248,6 +248,9 @@
   align-items: center;
   justify-content: center;
   font-weight: 700;
+  /* Always show the count badge */
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 /* ================ ADD TO CART BUTTONS ================ */
