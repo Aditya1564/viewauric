@@ -650,7 +650,28 @@ document.addEventListener('DOMContentLoaded', function() {
             showOrderConfirmation(orderData);
             
             // Clear cart after successful order
-            clearCart();
+            try {
+                console.log('About to clear cart after successful order');
+                clearCart();
+                
+                // Forcibly reset the cart display immediately
+                if (orderSummaryContainer) {
+                    orderSummaryContainer.innerHTML = '<p>No products added yet.</p>';
+                }
+                if (orderTotalElement) {
+                    orderTotalElement.textContent = '₹0.00';
+                }
+                if (productListContainer) {
+                    productListContainer.innerHTML = '';
+                }
+                
+                // Reset global cart items
+                window.checkoutCartItems = [];
+                
+                console.log('Cart cleared after successful order submission');
+            } catch (clearError) {
+                console.error('Error clearing cart:', clearError);
+            }
             
             // Reset form
             checkoutForm.reset();
@@ -985,7 +1006,54 @@ document.addEventListener('DOMContentLoaded', function() {
             orderDetailsElement.innerHTML = detailsHTML;
         }
         
-        const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+        // Create a reference to the modal element
+        const confirmationModalElement = document.getElementById('confirmationModal');
+        const confirmationModal = new bootstrap.Modal(confirmationModalElement);
+        
+        // Add an event listener for when the modal is fully shown
+        confirmationModalElement.addEventListener('shown.bs.modal', function() {
+            console.log('Order confirmation modal shown, ensuring cart is cleared');
+            
+            // Ensure the cart is cleared (this is a backup in case the first clear didn't work)
+            setTimeout(() => {
+                // Clear cart items from storage
+                if (typeof CartManager !== 'undefined' && typeof CartManager.clearCart === 'function') {
+                    CartManager.clearCart().catch(e => console.error('Error in modal shown event:', e));
+                }
+                
+                // Clear the cart UI in cart-manager.js
+                if (typeof CartManager !== 'undefined' && typeof CartManager.updateCartUI === 'function') {
+                    CartManager.updateCartUI();
+                }
+                
+                // Also clear from module directly if available
+                if (typeof LocalStorageCart !== 'undefined' && LocalStorageCart.clearItems) {
+                    LocalStorageCart.clearItems();
+                }
+                
+                // Basic localStorage clearing fallback
+                localStorage.removeItem(STORAGE_KEY);
+                
+                // Ensure the UI is cleared
+                if (orderSummaryContainer) {
+                    orderSummaryContainer.innerHTML = '<p>No products added yet.</p>';
+                }
+                if (orderTotalElement) {
+                    orderTotalElement.textContent = '₹0.00';
+                }
+                
+                console.log('Cart completely cleared after order confirmation modal shown');
+            }, 500);
+        }, { once: true }); // Only run this event handler once
+        
+        // Add an event listener for when the modal is closed
+        confirmationModalElement.addEventListener('hidden.bs.modal', function() {
+            console.log('Order confirmation modal closed, redirecting to index page');
+            // Redirect to home page after modal is closed
+            window.location.href = 'index.html';
+        }, { once: true }); // Only run this event handler once
+        
+        // Show the modal
         confirmationModal.show();
     }
     
