@@ -581,7 +581,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 name: item.name,
                 price: item.price,
                 quantity: item.quantity,
-                total: item.price * item.quantity
+                total: item.price * item.quantity,
+                image: item.image // Add image URL for each product
             })),
             orderTotal: calculateTotal(cartItems),
             orderReference: generateOrderReference(),
