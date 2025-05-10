@@ -596,6 +596,14 @@ document.addEventListener('DOMContentLoaded', function() {
         submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
         
         try {
+            // Check if Razorpay payment method is selected
+            if (paymentMethod === 'Razorpay') {
+                // Handle Razorpay payment flow
+                await processRazorpayPayment(orderData);
+                return; // Exit early as the payment flow will continue in the Razorpay callback
+            }
+            
+            // For non-Razorpay payments (e.g. Cash on Delivery), continue with normal flow
             // Save order to Firebase if the module is loaded and user is logged in
             if (firebaseOrdersModule) {
                 console.log('Saving order to Firebase...');
@@ -622,32 +630,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('Order saved to Firebase with ID:', saveResult.orderId);
             }
             
-            // Send order confirmation emails using the Nodemailer server
-            try {
-                console.log('Sending order confirmation emails via Nodemailer server...');
-                const emailServerUrl = window.location.origin + '/api/send-order-email';
-                
-                // Make API call to the email server
-                const emailResponse = await fetch(emailServerUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(orderData)
-                });
-                
-                const emailResult = await emailResponse.json();
-                
-                if (emailResult.success) {
-                    console.log('Order confirmation emails sent successfully:', emailResult);
-                } else {
-                    console.warn('Failed to send order confirmation emails:', emailResult.message);
-                    // Continue with order processing even if email sending fails
-                }
-            } catch (emailError) {
-                console.error('Error sending order emails:', emailError);
-                // Continue with order processing even if email sending fails
-            }
+            // Send order confirmation emails for Cash on Delivery
+            await sendOrderConfirmationEmails(orderData);
             
             // Show order confirmation modal
             showOrderConfirmation(orderData);
@@ -1111,4 +1095,225 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Failed to initialize checkout page:', error);
         showEmptyCartMessage();
     });
+    
+    /**
+     * Process Razorpay Payment
+     * This function creates a Razorpay order and opens the payment modal
+     * @param {Object} orderData - The order data to process
+     */
+    async function processRazorpayPayment(orderData) {
+        try {
+            console.log('Processing Razorpay payment for order:', orderData.orderReference);
+            
+            // Create a Razorpay order on the server
+            const response = await fetch('/api/create-razorpay-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    amount: orderData.orderTotal,
+                    currency: 'INR',
+                    receipt: orderData.orderReference,
+                    notes: {
+                        orderReference: orderData.orderReference,
+                        customerEmail: orderData.customer.email,
+                        customerPhone: orderData.customer.phone
+                    }
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.message || 'Failed to create Razorpay order');
+            }
+            
+            console.log('Razorpay order created:', result.order.id);
+            
+            // Save order to Firebase first
+            if (firebaseOrdersModule) {
+                console.log('Saving order to Firebase with pending payment status...');
+                orderData.paymentStatus = 'pending';
+                orderData.razorpayOrderId = result.order.id;
+                
+                const saveResult = await firebaseOrdersModule.saveOrderToFirebase(orderData);
+                
+                if (!saveResult.success) {
+                    if (saveResult.requiresAuth) {
+                        // Authentication required but user is not logged in
+                        console.log('Authentication required for order placement');
+                        showCreateAccountModal();
+                        
+                        // Reset button state
+                        const submitButton = checkoutForm.querySelector('button[type="submit"]');
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = 'Place Order';
+                        return;
+                    }
+                }
+                
+                // Store the Firebase order ID
+                orderData.orderId = saveResult.orderId;
+            }
+            
+            // Configure Razorpay options
+            const options = {
+                key: result.key_id,
+                amount: result.order.amount,
+                currency: result.order.currency,
+                name: 'Auric Jewelry',
+                description: 'Purchase Order: ' + orderData.orderReference,
+                order_id: result.order.id,
+                handler: async function(response) {
+                    await handleRazorpaySuccess(response, orderData);
+                },
+                prefill: {
+                    name: orderData.customer.firstName + ' ' + orderData.customer.lastName,
+                    email: orderData.customer.email,
+                    contact: orderData.customer.phone
+                },
+                notes: {
+                    address: orderData.customer.address
+                },
+                theme: {
+                    color: '#3399cc'
+                }
+            };
+            
+            // Open Razorpay checkout
+            const razorpay = new Razorpay(options);
+            razorpay.open();
+            
+            // Handle payment cancellation
+            razorpay.on('payment.failed', function(response) {
+                console.error('Razorpay payment failed:', response.error);
+                showErrorModal('Payment failed: ' + response.error.description);
+                
+                // Reset button state
+                const submitButton = checkoutForm.querySelector('button[type="submit"]');
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Place Order';
+            });
+            
+        } catch (error) {
+            console.error('Error processing Razorpay payment:', error);
+            showErrorModal('Payment processing error: ' + error.message);
+            
+            // Reset button state
+            const submitButton = checkoutForm.querySelector('button[type="submit"]');
+            submitButton.disabled = false;
+            submitButton.innerHTML = 'Place Order';
+        }
+    }
+    
+    /**
+     * Handle successful Razorpay payment
+     * @param {Object} response - The Razorpay success response
+     * @param {Object} orderData - The original order data
+     */
+    async function handleRazorpaySuccess(response, orderData) {
+        try {
+            console.log('Razorpay payment successful:', response.razorpay_payment_id);
+            
+            // Verify the payment with server
+            const verifyResponse = await fetch('/api/verify-razorpay-payment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_signature: response.razorpay_signature
+                })
+            });
+            
+            const verifyResult = await verifyResponse.json();
+            
+            if (!verifyResult.success) {
+                throw new Error(verifyResult.message || 'Payment verification failed');
+            }
+            
+            console.log('Payment verified successfully');
+            
+            // Update the order with payment information
+            orderData.paymentStatus = 'completed';
+            orderData.paymentId = response.razorpay_payment_id;
+            orderData.paymentSignature = response.razorpay_signature;
+            
+            // Update order in Firebase if available
+            if (firebaseOrdersModule && firebaseOrdersModule.updateOrderPaymentStatus) {
+                await firebaseOrdersModule.updateOrderPaymentStatus(orderData.orderId, {
+                    paymentStatus: 'completed',
+                    paymentId: response.razorpay_payment_id,
+                    paymentSignature: response.razorpay_signature
+                });
+            }
+            
+            // Send confirmation emails
+            await sendOrderConfirmationEmails(orderData);
+            
+            // Show payment details in confirmation
+            const paymentDetails = document.getElementById('paymentDetails');
+            if (paymentDetails) {
+                paymentDetails.style.display = 'block';
+                document.getElementById('paymentId').textContent = response.razorpay_payment_id;
+                document.getElementById('paymentMethod').textContent = 'Razorpay (Online)';
+            }
+            
+            // Show confirmation modal
+            showOrderConfirmation(orderData);
+            
+            // Clear cart
+            clearCart();
+            
+            // Reset checkout form
+            checkoutForm.reset();
+            
+        } catch (error) {
+            console.error('Error handling Razorpay success:', error);
+            showErrorModal('Error completing payment: ' + error.message);
+        } finally {
+            // Reset button state
+            const submitButton = checkoutForm.querySelector('button[type="submit"]');
+            submitButton.disabled = false;
+            submitButton.innerHTML = 'Place Order';
+        }
+    }
+    
+    /**
+     * Send order confirmation emails
+     * @param {Object} orderData - The order data
+     */
+    async function sendOrderConfirmationEmails(orderData) {
+        try {
+            console.log('Sending order confirmation emails via Nodemailer server...');
+            const emailServerUrl = window.location.origin + '/api/send-order-email';
+            
+            // Make API call to the email server
+            const emailResponse = await fetch(emailServerUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(orderData)
+            });
+            
+            const emailResult = await emailResponse.json();
+            
+            if (emailResult.success) {
+                console.log('Order confirmation emails sent successfully:', emailResult);
+                return true;
+            } else {
+                console.warn('Failed to send order confirmation emails:', emailResult.message);
+                // Continue with order processing even if email sending fails
+                return false;
+            }
+        } catch (emailError) {
+            console.error('Error sending order emails:', emailError);
+            // Continue with order processing even if email sending fails
+            return false;
+        }
+    }
 });

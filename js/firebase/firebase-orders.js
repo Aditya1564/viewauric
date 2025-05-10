@@ -1,219 +1,167 @@
 /**
- * Auric Firebase Orders Management System
+ * Firebase Orders Module
  * 
- * This module handles all order-related operations with Firebase Firestore,
- * including saving orders, retrieving order history, and tracking order status.
- * 
- * All orders are stored at path: users/{userId}/orders/{orderId}
- * This follows the same pattern as the cart data and ensures orders are associated with user accounts.
+ * This module handles order creation, storage and retrieval from Firebase.
+ * Order data is stored at: users/{userId}/orders/{orderId}
  */
 
-// Access Firebase instances that should be already initialized in the HTML
-const db = firebase.firestore();
-const auth = firebase.auth();
-
-// Collection names
-const USERS_COLLECTION = 'users';
-const ORDERS_COLLECTION = 'orders';
-
-/**
- * Check if a user is currently authenticated
- * @returns {Boolean} True if user is logged in, false otherwise
- */
-function isUserAuthenticated() {
-    return !!auth.currentUser;
+// Check if Firebase is initialized
+if (typeof firebase === 'undefined') {
+    console.error('Firebase is not initialized. Make sure to include Firebase SDK and initialize it first.');
 }
 
 /**
- * Save an order to Firebase Firestore
- * @param {Object} orderData - Complete order data including customer info and products
- * @returns {Promise<Object>} - Order reference ID and success status
+ * Check if authentication is required for placing orders
+ * @returns {Object} Auth requirement status
+ */
+export function checkOrderAuthRequirement() {
+    // Default requirement: not authenticated and auth required
+    const result = {
+        requiresAuth: true,
+        isAuthenticated: false
+    };
+    
+    // Check if user is authenticated
+    if (firebase.auth().currentUser) {
+        result.isAuthenticated = true;
+    }
+    
+    return result;
+}
+
+/**
+ * Save order to Firebase
+ * @param {Object} orderData - Order data to save
+ * @returns {Promise<Object>} Success status and order ID
  */
 export async function saveOrderToFirebase(orderData) {
     try {
         // Check if user is authenticated
-        if (!isUserAuthenticated()) {
-            console.log('User not logged in, order cannot be saved to Firebase');
-            return { 
-                success: false, 
-                requiresAuth: true, 
-                error: 'Authentication required to save order' 
+        const user = firebase.auth().currentUser;
+        if (!user) {
+            return {
+                success: false,
+                requiresAuth: true,
+                error: 'Authentication required for order placement'
             };
         }
-
-        const userId = auth.currentUser.uid;
         
-        // Create a new order with timestamp and status
-        const orderWithMetadata = {
-            ...orderData,
-            userId: userId,
-            createdAt: firebase.firestore.Timestamp.now(),
-            status: 'pending',
-            updatedAt: firebase.firestore.Timestamp.now()
-        };
+        // Create a new order document in the user's orders collection
+        const userOrdersRef = firebase.firestore().collection('users').doc(user.uid).collection('orders');
         
-        // Create order document in the path: users/{userId}/orders/{auto-id}
-        const orderRef = db.collection(USERS_COLLECTION)
-                           .doc(userId)
-                           .collection(ORDERS_COLLECTION)
-                           .doc(); // Auto-generated ID
-
-        // Get the auto-generated ID
-        const orderId = orderRef.id;
+        // Add timestamp
+        orderData.timestamp = firebase.firestore.FieldValue.serverTimestamp();
+        orderData.userId = user.uid;
         
-        // Update the order reference in the order data
-        orderWithMetadata.orderId = orderId;
+        // Add order to Firestore
+        const orderRef = await userOrdersRef.add(orderData);
         
-        console.log('Saving order to Firebase path:', `${USERS_COLLECTION}/${userId}/${ORDERS_COLLECTION}/${orderId}`);
-        
-        // Save the order data
-        await orderRef.set(orderWithMetadata);
-        
-        console.log('Order saved to Firebase with ID:', orderId);
-        return { 
-            success: true, 
-            orderId: orderId 
+        return {
+            success: true,
+            orderId: orderRef.id
         };
     } catch (error) {
         console.error('Error saving order to Firebase:', error);
-        return { 
-            success: false, 
-            error: error.message 
+        return {
+            success: false,
+            error: error.message
         };
     }
 }
 
 /**
- * Get all orders for the current user
- * @returns {Promise<Object>} - List of orders and success status
+ * Update order payment status in Firebase
+ * @param {String} orderId - ID of the order to update
+ * @param {Object} paymentData - Payment data to update
+ * @returns {Promise<Object>} Success status
+ */
+export async function updateOrderPaymentStatus(orderId, paymentData) {
+    try {
+        // Check if user is authenticated
+        const user = firebase.auth().currentUser;
+        if (!user) {
+            return {
+                success: false,
+                error: 'Authentication required to update order'
+            };
+        }
+        
+        // Get reference to the order document
+        const orderRef = firebase.firestore()
+            .collection('users')
+            .doc(user.uid)
+            .collection('orders')
+            .doc(orderId);
+        
+        // Update the order with payment information
+        await orderRef.update({
+            paymentStatus: paymentData.paymentStatus,
+            paymentId: paymentData.paymentId,
+            paymentSignature: paymentData.paymentSignature,
+            paymentUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        return {
+            success: true
+        };
+    } catch (error) {
+        console.error('Error updating order payment status:', error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
+/**
+ * Get user's orders from Firebase
+ * @returns {Promise<Object>} Success status and orders
  */
 export async function getUserOrders() {
     try {
         // Check if user is authenticated
-        if (!isUserAuthenticated()) {
-            console.log('User not logged in, no orders to retrieve');
-            return { 
-                success: false, 
-                requiresAuth: true, 
-                orders: [], 
-                error: 'Authentication required to view orders' 
+        const user = firebase.auth().currentUser;
+        if (!user) {
+            return {
+                success: false,
+                error: 'Authentication required to view orders'
             };
         }
-
-        const userId = auth.currentUser.uid;
         
-        // Get orders from the path: users/{userId}/orders
-        const ordersRef = db.collection(USERS_COLLECTION)
-                            .doc(userId)
-                            .collection(ORDERS_COLLECTION)
-                            .orderBy('createdAt', 'desc');
+        // Get user's orders collection
+        const userOrdersRef = firebase.firestore()
+            .collection('users')
+            .doc(user.uid)
+            .collection('orders');
         
-        console.log('Retrieving orders from Firebase path:', `${USERS_COLLECTION}/${userId}/${ORDERS_COLLECTION}`);
-        const ordersSnapshot = await ordersRef.get();
+        // Query orders, sorted by timestamp in descending order
+        const orderSnapshot = await userOrdersRef
+            .orderBy('timestamp', 'desc')
+            .get();
         
-        // Convert to array of order objects
-        const orders = [];
-        ordersSnapshot.forEach(doc => {
-            orders.push({
+        // Map snapshot to array of order objects
+        const orders = orderSnapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
                 id: doc.id,
-                ...doc.data()
-            });
+                ...data,
+                // Convert timestamps to date strings for easier display
+                orderDate: data.timestamp ? data.timestamp.toDate().toISOString() : new Date().toISOString()
+            };
         });
         
-        console.log(`Retrieved ${orders.length} orders from Firebase`);
-        return { 
-            success: true, 
-            orders: orders 
+        return {
+            success: true,
+            orders
         };
     } catch (error) {
-        console.error('Error retrieving orders from Firebase:', error);
-        return { 
-            success: false, 
-            orders: [], 
-            error: error.message 
+        console.error('Error getting user orders:', error);
+        return {
+            success: false,
+            error: error.message
         };
     }
 }
 
-/**
- * Get a specific order by ID for the current user
- * @param {String} orderId - ID of the order to retrieve
- * @returns {Promise<Object>} - Order data and success status
- */
-export async function getOrderById(orderId) {
-    try {
-        // Check if user is authenticated
-        if (!isUserAuthenticated()) {
-            console.log('User not logged in, no order to retrieve');
-            return { 
-                success: false, 
-                requiresAuth: true, 
-                error: 'Authentication required to view order' 
-            };
-        }
-
-        const userId = auth.currentUser.uid;
-        
-        // Get order from the path: users/{userId}/orders/{orderId}
-        const orderRef = db.collection(USERS_COLLECTION)
-                           .doc(userId)
-                           .collection(ORDERS_COLLECTION)
-                           .doc(orderId);
-        
-        console.log('Retrieving order from Firebase path:', `${USERS_COLLECTION}/${userId}/${ORDERS_COLLECTION}/${orderId}`);
-        const orderDoc = await orderRef.get();
-        
-        if (!orderDoc.exists) {
-            console.log('Order not found:', orderId);
-            return { 
-                success: false, 
-                error: 'Order not found' 
-            };
-        }
-        
-        const orderData = {
-            id: orderDoc.id,
-            ...orderDoc.data()
-        };
-        
-        console.log('Order retrieved from Firebase:', orderData.orderId);
-        return { 
-            success: true, 
-            order: orderData 
-        };
-    } catch (error) {
-        console.error('Error retrieving order from Firebase:', error);
-        return { 
-            success: false, 
-            error: error.message 
-        };
-    }
-}
-
-/**
- * Check if the order requires authentication
- * @returns {Boolean} True if authentication is required for orders
- */
-export function requiresAuthentication() {
-    return true; // We always require authentication for orders
-}
-
-/**
- * Handle authentication requirement for orders
- * Determines if the login modal should be shown
- * @returns {Object} Status and message about authentication requirement
- */
-export function checkOrderAuthRequirement() {
-    if (isUserAuthenticated()) {
-        return { 
-            requiresAuth: false, 
-            isAuthenticated: true 
-        };
-    } else {
-        return { 
-            requiresAuth: true, 
-            isAuthenticated: false,
-            message: 'Please create an account or sign in to place your order'
-        };
-    }
-}
+// Log that the module is loaded
+console.log('Firebase Orders module loaded');
