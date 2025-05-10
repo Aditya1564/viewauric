@@ -233,13 +233,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Load and display cart items - prioritizes Firebase if user is logged in
-    function loadCartItems() {
+    async function loadCartItems() {
         // First check if we need to initialize Firebase
         initializeFirebaseIntegration();
         
         // Use Firebase if available and user is logged in, otherwise use local storage
         if (firebaseCartModule && firebase.auth().currentUser) {
-            return loadCartFromFirebase();
+            // Wait for the Firebase cart to load
+            const items = await loadCartFromFirebase();
+            return items;
         } else {
             return loadCartFromLocalStorage();
         }
@@ -853,23 +855,34 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Initialize the page
-    function init() {
+    async function init() {
         console.log('Initializing checkout page...');
         
-        // Load and display cart items
-        const cartItems = loadCartItems();
-        
-        // Store cart items in a global variable for quantity controls
-        window.checkoutCartItems = cartItems;
-        
-        // Set up event listeners
-        if (checkoutForm) {
-            checkoutForm.addEventListener('submit', handleSubmit);
+        try {
+            // Load and display cart items - wait for this to complete
+            const cartItems = await loadCartItems();
+            
+            // Display the cart items in the order summary
+            displayCartItems(cartItems);
+            
+            // Store cart items in a global variable for quantity controls
+            window.checkoutCartItems = cartItems;
+            
+            // Set up event listeners
+            if (checkoutForm) {
+                checkoutForm.addEventListener('submit', handleSubmit);
+            }
+            
+            console.log('Checkout page initialized with cart items:', cartItems?.length || 0);
+        } catch (error) {
+            console.error('Error initializing checkout page:', error);
+            showEmptyCartMessage();
         }
-        
-        console.log('Checkout page initialized with cart items:', cartItems?.length || 0);
     }
     
-    // Initialize the page
-    init();
+    // Initialize the page asynchronously
+    init().catch(error => {
+        console.error('Failed to initialize checkout page:', error);
+        showEmptyCartMessage();
+    });
 });
