@@ -672,9 +672,44 @@ document.addEventListener('DOMContentLoaded', function() {
     // Clear cart from both localStorage and Firebase
     function clearCart() {
         try {
-            // First try to use our new cart modules if available
+            console.log('Clearing cart after successful order');
+            
+            // Clear the order summary display on the page
+            if (orderSummaryContainer) {
+                orderSummaryContainer.innerHTML = '<p>No products added yet.</p>';
+                console.log('Order summary cleared from UI');
+            }
+            
+            // Update the order total
+            if (orderTotalElement) {
+                orderTotalElement.textContent = '₹0.00';
+                console.log('Order total reset to zero');
+            }
+            
+            // Clear hidden product list
+            if (productListContainer) {
+                productListContainer.innerHTML = '';
+                console.log('Hidden product list cleared');
+            }
+            
+            // Reset global cart items
+            window.checkoutCartItems = [];
+            
+            // First try to use cart-manager.js if available (handles both local and Firebase)
+            if (typeof CartManager !== 'undefined' && typeof CartManager.clearCart === 'function') {
+                // Use CartManager to clear cart in all storage
+                CartManager.clearCart().then(() => {
+                    console.log('Cart cleared using CartManager.clearCart()');
+                }).catch(err => {
+                    console.error('Error clearing cart with CartManager:', err);
+                });
+                
+                // We still continue with the other methods as backup
+            }
+            
+            // Try LocalStorageCart module next
             if (typeof LocalStorageCart !== 'undefined' && LocalStorageCart.clearItems) {
-                // Use new LocalStorageCart module
+                // Use LocalStorageCart module
                 LocalStorageCart.clearItems();
                 console.log('Cart cleared using LocalStorageCart module');
             } else {
@@ -684,18 +719,40 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // Clear Firebase cart if user is logged in
-            if (firebaseCartModule && firebase.auth && firebase.auth().currentUser) {
-                firebaseCartModule.clearFirebaseCart()
-                    .then(result => {
-                        if (result.success) {
-                            console.log('Cart cleared from Firebase after order submission');
-                        } else {
-                            console.warn('Failed to clear Firebase cart:', result.error);
-                        }
-                    })
-                    .catch(err => {
-                        console.error('Error clearing Firebase cart:', err);
-                    });
+            if (firebase.auth && firebase.auth().currentUser) {
+                console.log('Clearing Firebase cart...');
+                
+                if (typeof FirebaseCartManager !== 'undefined' && typeof FirebaseCartManager.clearItems === 'function') {
+                    // Use direct FirebaseCartManager if available
+                    FirebaseCartManager.clearItems()
+                        .then(() => {
+                            console.log('Cart cleared from Firebase using FirebaseCartManager.clearItems()');
+                        })
+                        .catch(err => {
+                            console.error('Error clearing Firebase cart:', err);
+                        });
+                } else if (firebaseCartModule && firebaseCartModule.clearFirebaseCart) {
+                    // Use module wrapper
+                    firebaseCartModule.clearFirebaseCart()
+                        .then(result => {
+                            if (result && result.success) {
+                                console.log('Cart cleared from Firebase after order submission');
+                            } else {
+                                console.warn('Failed to clear Firebase cart:', result ? result.error : 'unknown error');
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Error clearing Firebase cart:', err);
+                        });
+                }
+            }
+            
+            // Update cart UI if cart-manager.js is available
+            if (typeof CartManager !== 'undefined' && typeof CartManager.updateCartUI === 'function') {
+                setTimeout(() => {
+                    CartManager.updateCartUI();
+                    console.log('Cart UI updated after clearing');
+                }, 500);
             }
         } catch (error) {
             console.error('Error clearing cart:', error);
@@ -703,6 +760,14 @@ document.addEventListener('DOMContentLoaded', function() {
             // Always try the most basic fallback method on error
             try {
                 localStorage.removeItem(STORAGE_KEY);
+                
+                // Also clear the UI as a last resort
+                if (orderSummaryContainer) {
+                    orderSummaryContainer.innerHTML = '<p>No products added yet.</p>';
+                }
+                if (orderTotalElement) {
+                    orderTotalElement.textContent = '₹0.00';
+                }
             } catch (fallbackError) {
                 console.error('Critical error: Failed to clear cart with fallback method', fallbackError);
             }
