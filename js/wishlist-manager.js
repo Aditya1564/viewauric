@@ -20,14 +20,17 @@ const WishlistManager = (function() {
     function init() {
         console.log('Initializing wishlist system...');
         
+        // Set up wishlist UI elements first
+        setupWishlistPanel();
+        
         // Load wishlist data initially
         loadWishlist();
         
-        // Set up wishlist UI elements
-        setupWishlistPanel();
-        
-        // Set up event listeners
-        setupEventListeners();
+        // Set up event listeners after everything is loaded
+        setTimeout(() => {
+            setupEventListeners();
+            updateWishlistUI();
+        }, 500);
         
         // Set up authentication listener
         setupAuthListener();
@@ -589,8 +592,89 @@ const WishlistManager = (function() {
      * Set up all event listeners for wishlist functionality
      */
     function setupEventListeners() {
+        console.log('Setting up wishlist event listeners');
+        
+        // Add direct event listeners to all wishlist buttons (product cards)
+        document.querySelectorAll('.add-to-wishlist').forEach(button => {
+            console.log('Found wishlist button:', button);
+            button.addEventListener('click', function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                console.log('Direct wishlist button clicked');
+                
+                const productItem = this.closest('.product-item');
+                if (productItem) {
+                    const productId = productItem.dataset.productId;
+                    const productName = productItem.querySelector('.product-name').textContent;
+                    const priceElement = productItem.querySelector('.current-price') || productItem.querySelector('.original-price');
+                    const productPrice = parseFloat(priceElement ? priceElement.textContent.replace(/[^0-9.]/g, '') : 0);
+                    const productImage = productItem.querySelector('.product-image img').src;
+                    
+                    console.log('Product found:', { id: productId, name: productName, price: productPrice, image: productImage });
+                    
+                    const product = {
+                        id: productId,
+                        name: productName,
+                        price: productPrice,
+                        image: productImage
+                    };
+                    
+                    // Toggle wishlist status
+                    if (isInWishlist(productId)) {
+                        removeFromWishlist(productId);
+                        this.classList.remove('active');
+                    } else {
+                        addToWishlist(product);
+                        this.classList.add('active');
+                    }
+                }
+            });
+        });
+        
+        // Add direct event listener to product detail page wishlist button
+        const detailWishlistBtn = document.querySelector('.add-to-wishlist-btn');
+        if (detailWishlistBtn) {
+            console.log('Found product detail wishlist button:', detailWishlistBtn);
+            detailWishlistBtn.addEventListener('click', function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                console.log('Detail page wishlist button clicked');
+                
+                const detailContainer = document.querySelector('.product-detail-container');
+                if (detailContainer) {
+                    const productId = detailContainer.dataset.productId;
+                    const productName = detailContainer.querySelector('.product-title').textContent;
+                    const priceElement = detailContainer.querySelector('.price-value');
+                    const productPrice = parseFloat(priceElement ? priceElement.textContent.replace(/[^0-9.]/g, '') : 0);
+                    const productImage = document.querySelector('.main-product-image img').src;
+                    
+                    console.log('Detail product found:', { id: productId, name: productName, price: productPrice, image: productImage });
+                    
+                    const product = {
+                        id: productId,
+                        name: productName,
+                        price: productPrice,
+                        image: productImage
+                    };
+                    
+                    // Toggle wishlist status
+                    if (isInWishlist(productId)) {
+                        removeFromWishlist(productId);
+                        this.classList.remove('active');
+                        this.innerHTML = '<i class="fas fa-heart"></i> ADD TO WISHLIST';
+                    } else {
+                        addToWishlist(product);
+                        this.classList.add('active');
+                        this.innerHTML = '<i class="fas fa-heart"></i> REMOVE FROM WISHLIST';
+                    }
+                }
+            });
+        }
+        
         // Wishlist panel toggle
         document.addEventListener('click', function(e) {
+            console.log('Click detected:', e.target);
+            
             // Toggle wishlist panel
             if (e.target.closest('.wishlist-toggle')) {
                 e.preventDefault();
