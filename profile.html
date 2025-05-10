@@ -631,6 +631,10 @@
           if (ordersResult.success && ordersResult.orders.length > 0) {
             // Display each order
             ordersResult.orders.forEach(order => {
+              // Add debug logging to inspect order data
+              console.log("Order data:", order);
+              console.log("Products/items in order:", order.products || order.items || []);
+              
               // Format date for display
               let orderDate;
               if (order.createdAt && order.createdAt.seconds) {
@@ -657,7 +661,10 @@
                 order.products.forEach(item => {
                   orderHTML += `
                     <div class="order-item">
-                      <img src="${item.image}" alt="${item.name}" class="order-item-image">
+                      <img src="${item.image || '/images/placeholder-product.jpg'}" 
+                          alt="${item.name}" 
+                          class="order-item-image"
+                          onerror="this.src='/images/newarrivals/IMG_20250504_150241.jpg'; this.onerror='';">
                       <div class="order-item-details">
                         <h4>${item.name}</h4>
                         <div class="order-item-info">
@@ -673,7 +680,10 @@
                 order.items.forEach(item => {
                   orderHTML += `
                     <div class="order-item">
-                      <img src="${item.image}" alt="${item.name}" class="order-item-image">
+                      <img src="${item.image || '/images/placeholder-product.jpg'}" 
+                          alt="${item.name}" 
+                          class="order-item-image"
+                          onerror="this.src='/images/newarrivals/IMG_20250504_150241.jpg'; this.onerror='';">
                       <div class="order-item-details">
                         <h4>${item.name}</h4>
                         <span class="order-item-price">₹${parseFloat(item.price).toFixed(2)}</span>

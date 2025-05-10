@@ -563,6 +563,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Get payment method selected
         const paymentMethod = formData.get('paymentMethod') || 'Cash on Delivery';
         
+        // Log cart items to see what we're working with
+        console.log("Cart items being saved to order:", cartItems);
+        
         // Prepare order data with customer info and products
         const orderData = {
             customer: {
@@ -576,14 +579,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 postalCode: formData.get('postalCode') || ''
             },
             paymentMethod: paymentMethod,
-            products: cartItems.map(item => ({
-                id: item.id,
-                name: item.name,
-                price: item.price,
-                quantity: item.quantity,
-                total: item.price * item.quantity,
-                image: item.image // Add image URL for each product
-            })),
+            products: cartItems.map(item => {
+                // Make sure image property exists and is properly structured
+                console.log(`Product ${item.name} - image:`, item.image);
+                
+                return {
+                    id: item.id,
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity,
+                    total: item.price * item.quantity,
+                    // Ensure image is always a string path
+                    image: item.image || `/images/newarrivals/${item.id}.jpg` 
+                };
+            }),
             orderTotal: calculateTotal(cartItems),
             orderReference: generateOrderReference(),
             orderDate: new Date().toISOString(),
