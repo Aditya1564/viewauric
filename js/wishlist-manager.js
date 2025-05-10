@@ -605,12 +605,21 @@ const WishlistManager = (function() {
             // Add to wishlist buttons on product cards
             if (e.target.closest('.add-to-wishlist')) {
                 e.preventDefault();
-                const productCard = e.target.closest('.product-card');
+                console.log('Wishlist button clicked');
+                const productCard = e.target.closest('.product-item') || e.target.closest('.product-card');
                 if (productCard) {
+                    console.log('Found product container:', productCard);
                     const productId = productCard.dataset.productId || productCard.dataset.id;
+                    console.log('Product ID:', productId);
                     const productName = productCard.querySelector('.product-name').textContent;
-                    const productPrice = parseFloat(productCard.querySelector('.product-price').dataset.price || productCard.querySelector('.product-price').textContent.replace(/[^0-9.]/g, ''));
+                    console.log('Product Name:', productName);
+                    // Look for .current-price first, then .product-price
+                    const priceElement = productCard.querySelector('.current-price') || productCard.querySelector('.product-price');
+                    console.log('Price element:', priceElement);
+                    const productPrice = parseFloat(priceElement ? (priceElement.dataset.price || priceElement.textContent.replace(/[^0-9.]/g, '')) : 0);
+                    console.log('Product Price:', productPrice);
                     const productImage = productCard.querySelector('.product-image img').src;
+                    console.log('Product Image:', productImage);
                     
                     const product = {
                         id: productId,
@@ -633,12 +642,14 @@ const WishlistManager = (function() {
             // Add to wishlist button on product detail page
             if (e.target.closest('.add-to-wishlist-btn')) {
                 e.preventDefault();
-                const detailSection = e.target.closest('.product-detail-section');
+                const detailSection = e.target.closest('.product-detail-section') || e.target.closest('.product-detail-container');
                 if (detailSection) {
                     const productId = detailSection.dataset.productId;
                     const productName = detailSection.querySelector('.product-title').textContent;
-                    const productPrice = parseFloat(detailSection.querySelector('.product-price').dataset.price || detailSection.querySelector('.product-price').textContent.replace(/[^0-9.]/g, ''));
-                    const productImage = document.querySelector('.product-image-main img').src;
+                    // Look for price-value first, then product-price
+                    const priceElement = detailSection.querySelector('.price-value') || detailSection.querySelector('.product-price');
+                    const productPrice = parseFloat(priceElement ? (priceElement.dataset.price || priceElement.textContent.replace(/[^0-9.]/g, '')) : 0);
+                    const productImage = document.querySelector('.product-image-main img, .main-product-image img').src;
                     
                     const product = {
                         id: productId,
@@ -763,7 +774,7 @@ const WishlistManager = (function() {
         });
         
         // Update product detail wishlist button
-        const detailSection = document.querySelector('.product-detail-section');
+        const detailSection = document.querySelector('.product-detail-section') || document.querySelector('.product-detail-container');
         if (detailSection) {
             const productId = detailSection.dataset.productId;
             const wishlistButton = document.querySelector('.add-to-wishlist-btn');
