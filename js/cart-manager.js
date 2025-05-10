@@ -513,8 +513,8 @@ const CartManager = (function() {
         
         cartCountElements.forEach(element => {
             element.textContent = itemCount;
-            // Hide count if zero
-            element.style.display = itemCount > 0 ? 'flex' : 'none';
+            // Always show the count, even when it's zero
+            element.style.display = 'flex';
         });
         
         // Update cart items display
