@@ -424,8 +424,12 @@ const CartManager = (function() {
             }
             
             // Add to cart button click - except on the product detail page (that has its own handler)
+            // Check if we're on a product detail page 
+            const isProductDetailPage = document.querySelector('.product-detail-container') !== null;
+            
+            // Only handle small buttons or regular buttons when NOT on product detail page
             if (e.target.closest('.add-to-cart-btn-small') || 
-                (e.target.closest('.add-to-cart-btn') && !document.querySelector('.product-detail-container')))
+                (e.target.closest('.add-to-cart-btn') && !isProductDetailPage))
             {
                 e.preventDefault();
                 
