@@ -52,21 +52,34 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     };
                     console.log('Firebase cart module initialized');
-                    console.log('Firebase cart manager module loaded for checkout');
                 }
                 
-                // Load Orders Module
-                import('/js/firebase/firebase-orders.js')
-                    .then(module => {
-                        console.log('Firebase orders module loaded for checkout');
-                        firebaseOrdersModule = module;
-                        
-                        // Check auth requirement and update UI accordingly
-                        updateCheckoutButtonState();
-                    })
-                    .catch(err => {
-                        console.error('Failed to load Firebase orders module:', err);
-                    });
+                // Safe load Orders Module
+                try {
+                    fetch('/js/firebase/firebase-orders.js')
+                        .then(response => {
+                            if (response.ok) {
+                                return import('/js/firebase/firebase-orders.js');
+                            } else {
+                                console.log('Firebase orders module not available');
+                                return null;
+                            }
+                        })
+                        .then(module => {
+                            if (module) {
+                                console.log('Firebase orders module loaded for checkout');
+                                firebaseOrdersModule = module;
+                                
+                                // Check auth requirement and update UI correctly
+                                setTimeout(updateCheckoutButtonState, 100);
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Failed to load Firebase orders module:', err);
+                        });
+                } catch (importError) {
+                    console.error('Error importing Firebase orders module:', importError);
+                }
             } else {
                 console.log('Firebase not available, using local storage only');
             }
@@ -98,44 +111,53 @@ document.addEventListener('DOMContentLoaded', function() {
      * If authentication is required, disable the button for non-authenticated users
      */
     function updateCheckoutButtonState() {
-        if (!firebaseOrdersModule) return;
+        console.log('Updating checkout button state');
         
-        const authRequirement = firebaseOrdersModule.checkOrderAuthRequirement();
         const submitButton = checkoutForm?.querySelector('button[type="submit"]');
+        if (!submitButton) {
+            console.log('Submit button not found');
+            return;
+        }
         
-        if (submitButton) {
-            if (authRequirement.requiresAuth && !authRequirement.isAuthenticated) {
-                // User is not authenticated but auth is required
-                submitButton.innerHTML = 'Sign In to Place Order';
-                submitButton.classList.add('auth-required');
-                
-                // Add special click handler for unauthenticated users
-                submitButton.removeEventListener('click', showAuthRequirementModal);
-                submitButton.addEventListener('click', showAuthRequirementModal);
-            } else {
-                // User is authenticated or auth is not required
-                submitButton.innerHTML = 'Place Order';
-                submitButton.classList.remove('auth-required');
-                submitButton.removeEventListener('click', showAuthRequirementModal);
-            }
+        // Check if user is logged in
+        const isLoggedIn = firebase.auth && firebase.auth().currentUser;
+        console.log('User authentication status:', isLoggedIn ? 'Logged in' : 'Not logged in');
+        
+        if (isLoggedIn) {
+            // User is authenticated
+            submitButton.innerHTML = 'Place Order';
+            submitButton.classList.remove('auth-required');
+            submitButton.removeEventListener('click', showAuthRequirementModal);
+            console.log('Button state updated for logged in user');
+        } else {
+            // User is not authenticated
+            submitButton.innerHTML = 'Sign In to Place Order';
+            submitButton.classList.add('auth-required');
+            
+            // Add special click handler for unauthenticated users
+            submitButton.removeEventListener('click', showAuthRequirementModal);
+            submitButton.addEventListener('click', showAuthRequirementModal);
+            console.log('Button state updated for guest user');
         }
     }
     
     // Show modal requiring authentication before order placement
     function showAuthRequirementModal(e) {
-        if (!firebaseOrdersModule) return;
+        e.preventDefault();
+        e.stopPropagation();
         
-        const authRequirement = firebaseOrdersModule.checkOrderAuthRequirement();
+        // Check if user is logged in directly
+        const isLoggedIn = firebase.auth && firebase.auth().currentUser;
         
-        if (authRequirement.requiresAuth && !authRequirement.isAuthenticated) {
-            e.preventDefault();
-            e.stopPropagation();
-            
+        if (!isLoggedIn) {
+            console.log('Showing auth requirement modal');
             // Show account creation modal
             showCreateAccountModal();
             return false;
         }
         
+        // User is already logged in, allow form submission
+        console.log('User is logged in, proceeding with order');
         return true;
     }
     
@@ -155,13 +177,31 @@ document.addEventListener('DOMContentLoaded', function() {
             
             console.log('Loading cart from Firebase...');
             try {
-                const result = await firebaseCartModule.getItems();
-                
-                if (result && result.success && result.items && result.items.length > 0) {
-                    console.log('Cart loaded from Firebase:', result.items);
-                    return result.items;
+                // Try to use FirebaseCartManager directly if available
+                if (typeof FirebaseCartManager !== 'undefined' && typeof FirebaseCartManager.getItems === 'function') {
+                    console.log('Using FirebaseCartManager directly');
+                    const result = await FirebaseCartManager.getItems();
+                    
+                    if (result && result.items && result.items.length > 0) {
+                        console.log('Cart loaded from Firebase:', result.items);
+                        return result.items;
+                    } else {
+                        console.log('Firebase cart is empty');
+                        return [];
+                    }
+                } else if (firebaseCartModule.loadCartFromFirebase) {
+                    console.log('Using firebaseCartModule wrapper');
+                    const result = await firebaseCartModule.loadCartFromFirebase();
+                    
+                    if (result && result.success && result.items && result.items.length > 0) {
+                        console.log('Cart loaded from Firebase using wrapper:', result.items);
+                        return result.items;
+                    } else {
+                        console.log('Firebase cart is empty (from wrapper)');
+                        return [];
+                    }
                 } else {
-                    console.log('Firebase cart is empty');
+                    console.log('No Firebase cart methods available');
                     return [];
                 }
             } catch (firebaseError) {
@@ -170,7 +210,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } catch (error) {
             console.error('Error in loadCartFromFirebase:', error);
-            return loadCartFromLocalStorage();
+            return [];
         }
     }
     
@@ -223,8 +263,15 @@ document.addEventListener('DOMContentLoaded', function() {
         initializeFirebaseIntegration();
         
         try {
+            // Check if user is logged in first
+            const isUserLoggedIn = firebase.auth && firebase.auth().currentUser;
+            console.log('User login status:', isUserLoggedIn ? 'Logged in' : 'Not logged in');
+            
+            // Update checkout button state based on login status
+            updateCheckoutButtonState();
+            
             // Use Firebase if available and user is logged in, otherwise use local storage
-            if (firebaseCartModule && firebase.auth && firebase.auth().currentUser) {
+            if (isUserLoggedIn) {
                 console.log('User is logged in, trying Firebase cart first');
                 try {
                     // Wait for the Firebase cart to load
@@ -232,6 +279,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.log('Firebase cart items loaded:', items ? items.length : 0);
                     
                     if (items && items.length > 0) {
+                        // Display cart items here directly to ensure they appear
+                        displayCartItems(items);
                         return items;
                     } else {
                         console.log('Firebase cart empty, falling back to local storage');
@@ -243,11 +292,19 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Fallback to local storage
             console.log('Loading cart from local storage');
-            return loadCartFromLocalStorage();
+            const localCartItems = loadCartFromLocalStorage();
+            
+            // Display local cart items if we didn't already display Firebase items
+            if (!isUserLoggedIn && localCartItems && localCartItems.length > 0) {
+                displayCartItems(localCartItems);
+            }
+            
+            return localCartItems;
         } catch (error) {
             console.error('Error in loadCartItems:', error);
             // Ultimate fallback
             console.log('Error encountered, using empty cart');
+            showEmptyCartMessage();
             return [];
         }
     }
