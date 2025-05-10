@@ -844,11 +844,12 @@ const WishlistManager = (function() {
      */
     function updateWishlistButtonsState() {
         // Update product card wishlist buttons
-        document.querySelectorAll('.product-card').forEach(card => {
+        document.querySelectorAll('.product-item, .product-card').forEach(card => {
             const productId = card.dataset.productId || card.dataset.id;
             const wishlistButton = card.querySelector('.add-to-wishlist');
             
             if (productId && wishlistButton) {
+                console.log('Updating wishlist button state for product ID:', productId, 'In wishlist:', isInWishlist(productId));
                 if (isInWishlist(productId)) {
                     wishlistButton.classList.add('active');
                 } else {
