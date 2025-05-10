@@ -124,19 +124,36 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('User authentication status:', isLoggedIn ? 'Logged in' : 'Not logged in');
         
         if (isLoggedIn) {
-            // User is authenticated
+            // User is authenticated - ensure button is enabled
             submitButton.innerHTML = 'Place Order';
             submitButton.classList.remove('auth-required');
             submitButton.removeEventListener('click', showAuthRequirementModal);
-            console.log('Button state updated for logged in user');
+            submitButton.disabled = false;
+            submitButton.classList.remove('disabled');
+            
+            // Make sure the form uses the standard submit handler
+            if (checkoutForm) {
+                checkoutForm.removeEventListener('submit', showAuthRequirementModal);
+                if (!checkoutForm._hasSubmitHandler) {
+                    checkoutForm.addEventListener('submit', handleSubmit);
+                    checkoutForm._hasSubmitHandler = true;
+                }
+            }
+            
+            console.log('Button state updated for logged in user - enabled');
         } else {
-            // User is not authenticated
+            // User is not authenticated - use auth modal
             submitButton.innerHTML = 'Sign In to Place Order';
             submitButton.classList.add('auth-required');
             
             // Add special click handler for unauthenticated users
             submitButton.removeEventListener('click', showAuthRequirementModal);
             submitButton.addEventListener('click', showAuthRequirementModal);
+            
+            // Make sure button appears enabled
+            submitButton.disabled = false;
+            submitButton.classList.remove('disabled');
+            
             console.log('Button state updated for guest user');
         }
     }
@@ -146,19 +163,10 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         e.stopPropagation();
         
-        // Check if user is logged in directly
-        const isLoggedIn = firebase.auth && firebase.auth().currentUser;
-        
-        if (!isLoggedIn) {
-            console.log('Showing auth requirement modal');
-            // Show account creation modal
-            showCreateAccountModal();
-            return false;
-        }
-        
-        // User is already logged in, allow form submission
-        console.log('User is logged in, proceeding with order');
-        return true;
+        console.log('Showing auth requirement modal');
+        // Show account creation modal
+        showCreateAccountModal();
+        return false;
     }
     
     // Load cart items from Firebase for logged in users
@@ -948,9 +956,11 @@ document.addEventListener('DOMContentLoaded', function() {
             // Store cart items in a global variable for quantity controls
             window.checkoutCartItems = cartItems;
             
-            // Set up event listeners
-            if (checkoutForm) {
+            // Set up event listeners - only if not already set up
+            if (checkoutForm && !checkoutForm._hasSubmitHandler) {
                 checkoutForm.addEventListener('submit', handleSubmit);
+                checkoutForm._hasSubmitHandler = true;
+                console.log('Added submit handler to checkout form');
             }
             
             console.log('Checkout page initialized with cart items:', cartItems?.length || 0);
