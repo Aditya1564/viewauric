@@ -20,32 +20,106 @@ document.addEventListener('DOMContentLoaded', function() {
     const checkoutForm = document.getElementById('checkoutForm');
     const productListContainer = document.getElementById('productList');
     
-    // Try to load Firebase modules if available
+    // A simplified Firebase integration function that focuses on reliability
     function initializeFirebaseIntegration() {
-        try {
-            // Check if Firebase is available
-            if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth()) {
-                console.log('Firebase auth available');
-                
-                // First check if FirebaseCartManager is available globally
-                if (typeof FirebaseCartManager !== 'undefined') {
-                    console.log('Using global FirebaseCartManager for checkout');
-                    firebaseCartModule = FirebaseCartManager;
-                }
-            }
-        } catch (error) {
-            console.error('Error initializing Firebase:', error);
-        }
+        console.log('Initializing Firebase integration (simplified version)');
         
-        // Attempt to load firebase orders module if available
         try {
-            if (typeof firebase !== 'undefined' && firebase.auth && typeof FirebaseOrderManager !== 'undefined') {
-                console.log('Firebase orders module loaded for checkout');
-                firebaseOrdersModule = FirebaseOrderManager;
+            // First try to access LocalStorageCart for reliable cart access
+            if (typeof LocalStorageCart !== 'undefined' && LocalStorageCart.getItems) {
+                console.log('Using LocalStorageCart module for checkout');
+            } else {
+                console.log('LocalStorageCart module not available');
+            }
+            
+            // Try to use Firebase if available
+            if (typeof firebase !== 'undefined' && firebase.auth) {
+                // Just check if auth module exists - avoid deep integration to prevent errors
+                console.log('Firebase auth detected, will try to use Firebase cart if user is logged in');
+                
+                // Create simple firebase module wrapper
+                if (typeof FirebaseCartManager !== 'undefined') {
+                    firebaseCartModule = {
+                        loadCartFromFirebase: async function() {
+                            try {
+                                console.log('Loading cart from Firebase...');
+                                const result = await FirebaseCartManager.getItems();
+                                return result;
+                            } catch (error) {
+                                console.error('Error loading cart from Firebase:', error);
+                                return { success: false, items: [] };
+                            }
+                        }
+                    };
+                    console.log('Firebase cart module initialized');
+                }
+                            console.log('Firebase cart manager module loaded for checkout');
+                            // Create adapter for the new API
+                            firebaseCartModule = {
+                                // Map to the new FirebaseCartManager API
+                                loadCartFromFirebase: async function() {
+                                    const manager = module.FirebaseCartManager || window.FirebaseCartManager;
+                                    const result = await manager.getItems();
+                                    return result;
+                                },
+                                saveCartToFirebase: async function(items) {
+                                    const manager = module.FirebaseCartManager || window.FirebaseCartManager;
+                                    return await manager.saveItems(items);
+                                },
+                                clearFirebaseCart: async function() {
+                                    const manager = module.FirebaseCartManager || window.FirebaseCartManager;
+                                    return await manager.clearItems();
+                                }
+                            };
+                            
+                            // Check if user is logged in, if so, reload cart from Firebase
+                            if (firebase.auth().currentUser) {
+                                loadCartFromFirebase();
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Failed to load Firebase cart manager module:', err);
+                            // Fallback to old module
+                            loadLegacyFirebaseCartModule();
+                        });
+                }
+                
+                // Load Orders Module
+                import('/js/firebase/firebase-orders.js')
+                    .then(module => {
+                        console.log('Firebase orders module loaded for checkout');
+                        firebaseOrdersModule = module;
+                        
+                        // Check auth requirement and update UI accordingly
+                        updateCheckoutButtonState();
+                    })
+                    .catch(err => {
+                        console.error('Failed to load Firebase orders module:', err);
+                    });
+            } else {
+                console.log('Firebase not available, using local storage only');
             }
         } catch (error) {
-            console.error('Error loading Firebase orders module:', error);
+            console.error('Error initializing Firebase integration:', error);
         }
+    }
+    
+    // Fallback to legacy module if needed
+    function loadLegacyFirebaseCartModule() {
+        // Load old Cart Module
+        import('/js/firebase/firebase-cart.js')
+            .then(module => {
+                console.log('Legacy Firebase cart module loaded for checkout');
+                firebaseCartModule = module;
+                
+                // Check if user is logged in, if so, reload cart from Firebase
+                if (firebase.auth().currentUser) {
+                    loadCartFromFirebase();
+                }
+            })
+            .catch(err => {
+                console.error('Failed to load legacy Firebase cart module:', err);
+            });
     }
     
     /**
@@ -84,53 +158,65 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (authRequirement.requiresAuth && !authRequirement.isAuthenticated) {
             e.preventDefault();
+            e.stopPropagation();
             
-            // Show the authentication modal
-            const authModal = new bootstrap.Modal(document.getElementById('createAccountModal'));
-            authModal.show();
+            // Show account creation modal
+            showCreateAccountModal();
+            return false;
         }
+        
+        return true;
     }
     
-    // Load cart from Firebase if user is logged in
+    // Load cart items from Firebase for logged in users
     async function loadCartFromFirebase() {
         try {
-            if (!firebaseCartModule || !firebase.auth().currentUser) {
-                console.log('Firebase cart module not available or user not logged in');
-                return { success: false, items: [] };
+            if (!firebaseCartModule) {
+                console.log('Firebase cart module not available, using local storage');
+                return [];
+            }
+            
+            // Check if user is logged in
+            if (!firebase.auth || !firebase.auth().currentUser) {
+                console.log('User not logged in, using local storage');
+                return [];
             }
             
             console.log('Loading cart from Firebase...');
-            const result = await firebaseCartModule.getItems();
-            
-            if (result.success && result.items && result.items.length > 0) {
-                console.log('Cart loaded from Firebase:', result.items);
-                return result.items;
-            } else {
-                console.log('Firebase cart is empty or error loading cart');
+            try {
+                const result = await firebaseCartModule.getItems();
+                
+                if (result && result.success && result.items && result.items.length > 0) {
+                    console.log('Cart loaded from Firebase:', result.items);
+                    return result.items;
+                } else {
+                    console.log('Firebase cart is empty');
+                    return [];
+                }
+            } catch (firebaseError) {
+                console.error('Firebase cart operation failed:', firebaseError);
                 return [];
             }
         } catch (error) {
-            console.error('Error loading cart from Firebase:', error);
-            return [];
+            console.error('Error in loadCartFromFirebase:', error);
+            return loadCartFromLocalStorage();
         }
     }
     
-    // Load cart from local storage
+    // Load cart items from local storage
     function loadCartFromLocalStorage() {
         try {
-            console.log('Loading cart from local storage');
-            
-            // First check if we can use our new LocalStorageCart module
-            if (typeof LocalStorageCart !== 'undefined' && LocalStorageCart.getItems) {
-                // Use new LocalStorageCart module
-                console.log('Using LocalStorageCart module');
-                const result = LocalStorageCart.getItems();
-                const cartItems = result.items || [];
+            // Use LocalStorageCart if available, otherwise fall back to direct localStorage access
+            if (typeof LocalStorageCart !== 'undefined') {
+                console.log('Using LocalStorageCart module for checkout');
+                const cartItems = LocalStorageCart.getItems();
                 
                 if (cartItems.length === 0) {
                     showEmptyCartMessage();
+                    return [];
                 }
                 
+                displayCartItems(cartItems);
                 return cartItems;
             } else {
                 // Fallback to direct localStorage access
@@ -142,8 +228,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     if (cartItems.length === 0) {
                         showEmptyCartMessage();
+                        return [];
                     }
                     
+                    displayCartItems(cartItems);
                     return cartItems;
                 } else {
                     showEmptyCartMessage();
@@ -159,37 +247,42 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Load and display cart items - prioritizes Firebase if user is logged in
     async function loadCartItems() {
+        console.log('Loading cart items for checkout display...');
         // First check if we need to initialize Firebase
         initializeFirebaseIntegration();
         
         try {
             // Use Firebase if available and user is logged in, otherwise use local storage
             if (firebaseCartModule && firebase.auth && firebase.auth().currentUser) {
-                console.log('User logged in, attempting to load cart from Firebase');
-                const items = await loadCartFromFirebase();
-                if (items && items.length > 0) {
-                    return items;
-                } else {
-                    console.log('No items in Firebase cart, checking local storage');
-                    return loadCartFromLocalStorage();
+                console.log('User is logged in, trying Firebase cart first');
+                try {
+                    // Wait for the Firebase cart to load
+                    const items = await loadCartFromFirebase();
+                    console.log('Firebase cart items loaded:', items ? items.length : 0);
+                    
+                    if (items && items.length > 0) {
+                        return items;
+                    } else {
+                        console.log('Firebase cart empty, falling back to local storage');
+                    }
+                } catch (firebaseError) {
+                    console.error('Error loading from Firebase, falling back to local storage:', firebaseError);
                 }
-            } else {
-                console.log('User not logged in or Firebase not available, loading from local storage');
-                return loadCartFromLocalStorage();
             }
+            
+            // Fallback to local storage
+            console.log('Loading cart from local storage');
+            return loadCartFromLocalStorage();
         } catch (error) {
             console.error('Error in loadCartItems:', error);
-            return loadCartFromLocalStorage();
+            // Ultimate fallback
+            console.log('Error encountered, using empty cart');
+            return [];
         }
     }
     
     // Display cart items in the order summary
     function displayCartItems(items) {
-        if (!items || items.length === 0) {
-            showEmptyCartMessage();
-            return;
-        }
-        
         let summaryHTML = '';
         let total = 0;
         
@@ -201,25 +294,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="card mb-2 cart-item" data-item-id="${item.id}">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
-                            <div class="me-3">
-                                <img src="${item.image || 'https://via.placeholder.com/50'}" class="img-thumbnail" alt="${item.name}" style="width: 50px; height: 50px; object-fit: cover;">
+                            <div class="me-3" style="width: 60px; height: 60px; overflow: hidden; border-radius: 4px;">
+                                <img src="${item.image}" alt="${item.name}" style="width: 100%; height: 100%; object-fit: cover;">
                             </div>
                             <div class="flex-grow-1">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <h6 class="mb-0">${item.name}</h6>
-                                        <div class="text-muted small">₹${item.price.toFixed(2)} each</div>
-                                    </div>
-                                    <div class="d-flex flex-column align-items-end">
-                                        <div class="mb-2">
-                                            <div class="input-group input-group-sm quantity-control">
-                                                <button type="button" class="btn btn-sm btn-quantity-minus" data-item-id="${item.id}">-</button>
-                                                <span class="px-2 quantity-value" data-item-id="${item.id}">${item.quantity}</span>
-                                                <button type="button" class="btn btn-sm btn-quantity-plus" data-item-id="${item.id}">+</button>
-                                            </div>
+                                <h6 class="mb-0">${item.name}</h6>
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <div class="d-flex align-items-center">
+                                        <span class="me-2">₹${item.price.toFixed(2)}</span>
+                                        <div class="quantity-controls d-flex align-items-center border rounded">
+                                            <button type="button" class="btn btn-sm btn-quantity-minus" data-item-id="${item.id}">-</button>
+                                            <span class="px-2 quantity-value" data-item-id="${item.id}">${item.quantity}</span>
+                                            <button type="button" class="btn btn-sm btn-quantity-plus" data-item-id="${item.id}">+</button>
                                         </div>
-                                        <span class="fw-bold item-subtotal" data-item-id="${item.id}">₹${itemTotal.toFixed(2)}</span>
                                     </div>
+                                    <span class="fw-bold item-subtotal" data-item-id="${item.id}">₹${itemTotal.toFixed(2)}</span>
                                 </div>
                             </div>
                         </div>
@@ -253,7 +342,9 @@ document.addEventListener('DOMContentLoaded', function() {
             setupQuantityControls(items);
         }
         
-        updateOrderTotal(items);
+        if (orderTotalElement) {
+            orderTotalElement.textContent = `₹${total.toFixed(2)}`;
+        }
     }
     
     // Set up quantity control buttons
@@ -266,7 +357,7 @@ document.addEventListener('DOMContentLoaded', function() {
         plusButtons.forEach(button => {
             button.addEventListener('click', function() {
                 const itemId = this.getAttribute('data-item-id');
-                incrementItemQuantity(itemId, items);
+                incrementItemQuantity(itemId, window.checkoutCartItems);
             });
         });
         
@@ -275,38 +366,50 @@ document.addEventListener('DOMContentLoaded', function() {
         minusButtons.forEach(button => {
             button.addEventListener('click', function() {
                 const itemId = this.getAttribute('data-item-id');
-                decrementItemQuantity(itemId, items);
+                decrementItemQuantity(itemId, window.checkoutCartItems);
             });
         });
     }
     
-    // Increment the quantity of an item
+    // Increment item quantity
     function incrementItemQuantity(itemId, items) {
-        const item = items.find(item => item.id === itemId);
-        
-        if (item) {
-            item.quantity += 1;
-            updateQuantityDisplay(itemId, item);
-            updateOrderTotal(items);
+        // Update the items array
+        const itemIndex = items.findIndex(item => item.id === itemId);
+        if (itemIndex !== -1) {
+            items[itemIndex].quantity += 1;
+            
+            // Update the display
+            updateQuantityDisplay(itemId, items[itemIndex]);
+            
+            // Update the localStorage
             updateLocalStorage(items);
+            
+            // Update order total
+            updateOrderTotal(items);
         }
     }
     
-    // Decrement the quantity of an item
+    // Decrement item quantity
     function decrementItemQuantity(itemId, items) {
-        const item = items.find(item => item.id === itemId);
-        
-        if (item && item.quantity > 1) {
-            item.quantity -= 1;
-            updateQuantityDisplay(itemId, item);
-            updateOrderTotal(items);
+        // Update the items array
+        const itemIndex = items.findIndex(item => item.id === itemId);
+        if (itemIndex !== -1 && items[itemIndex].quantity > 1) {
+            items[itemIndex].quantity -= 1;
+            
+            // Update the display
+            updateQuantityDisplay(itemId, items[itemIndex]);
+            
+            // Update the localStorage
             updateLocalStorage(items);
+            
+            // Update order total
+            updateOrderTotal(items);
         }
     }
     
-    // Update the quantity display
+    // Update quantity display
     function updateQuantityDisplay(itemId, item) {
-        // Update the quantity value
+        // Update quantity value
         const quantityElement = document.querySelector(`.quantity-value[data-item-id="${itemId}"]`);
         if (quantityElement) {
             quantityElement.textContent = item.quantity;
@@ -352,40 +455,46 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('Cart updated using direct localStorage access');
             }
             
-            // If Firebase is available and user is logged in, also save to Firebase
+            // If Firebase cart module is loaded and user is logged in, also save to Firebase
             if (firebaseCartModule && firebase.auth && firebase.auth().currentUser) {
-                firebaseCartModule.saveItems(items)
-                    .then(() => console.log('Cart also saved to Firebase'))
-                    .catch(error => console.error('Failed to save cart to Firebase:', error));
+                firebaseCartModule.saveCartToFirebase(items)
+                    .then(result => {
+                        if (result.success) {
+                            console.log('Cart updated in Firebase from checkout page');
+                        } else {
+                            console.warn('Failed to update cart in Firebase:', result.error);
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error updating Firebase cart:', err);
+                    });
             }
         } catch (error) {
-            console.error('Error updating local storage:', error);
+            console.error('Error saving cart to storage:', error);
+            
+            // Always try the most basic fallback method on error
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+            } catch (fallbackError) {
+                console.error('Critical error: Failed to save cart with fallback method', fallbackError);
+            }
         }
     }
     
     // Show empty cart message
     function showEmptyCartMessage() {
         if (orderSummaryContainer) {
-            orderSummaryContainer.innerHTML = `
-                <div class="alert alert-info">
-                    <i class="fas fa-shopping-cart me-2"></i>
-                    Your cart is empty. Please add some products before checking out.
-                </div>
-                <div class="text-center mt-3">
-                    <a href="index.html" class="btn btn-primary">Browse Products</a>
-                </div>
-            `;
+            orderSummaryContainer.innerHTML = '<p class="text-center text-muted">Your cart is empty. Please add some products before checkout.</p>';
         }
         
         if (orderTotalElement) {
             orderTotalElement.textContent = '₹0.00';
         }
         
-        if (checkoutForm) {
-            const submitButton = checkoutForm.querySelector('button[type="submit"]');
-            if (submitButton) {
-                submitButton.disabled = true;
-            }
+        // Disable the submit button
+        const submitButton = checkoutForm?.querySelector('button[type="submit"]');
+        if (submitButton) {
+            submitButton.disabled = true;
         }
     }
     
@@ -393,33 +502,36 @@ document.addEventListener('DOMContentLoaded', function() {
     async function handleSubmit(e) {
         e.preventDefault();
         
-        // Validate form
-        if (!checkoutForm.checkValidity()) {
-            e.stopPropagation();
-            checkoutForm.classList.add('was-validated');
+        // Check if the Firebase Orders module is loaded
+        if (firebaseOrdersModule) {
+            // Check if authentication is required for placing orders
+            const authRequirement = firebaseOrdersModule.checkOrderAuthRequirement();
+            
+            if (authRequirement.requiresAuth && !authRequirement.isAuthenticated) {
+                console.log('User authentication required for order placement');
+                showCreateAccountModal();
+                return;
+            }
+        }
+        
+        // Load cart items
+        const cartItems = await loadCartItemsFromStorage();
+        if (cartItems.length === 0) {
+            showErrorModal('Your cart is empty. Please add products before placing an order.');
             return;
         }
         
+        // Get form data for the order
         const formData = new FormData(checkoutForm);
         
-        // Get cart items
-        const cartItems = window.checkoutCartItems || await loadCartItemsFromStorage();
-        
-        if (!cartItems || cartItems.length === 0) {
-            showErrorModal('Your cart is empty. Please add some products before checking out.');
-            return;
-        }
-        
-        // Prepare order data
+        // Prepare order data with customer info and products
         const orderData = {
             customer: {
                 firstName: formData.get('firstName') || '',
                 lastName: formData.get('lastName') || '',
                 email: formData.get('email') || '',
-                phone: formData.get('phone') || ''
-            },
-            address: {
-                street: formData.get('address') || '',
+                phone: formData.get('phone') || '',
+                address: formData.get('address') || '',
                 city: formData.get('city') || '',
                 state: formData.get('state') || '',
                 postalCode: formData.get('postalCode') || ''
@@ -465,29 +577,55 @@ document.addEventListener('DOMContentLoaded', function() {
                         throw new Error(saveResult.error || 'Failed to save order to Firebase');
                     }
                 }
+                
+                // Store the Firebase order ID in the order data
+                orderData.orderId = saveResult.orderId;
+                console.log('Order saved to Firebase with ID:', saveResult.orderId);
             }
             
-            // Send order confirmation email via server
-            const response = await fetch('/api/orders/submit', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(orderData)
-            });
-            
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to submit order');
+            // Send order confirmation emails using the Nodemailer server
+            try {
+                console.log('Sending order confirmation emails via Nodemailer server...');
+                const emailServerUrl = window.location.origin + '/api/send-order-email';
+                
+                // Make API call to the email server
+                const emailResponse = await fetch(emailServerUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(orderData)
+                });
+                
+                const emailResult = await emailResponse.json();
+                
+                if (emailResult.success) {
+                    console.log('Order confirmation emails sent successfully:', emailResult);
+                } else {
+                    console.warn('Failed to send order confirmation emails:', emailResult.message);
+                    // Continue with order processing even if email sending fails
+                }
+            } catch (emailError) {
+                console.error('Error sending order emails:', emailError);
+                // Continue with order processing even if email sending fails
             }
             
-            // Order successful, clear cart and show confirmation
-            clearCart();
+            // Show order confirmation modal
             showOrderConfirmation(orderData);
+            
+            // Clear cart after successful order
+            clearCart();
+            
+            // Reset form
+            checkoutForm.reset();
+            
+            // Reset button state
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalButtonText;
             
         } catch (error) {
             console.error('Error processing order:', error);
-            showErrorModal(error.message || 'An error occurred while processing your order. Please try again.');
+            showErrorModal('There was an error processing your order. Please try again later.');
             
             // Reset button state
             submitButton.disabled = false;
@@ -495,153 +633,257 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Clear the cart after successful order
+    // Clear cart from both localStorage and Firebase
     function clearCart() {
-        // Clear cart in localStorage
-        if (typeof LocalStorageCart !== 'undefined' && LocalStorageCart.clearItems) {
-            LocalStorageCart.clearItems();
-        } else {
-            localStorage.removeItem(STORAGE_KEY);
-        }
-        
-        // Clear cart in Firebase if user is logged in
-        if (firebaseCartModule && firebase.auth && firebase.auth().currentUser) {
-            firebaseCartModule.clearItems()
-                .catch(error => console.error('Failed to clear Firebase cart:', error));
-        }
-        
-        // Update cart display
-        window.checkoutCartItems = [];
-    }
-    
-    // Show account creation modal
-    function showCreateAccountModal() {
-        const modal = new bootstrap.Modal(document.getElementById('createAccountModal'));
-        modal.show();
-    }
-    
-    // Load cart items from storage (localStorage or Firebase)
-    async function loadCartItemsFromStorage() {
-        // First check if we need to initialize Firebase
-        initializeFirebaseIntegration();
-        
         try {
-            // Use Firebase if available and user is logged in, otherwise use local storage
-            if (firebaseCartModule && firebase.auth && firebase.auth().currentUser) {
-                console.log('Loading cart items from Firebase...');
-                const items = await loadCartFromFirebase();
-                return items;
+            // First try to use our new cart modules if available
+            if (typeof LocalStorageCart !== 'undefined' && LocalStorageCart.clearItems) {
+                // Use new LocalStorageCart module
+                LocalStorageCart.clearItems();
+                console.log('Cart cleared using LocalStorageCart module');
             } else {
-                console.log('Loading cart items from localStorage...');
-                return loadCartFromLocalStorage();
+                // Fallback to direct localStorage
+                localStorage.removeItem(STORAGE_KEY);
+                console.log('Cart cleared using direct localStorage access');
+            }
+            
+            // Clear Firebase cart if user is logged in
+            if (firebaseCartModule && firebase.auth && firebase.auth().currentUser) {
+                firebaseCartModule.clearFirebaseCart()
+                    .then(result => {
+                        if (result.success) {
+                            console.log('Cart cleared from Firebase after order submission');
+                        } else {
+                            console.warn('Failed to clear Firebase cart:', result.error);
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error clearing Firebase cart:', err);
+                    });
             }
         } catch (error) {
-            console.error('Error loading cart items from storage:', error);
+            console.error('Error clearing cart:', error);
+            
+            // Always try the most basic fallback method on error
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+            } catch (fallbackError) {
+                console.error('Critical error: Failed to clear cart with fallback method', fallbackError);
+            }
+        }
+    }
+    
+    // Show create account modal
+    function showCreateAccountModal() {
+        // Create the modal HTML if it doesn't exist
+        if (!document.getElementById('createAccountModal')) {
+            const modalHTML = `
+                <div class="modal fade" id="createAccountModal" tabindex="-1" aria-labelledby="createAccountModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="createAccountModalLabel">Create Account Required</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-info" role="alert">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    You need to create an account to complete your purchase.
+                                </div>
+                                <p>Please create an account or sign in to complete your order. Creating an account allows you to:</p>
+                                <ul>
+                                    <li>Track your order status</li>
+                                    <li>Save your delivery information for future purchases</li>
+                                    <li>View your order history</li>
+                                    <li>Receive exclusive offers and discounts</li>
+                                </ul>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <a href="login.html" class="btn btn-outline-primary">Sign In</a>
+                                <a href="signup.html" class="btn btn-primary">Create Account</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+        
+        // Show the modal
+        const createAccountModal = new bootstrap.Modal(document.getElementById('createAccountModal'));
+        createAccountModal.show();
+    }
+    
+    // Load cart items from storage (utility function)
+    // Checks Firebase first if user is logged in, then falls back to localStorage
+    async function loadCartItemsFromStorage() {
+        try {
+            // Try to get cart from Firebase if user is logged in
+            if (firebaseCartModule && firebase.auth && firebase.auth().currentUser) {
+                try {
+                    const result = await firebaseCartModule.loadCartFromFirebase();
+                    if (result.success && result.items.length > 0) {
+                        console.log('Cart loaded from Firebase for order processing');
+                        return result.items;
+                    }
+                } catch (firebaseError) {
+                    console.error('Error loading cart from Firebase:', firebaseError);
+                    // Fall back to local storage
+                }
+            }
+            
+            // Try to use LocalStorageCart if available
+            if (typeof LocalStorageCart !== 'undefined' && LocalStorageCart.getItems) {
+                try {
+                    const cartItems = LocalStorageCart.getItems();
+                    console.log('Cart loaded from LocalStorageCart for order processing');
+                    return cartItems;
+                } catch (localStorageCartError) {
+                    console.error('Error loading cart from LocalStorageCart:', localStorageCartError);
+                    // Fall back to direct localStorage access
+                }
+            }
+            
+            // Fall back to direct localStorage access
+            const savedCart = localStorage.getItem(STORAGE_KEY);
+            console.log('Cart loaded from direct localStorage access for order processing');
+            return savedCart ? JSON.parse(savedCart) : [];
+        } catch (error) {
+            console.error('Error loading cart from storage:', error);
             return [];
         }
     }
     
-    // Calculate total price of all items
+    // Calculate total price of cart items
     function calculateTotal(items) {
-        if (!items || items.length === 0) return 0;
-        
-        return items.reduce((total, item) => {
-            return total + (item.price * item.quantity);
-        }, 0);
+        return items.reduce((total, item) => total + (item.price * item.quantity), 0);
     }
     
-    // Generate a unique order reference
+    // Generate a random order reference
     function generateOrderReference() {
+        const prefix = 'AURIC';
         const timestamp = new Date().getTime().toString().slice(-6);
         const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-        return `AUR-${timestamp}-${random}`;
+        return `${prefix}-${timestamp}-${random}`;
     }
     
     // Show error modal
     function showErrorModal(message) {
-        const modal = new bootstrap.Modal(document.getElementById('errorModal'));
-        document.getElementById('errorMessage').textContent = message;
-        modal.show();
-    }
-    
-    // Show order confirmation
-    function showOrderConfirmation(orderData) {
-        // Update confirmation details
-        document.getElementById('orderReference').textContent = orderData.orderReference;
-        
-        // Show payment details if not cash on delivery
-        const paymentDetails = document.getElementById('paymentDetails');
-        if (orderData.paymentMethod !== 'Cash on Delivery' && orderData.paymentId) {
-            paymentDetails.style.display = 'block';
-            document.getElementById('paymentId').textContent = orderData.paymentId;
-            document.getElementById('paymentMethod').textContent = orderData.paymentMethod;
-        } else {
-            paymentDetails.style.display = 'none';
+        // Create error modal if it doesn't exist
+        if (!document.getElementById('errorModal')) {
+            const modalHTML = `
+                <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header bg-danger text-white">
+                                <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p id="errorMessage"></p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
         }
         
-        // Format the order details
-        let orderDetailsHTML = `
-            <h5 class="mt-4">Order Summary</h5>
-            <div class="table-responsive">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th class="text-center">Quantity</th>
-                            <th class="text-end">Price</th>
-                            <th class="text-end">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        `;
+        const errorMessageElement = document.getElementById('errorMessage');
+        if (errorMessageElement) {
+            errorMessageElement.textContent = message;
+        }
         
-        // Add each product
-        orderData.products.forEach(product => {
-            orderDetailsHTML += `
-                <tr>
-                    <td>${product.name}</td>
-                    <td class="text-center">${product.quantity}</td>
-                    <td class="text-end">₹${product.price.toFixed(2)}</td>
-                    <td class="text-end">₹${product.total.toFixed(2)}</td>
-                </tr>
+        const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+        errorModal.show();
+    }
+    
+    // Show order confirmation modal
+    function showOrderConfirmation(orderData) {
+        // Create confirmation modal if it doesn't exist
+        if (!document.getElementById('confirmationModal')) {
+            const modalHTML = `
+                <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header bg-success text-white">
+                                <h5 class="modal-title" id="confirmationModalLabel">Order Confirmed</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-success" role="alert">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    Your order has been placed successfully!
+                                </div>
+                                <p><strong>Order Reference:</strong> <span id="orderReference"></span></p>
+                                <div id="orderDetails"></div>
+                            </div>
+                            <div class="modal-footer">
+                                <a href="index.html" class="btn btn-primary">Continue Shopping</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             `;
-        });
-        
-        // Add order total
-        orderDetailsHTML += `
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <th colspan="3" class="text-end">Order Total:</th>
-                            <th class="text-end">₹${orderData.orderTotal.toFixed(2)}</th>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
             
-            <h5 class="mt-4">Delivery Information</h5>
-            <p>
-                <strong>${orderData.customer.firstName} ${orderData.customer.lastName}</strong><br>
-                ${orderData.address.street}<br>
-                ${orderData.address.city}, ${orderData.address.state} ${orderData.address.postalCode}<br>
-                <strong>Email:</strong> ${orderData.customer.email}<br>
-                <strong>Phone:</strong> ${orderData.customer.phone}
-            </p>
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+        
+        const orderReferenceElement = document.getElementById('orderReference');
+        const orderDetailsElement = document.getElementById('orderDetails');
+        
+        if (orderReferenceElement) {
+            orderReferenceElement.textContent = orderData.orderReference;
+        }
+        
+        if (orderDetailsElement) {
+            let detailsHTML = `
+                <div class="mt-4">
+                    <h5>Order Summary</h5>
+                    <div class="card">
+                        <div class="card-body">
+            `;
             
-            <div class="alert alert-primary mt-4">
-                <strong>Payment Method:</strong> ${orderData.paymentMethod}
-            </div>
-        `;
+            orderData.products.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                detailsHTML += `
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>${item.name} × ${item.quantity}</span>
+                        <span>₹${itemTotal.toFixed(2)}</span>
+                    </div>
+                `;
+            });
+            
+            detailsHTML += `
+                            <hr>
+                            <div class="d-flex justify-content-between">
+                                <strong>Total</strong>
+                                <strong>₹${orderData.orderTotal.toFixed(2)}</strong>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h5 class="mt-4">Customer Information</h5>
+                    <div class="card">
+                        <div class="card-body">
+                            <p><strong>Name:</strong> ${orderData.customer.firstName} ${orderData.customer.lastName}</p>
+                            <p><strong>Email:</strong> ${orderData.customer.email}</p>
+                            <p><strong>Phone:</strong> ${orderData.customer.phone}</p>
+                            <p><strong>Address:</strong> ${orderData.customer.address}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            orderDetailsElement.innerHTML = detailsHTML;
+        }
         
-        // Set the HTML content
-        document.getElementById('orderDetails').innerHTML = orderDetailsHTML;
-        
-        // Set up return to homepage button
-        document.getElementById('closeConfirmationBtn').addEventListener('click', function() {
-            window.location.href = 'index.html';
-        });
-        
-        // Show the confirmation modal
         const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
         confirmationModal.show();
     }
