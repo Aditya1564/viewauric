@@ -560,6 +560,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Get form data for the order
         const formData = new FormData(checkoutForm);
         
+        // Get payment method selected
+        const paymentMethod = formData.get('paymentMethod') || 'Cash on Delivery';
+        
         // Prepare order data with customer info and products
         const orderData = {
             customer: {
@@ -572,7 +575,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 state: formData.get('state') || '',
                 postalCode: formData.get('postalCode') || ''
             },
-            paymentMethod: formData.get('paymentMethod') || 'card',
+            paymentMethod: paymentMethod,
             products: cartItems.map(item => ({
                 id: item.id,
                 name: item.name,

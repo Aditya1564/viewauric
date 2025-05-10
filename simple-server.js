@@ -91,6 +91,108 @@ app.post('/api/send-order-email', async (req, res) => {
 });
 
 /**
+ * Create a Razorpay order
+ */
+app.post('/api/create-razorpay-order', async (req, res) => {
+  try {
+    // Import Razorpay
+    const Razorpay = require('razorpay');
+    
+    // Create a Razorpay instance
+    const razorpay = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET
+    });
+    
+    // Get order details from request body
+    const { amount, currency = 'INR', receipt, notes } = req.body;
+    
+    // Validate required data
+    if (!amount) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required order data (amount)'
+      });
+    }
+    
+    console.log('Creating Razorpay order for amount:', amount);
+    
+    // Convert amount to paise (Razorpay uses smallest currency unit)
+    const amountInPaise = Math.round(amount * 100);
+    
+    // Create order
+    const order = await razorpay.orders.create({
+      amount: amountInPaise,
+      currency,
+      receipt,
+      notes
+    });
+    
+    // Return order details
+    return res.status(200).json({
+      success: true,
+      order,
+      key_id: process.env.RAZORPAY_KEY_ID
+    });
+  } catch (error) {
+    console.error('Error creating Razorpay order:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to create Razorpay order',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Verify Razorpay payment
+ */
+app.post('/api/verify-razorpay-payment', async (req, res) => {
+  try {
+    // Get payment details from request body
+    const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
+    
+    // Validate required data
+    if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required payment verification data'
+      });
+    }
+    
+    console.log('Verifying Razorpay payment:', razorpay_payment_id);
+    
+    // Create the signature verification data
+    const crypto = require('crypto');
+    const secret = process.env.RAZORPAY_KEY_SECRET;
+    const generated_signature = crypto
+      .createHmac('sha256', secret)
+      .update(razorpay_order_id + "|" + razorpay_payment_id)
+      .digest('hex');
+    
+    // Verify the signature
+    if (generated_signature === razorpay_signature) {
+      return res.status(200).json({
+        success: true,
+        message: 'Payment verified successfully'
+      });
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: 'Payment verification failed'
+      });
+    }
+  } catch (error) {
+    console.error('Error verifying Razorpay payment:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error while verifying payment',
+      error: error.message
+    });
+  }
+});
+
+/**
  * Health check endpoint
  * Used to verify server is running properly
  */
@@ -102,6 +204,10 @@ app.get('/api/health', (req, res) => {
       service: process.env.EMAIL_SERVICE || 'Not set',
       user: process.env.EMAIL_USER ? 'Set' : 'Not set',
       pass: process.env.EMAIL_PASS ? 'Set' : 'Not set'
+    },
+    razorpayConfig: {
+      key_id: process.env.RAZORPAY_KEY_ID ? 'Set' : 'Not set',
+      key_secret: process.env.RAZORPAY_KEY_SECRET ? 'Set' : 'Not set'
     }
   });
 });
@@ -174,6 +280,8 @@ app.listen(PORT, '0.0.0.0', () => {
 Available Routes:
 - Static files: Serving from current directory
 - POST /api/send-order-email : Send order confirmation emails
+- POST /api/create-razorpay-order : Create a new Razorpay payment order
+- POST /api/verify-razorpay-payment : Verify a Razorpay payment signature
 - GET  /api/health : Health check endpoint
 
 Press Ctrl+C to stop the server

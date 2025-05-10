@@ -20,6 +20,7 @@
     "firebase-tools": "^14.2.2",
     "memoizee": "^0.4.17",
     "nodemailer": "^7.0.3",
-    "openid-client": "^6.4.2"
+    "openid-client": "^6.4.2",
+    "razorpay": "^2.9.6"
   }
 }
