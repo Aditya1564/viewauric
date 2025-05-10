@@ -52,36 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     };
                     console.log('Firebase cart module initialized');
-                }
-                            console.log('Firebase cart manager module loaded for checkout');
-                            // Create adapter for the new API
-                            firebaseCartModule = {
-                                // Map to the new FirebaseCartManager API
-                                loadCartFromFirebase: async function() {
-                                    const manager = module.FirebaseCartManager || window.FirebaseCartManager;
-                                    const result = await manager.getItems();
-                                    return result;
-                                },
-                                saveCartToFirebase: async function(items) {
-                                    const manager = module.FirebaseCartManager || window.FirebaseCartManager;
-                                    return await manager.saveItems(items);
-                                },
-                                clearFirebaseCart: async function() {
-                                    const manager = module.FirebaseCartManager || window.FirebaseCartManager;
-                                    return await manager.clearItems();
-                                }
-                            };
-                            
-                            // Check if user is logged in, if so, reload cart from Firebase
-                            if (firebase.auth().currentUser) {
-                                loadCartFromFirebase();
-                            }
-                        })
-                        .catch(err => {
-                            console.error('Failed to load Firebase cart manager module:', err);
-                            // Fallback to old module
-                            loadLegacyFirebaseCartModule();
-                        });
+                    console.log('Firebase cart manager module loaded for checkout');
                 }
                 
                 // Load Orders Module
