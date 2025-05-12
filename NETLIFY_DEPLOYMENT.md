@@ -55,11 +55,42 @@ Click "Deploy site" and wait for the deployment to complete.
 
 ## Troubleshooting
 
-If you encounter issues with Netlify Functions:
+### Common Issues and Solutions
 
-1. Check Netlify's Function logs in the Netlify dashboard under Functions > Logs
-2. Verify your environment variables are correctly set
-3. Make sure your Netlify Functions have the necessary dependencies (check the `package.json` in the `netlify/functions` directory)
+#### 1. Netlify Functions Not Working (Order Email and Razorpay)
+
+If your order confirmation emails and Razorpay integration aren't working:
+
+1. **Check Function Logs**: In the Netlify dashboard, go to Functions > Logs to see detailed error messages
+2. **Verify Environment Variables**: Make sure all environment variables are correctly set:
+   - Go to Site settings > Environment variables
+   - Verify EMAIL_USER, EMAIL_PASS, EMAIL_SERVICE, OWNER_EMAIL, RAZORPAY_KEY_ID, and RAZORPAY_KEY_SECRET are all set
+   - Consider reimporting your .env file using the "Import from .env file" option
+
+3. **Dependencies Installation**: Ensure your function dependencies are being installed:
+   - Verify the build command in netlify.toml is correctly set to `cd netlify/functions && npm install`
+   - Check build logs to confirm dependencies are installing
+   - If needed, manually install dependencies by going to the Netlify dashboard > Deploys > Trigger deploy > Clear cache and deploy site
+
+4. **CORS Issues**: If you're seeing CORS errors in the browser console:
+   - Confirm your Netlify Functions have proper CORS headers
+   - Try accessing the functions directly by visiting `your-site.netlify.app/.netlify/functions/health`
+
+5. **Function Path Issues**: If your frontend can't find the functions:
+   - Make sure netlify-helpers.js is using the correct path (/.netlify/functions)
+   - Test function URLs directly in the browser
+   - Check network tab in browser dev tools for 404 errors
+
+#### 2. Specific Fixes for Current Deployment
+
+If you continue to have issues with your current-demo.netlify.app deployment:
+
+1. **Redeploy with Updated Code**: The changes we've made to improve error handling and fix path issues should resolve most problems
+2. **Check Function Execution**: In the Netlify dashboard, check if your functions are being called (Functions > Invocations)
+3. **Test Direct Function URLs**:
+   - Test health endpoint: https://current-demo.netlify.app/.netlify/functions/health
+   - If health check works but other functions don't, the issue is in the function implementation
+4. **Clear Browser Cache**: Have users clear their browser cache when testing
 
 ## Additional Configuration
 

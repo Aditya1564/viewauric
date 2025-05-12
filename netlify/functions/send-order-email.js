@@ -8,11 +8,12 @@
 const emailService = require('./utils/email-service');
 
 exports.handler = async (event, context) => {
-  // Set CORS headers
+  // Set CORS headers - allow all origins for development
   const headers = {
-    'Access-Control-Allow-Origin': '*', // Or restrict to your domains
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS'
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Content-Type': 'application/json'
   };
   
   // Handle preflight OPTIONS request
@@ -36,17 +37,59 @@ exports.handler = async (event, context) => {
   }
   
   try {
-    // Parse the request body
-    const orderData = JSON.parse(event.body);
+    // Check if email credentials are available
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.error('Email credentials missing from environment variables');
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({
+          success: false,
+          message: 'Email service is not configured correctly',
+          debug: {
+            emailUserExists: !!process.env.EMAIL_USER,
+            emailPassExists: !!process.env.EMAIL_PASS,
+            emailServiceExists: !!process.env.EMAIL_SERVICE
+          }
+        })
+      };
+    }
     
-    // Validate required data
-    if (!orderData || !orderData.customer || !orderData.products) {
+    // Parse the request body
+    let orderData;
+    try {
+      orderData = JSON.parse(event.body);
+    } catch (parseError) {
+      console.error('Failed to parse request body:', parseError);
       return {
         statusCode: 400,
         headers,
         body: JSON.stringify({
           success: false,
-          message: 'Missing required order data'
+          message: 'Invalid request body format. JSON expected.'
+        })
+      };
+    }
+    
+    // Validate required data
+    if (!orderData || !orderData.customer || !orderData.products) {
+      console.error('Missing required order data:', {
+        hasOrderData: !!orderData,
+        hasCustomer: !!(orderData && orderData.customer),
+        hasProducts: !!(orderData && orderData.products)
+      });
+      
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({
+          success: false,
+          message: 'Missing required order data',
+          debug: {
+            hasOrderData: !!orderData,
+            hasCustomer: !!(orderData && orderData.customer),
+            hasProducts: !!(orderData && orderData.products)
+          }
         })
       };
     }
@@ -57,6 +100,7 @@ exports.handler = async (event, context) => {
     const result = await emailService.sendOrderEmails(orderData);
     
     if (result.success) {
+      console.log('Order emails sent successfully for:', orderData.orderReference);
       return {
         statusCode: 200,
         headers,
@@ -67,6 +111,7 @@ exports.handler = async (event, context) => {
         })
       };
     } else {
+      console.error('Failed to send order emails:', result.error);
       return {
         statusCode: 500,
         headers,

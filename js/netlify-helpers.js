@@ -14,9 +14,14 @@ const isProduction = !window.location.hostname.includes('localhost') &&
  * @returns {string} The base URL to use for API requests
  */
 function getApiBaseUrl() {
-  // In production, Netlify Functions are accessed at /.netlify/functions/
-  // In development, we use the redirects from netlify.toml to map /api/ to /.netlify/functions/
-  return isProduction ? '/.netlify/functions' : '/api';
+  // Always use /.netlify/functions directly in production
+  // This ensures we're accessing the functions directly without relying on redirects
+  if (isProduction) {
+    return '/.netlify/functions';
+  }
+  
+  // In development, use the redirects from netlify.toml to map /api/ to /.netlify/functions/
+  return '/api';
 }
 
 /**
@@ -42,19 +47,47 @@ async function callNetlifyFunction(endpoint, options = {}) {
   const url = `${baseUrl}/${endpoint}`;
   
   try {
-    console.log(`Calling Netlify Function: ${url}`);
-    const response = await fetch(url, options);
+    console.log(`Calling Netlify Function: ${url}`, options);
     
-    // Parse the JSON response
-    const data = await response.json();
+    // Add a timeout to the fetch call
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    
+    // Clone options and add signal
+    const fetchOptions = {
+      ...options,
+      signal: controller.signal
+    };
+    
+    const response = await fetch(url, fetchOptions);
+    clearTimeout(timeoutId);
+    
+    // Log response status
+    console.log(`Netlify Function response: ${response.status} ${response.statusText}`);
+    
+    // Try to parse the JSON response
+    let data;
+    try {
+      data = await response.json();
+    } catch (parseError) {
+      console.error('Failed to parse JSON response:', parseError);
+      throw new Error(`Failed to parse response from ${endpoint}: ${parseError.message}`);
+    }
     
     // If response is not ok, throw an error
     if (!response.ok) {
-      throw new Error(data.message || `API error: ${response.status}`);
+      console.error('API error response:', data);
+      throw new Error(data.message || data.error || `API error: ${response.status}`);
     }
     
     return data;
   } catch (error) {
+    // Check if it's an abort error (timeout)
+    if (error.name === 'AbortError') {
+      console.error(`Timeout calling Netlify Function ${endpoint}`);
+      throw new Error(`Request to ${endpoint} timed out after 30 seconds`);
+    }
+    
     console.error(`Error calling Netlify Function ${endpoint}:`, error);
     throw error;
   }

@@ -10,12 +10,22 @@ const nodemailer = require('nodemailer');
  * @returns {Object} Nodemailer transport configuration
  */
 function getEmailConfig() {
-  const emailService = process.env.EMAIL_SERVICE || '';
+  // Load variables from environment with defaults
+  const emailService = process.env.EMAIL_SERVICE || 'gmail';
   const emailHost = process.env.EMAIL_HOST || '';
   const emailPort = parseInt(process.env.EMAIL_PORT || '587', 10);
   const emailUser = process.env.EMAIL_USER || '';
   const emailPass = process.env.EMAIL_PASS || '';
   const emailSecure = process.env.EMAIL_SECURE === 'true';
+  
+  console.log('Email configuration:', {
+    service: emailService,
+    host: emailHost ? 'configured' : 'not configured',
+    port: emailPort,
+    secure: emailSecure,
+    user: emailUser ? `${emailUser.substring(0, 3)}...` : 'missing',
+    pass: emailPass ? 'configured' : 'missing'
+  });
   
   // Create the configuration object
   const config = {
@@ -29,6 +39,10 @@ function getEmailConfig() {
       user: emailUser,
       pass: emailPass,
     },
+    // Add debugging and connection timeout settings
+    debug: false,
+    logger: true,
+    connectionTimeout: 10000, // 10 seconds
   };
   
   return config;

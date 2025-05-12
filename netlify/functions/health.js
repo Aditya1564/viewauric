@@ -1,16 +1,17 @@
 /**
  * Netlify Function: Health Check
  * 
- * A simple health check endpoint to verify that Netlify Functions are working properly
+ * Simple health check endpoint to verify functions are working
  * Handles GET requests to /.netlify/functions/health
  */
 
 exports.handler = async (event, context) => {
-  // Set CORS headers
+  // Set CORS headers - allow all origins for development
   const headers = {
-    'Access-Control-Allow-Origin': '*', // Or restrict to your domains
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'GET, OPTIONS'
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    'Content-Type': 'application/json'
   };
   
   // Handle preflight OPTIONS request
@@ -33,22 +34,42 @@ exports.handler = async (event, context) => {
     };
   }
   
-  return {
-    statusCode: 200,
-    headers,
-    body: JSON.stringify({
-      status: 'OK',
-      timestamp: new Date().toISOString(),
-      environment: 'Netlify Functions',
-      emailConfig: {
-        service: process.env.EMAIL_SERVICE || 'Not set',
-        user: process.env.EMAIL_USER ? 'Set' : 'Not set',
-        pass: process.env.EMAIL_PASS ? 'Set' : 'Not set'
+  try {
+    // Check if environment variables are configured
+    const environmentStatus = {
+      email: {
+        configured: !!(process.env.EMAIL_USER && process.env.EMAIL_PASS),
+        service: process.env.EMAIL_SERVICE || 'not set',
+        user_exists: !!process.env.EMAIL_USER,
+        pass_exists: !!process.env.EMAIL_PASS
       },
-      razorpayConfig: {
-        key_id: process.env.RAZORPAY_KEY_ID ? 'Set' : 'Not set',
-        key_secret: process.env.RAZORPAY_KEY_SECRET ? 'Set' : 'Not set'
+      razorpay: {
+        configured: !!(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET),
+        key_id_exists: !!process.env.RAZORPAY_KEY_ID,
+        key_secret_exists: !!process.env.RAZORPAY_KEY_SECRET
       }
-    })
-  };
+    };
+    
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({
+        success: true,
+        message: 'Netlify Functions are running',
+        time: new Date().toISOString(),
+        environment: environmentStatus
+      })
+    };
+  } catch (error) {
+    console.error('Error in health check function:', error);
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({
+        success: false,
+        message: 'Health check failed',
+        error: error.message
+      })
+    };
+  }
 };
