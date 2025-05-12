@@ -1354,12 +1354,9 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             console.log('Processing Razorpay payment for order:', orderData.orderReference);
             
-            // Create a Razorpay order on the server
-            const response = await fetch('/api/create-razorpay-order', {
+            // Create a Razorpay order using Netlify Functions
+            const result = await window.netlifyHelpers.callNetlifyFunction('create-razorpay-order', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
                 body: JSON.stringify({
                     amount: orderData.orderTotal,
                     currency: 'INR',
@@ -1371,8 +1368,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 })
             });
-            
-            const result = await response.json();
             
             if (!result.success) {
                 throw new Error(result.message || 'Failed to create Razorpay order');
@@ -1465,20 +1460,15 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             console.log('Razorpay payment successful:', response.razorpay_payment_id);
             
-            // Verify the payment with server
-            const verifyResponse = await fetch('/api/verify-razorpay-payment', {
+            // Verify the payment with Netlify Function
+            const verifyResult = await window.netlifyHelpers.callNetlifyFunction('verify-razorpay-payment', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
                 body: JSON.stringify({
                     razorpay_payment_id: response.razorpay_payment_id,
                     razorpay_order_id: response.razorpay_order_id,
                     razorpay_signature: response.razorpay_signature
                 })
             });
-            
-            const verifyResult = await verifyResponse.json();
             
             if (!verifyResult.success) {
                 throw new Error(verifyResult.message || 'Payment verification failed');
@@ -1537,19 +1527,13 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     async function sendOrderConfirmationEmails(orderData) {
         try {
-            console.log('Sending order confirmation emails via Nodemailer server...');
-            const emailServerUrl = window.location.origin + '/api/send-order-email';
+            console.log('Sending order confirmation emails via Netlify Functions...');
             
-            // Make API call to the email server
-            const emailResponse = await fetch(emailServerUrl, {
+            // Make API call to the Netlify Function
+            const emailResult = await window.netlifyHelpers.callNetlifyFunction('send-order-email', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
                 body: JSON.stringify(orderData)
             });
-            
-            const emailResult = await emailResponse.json();
             
             if (emailResult.success) {
                 console.log('Order confirmation emails sent successfully:', emailResult);
