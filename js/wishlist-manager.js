@@ -553,8 +553,8 @@ const WishlistManager = (function() {
                     }
                     
                     .add-to-wishlist.active {
-                        background-color: #fff5f8;
-                        border-color: #ff3e6c;
+                        background-color: transparent;
+                        border-color: transparent;
                     }
                     
                     .add-to-wishlist.active .fa-heart,
