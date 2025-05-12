@@ -14,11 +14,32 @@ document.addEventListener('DOMContentLoaded', function() {
     let firebaseCartModule = null;
     let firebaseOrdersModule = null;
     
-    // DOM Elements
+    // DOM Elements for Order Summary and Form
     const orderSummaryContainer = document.getElementById('orderSummary');
+    const orderSummaryStep2 = document.getElementById('orderSummaryStep2');
+    const orderSummaryStep3 = document.getElementById('orderSummaryStep3');
+    const orderSummaryDetails = document.getElementById('orderSummaryDetails');
     const orderTotalElement = document.getElementById('orderTotal');
+    const orderTotalStep2 = document.getElementById('orderTotalStep2');
+    const orderTotalStep3 = document.getElementById('orderTotalStep3');
     const checkoutForm = document.getElementById('checkoutForm');
     const productListContainer = document.getElementById('productList');
+    
+    // DOM Elements for Checkout Steps
+    const step1 = document.getElementById('checkout-step-1');
+    const step2 = document.getElementById('checkout-step-2');
+    const step3 = document.getElementById('checkout-step-3');
+    const stepIcon1 = document.getElementById('step-icon-1');
+    const stepIcon2 = document.getElementById('step-icon-2');
+    const stepIcon3 = document.getElementById('step-icon-3');
+    const progressBar = document.getElementById('checkout-progress-bar');
+    const addressConfirmation = document.getElementById('address-confirmation');
+    
+    // DOM Elements for Step Navigation
+    const continueToAddressBtn = document.getElementById('continue-to-address');
+    const backToSummaryBtn = document.getElementById('back-to-summary');
+    const continueToPaymentBtn = document.getElementById('continue-to-payment');
+    const backToAddressBtn = document.getElementById('back-to-address');
     
     // A simplified Firebase integration function that focuses on reliability
     function initializeFirebaseIntegration() {

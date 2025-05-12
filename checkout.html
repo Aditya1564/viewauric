@@ -124,97 +124,228 @@
     <div class="container py-5">
         <header class="mb-5 text-center">
             <h1 class="display-4">Checkout</h1>
-            <p class="lead">Complete your order by filling out the form below</p>
+            <p class="lead">Complete your order in a few simple steps</p>
         </header>
 
-        <div class="row">
-            <!-- Order Form -->
-            <div class="col-lg-8">
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">Order Details</h5>
+        <!-- Checkout Steps Progress -->
+        <div class="checkout-progress mb-5">
+            <div class="row text-center">
+                <div class="col-4">
+                    <div class="step-icon active" id="step-icon-1">
+                        <i class="fas fa-shopping-cart"></i>
                     </div>
-                    <div class="card-body">
-                        <form id="checkoutForm">
-                            <div class="row mb-4">
-                                <div class="col-md-6 mb-3 mb-md-0">
-                                    <label for="firstName" class="form-label">First Name</label>
-                                    <input type="text" class="form-control" id="firstName" name="firstName" value="John" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="lastName" class="form-label">Last Name</label>
-                                    <input type="text" class="form-control" id="lastName" name="lastName" value="Smith" required>
-                                </div>
-                            </div>
-
-                            <div class="mb-4">
-                                <label for="email" class="form-label">Email Address</label>
-                                <input type="email" class="form-control" id="email" name="email" value="sss.naik2007@gmail.com" required>
-                            </div>
-
-                            <div class="mb-4">
-                                <label for="phone" class="form-label">Phone Number</label>
-                                <input type="tel" class="form-control" id="phone" name="phone" value="1234567890" required>
-                            </div>
-
-                            <div class="mb-4">
-                                <label for="address" class="form-label">Delivery Address</label>
-                                <textarea class="form-control" id="address" name="address" rows="3" required>123 Main Street, Anytown, CA 12345</textarea>
-                            </div>
-
-                            <!-- Products are now managed directly in the order summary -->
-
-                            <!-- Hidden Product List - Used by JavaScript to store products -->
-                            <div id="productList" style="display: none;">
-                                <!-- Product items will be added here by JavaScript -->
-                            </div>
-                            
-                            <div class="mb-4">
-                                <h5 class="mb-3">Payment Method</h5>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="radio" name="paymentMethod" id="cashOnDelivery" value="Cash on Delivery" checked>
-                                    <label class="form-check-label" for="cashOnDelivery">
-                                        Cash on Delivery
-                                    </label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="radio" name="paymentMethod" id="razorpay" value="Razorpay">
-                                    <label class="form-check-label" for="razorpay">
-                                        Pay Online with Razorpay <img src="https://razorpay.com/assets/razorpay-logo.svg" alt="Razorpay" style="height: 20px; margin-left: 5px;">
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="mb-4">
-                                <label for="notes" class="form-label">Order Notes (Optional)</label>
-                                <textarea class="form-control" id="notes" name="notes" rows="3">Please handle with care. Gift wrapping requested.</textarea>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary">Place Order</button>
-                        </form>
+                    <div class="step-title">Order Summary</div>
+                </div>
+                <div class="col-4">
+                    <div class="step-icon" id="step-icon-2">
+                        <i class="fas fa-map-marker-alt"></i>
                     </div>
+                    <div class="step-title">Shipping Address</div>
+                </div>
+                <div class="col-4">
+                    <div class="step-icon" id="step-icon-3">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <div class="step-title">Payment</div>
                 </div>
             </div>
-
-            <!-- Order Summary -->
-            <div class="col-lg-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">Order Summary</h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="orderSummary">
-                            <p>No products added yet.</p>
-                        </div>
-                        <hr>
-                        <div class="d-flex justify-content-between">
-                            <h5>Total:</h5>
-                            <h5 id="orderTotal">$0.00</h5>
-                        </div>
-                    </div>
-                </div>
+            <div class="progress mt-3">
+                <div class="progress-bar" role="progressbar" style="width: 33%" id="checkout-progress-bar"></div>
             </div>
         </div>
+
+        <form id="checkoutForm">
+            <!-- Step 1: Order Summary -->
+            <div class="checkout-step active" id="checkout-step-1">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Your Cart Items</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="orderSummaryDetails">
+                                    <p>No products added yet.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="button" class="btn btn-primary" id="continue-to-address">Continue</button>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Order Summary</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="orderSummary">
+                                    <p>No products added yet.</p>
+                                </div>
+                                <hr>
+                                <div class="d-flex justify-content-between">
+                                    <h5>Total:</h5>
+                                    <h5 id="orderTotal">₹0.00</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Delivery Address -->
+            <div class="checkout-step" id="checkout-step-2">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Shipping Address</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-4">
+                                    <div class="col-md-6 mb-3 mb-md-0">
+                                        <label for="firstName" class="form-label">First Name</label>
+                                        <input type="text" class="form-control" id="firstName" name="firstName" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="lastName" class="form-label">Last Name</label>
+                                        <input type="text" class="form-control" id="lastName" name="lastName" required>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="email" class="form-label">Email Address</label>
+                                    <input type="email" class="form-control" id="email" name="email" required>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="phone" class="form-label">Phone Number</label>
+                                    <input type="tel" class="form-control" id="phone" name="phone" required>
+                                </div>
+
+                                <div class="row mb-4">
+                                    <div class="col-md-6 mb-3 mb-md-0">
+                                        <label for="pinCode" class="form-label">PIN Code</label>
+                                        <input type="text" class="form-control" id="pinCode" name="pinCode" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="state" class="form-label">State</label>
+                                        <input type="text" class="form-control" id="state" name="state" required>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-4">
+                                    <div class="col-md-6 mb-3 mb-md-0">
+                                        <label for="city" class="form-label">City</label>
+                                        <input type="text" class="form-control" id="city" name="city" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="houseNumber" class="form-label">House/Building Number</label>
+                                        <input type="text" class="form-control" id="houseNumber" name="houseNumber" required>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="roadName" class="form-label">Road Name/Area/Colony</label>
+                                    <textarea class="form-control" id="roadName" name="roadName" rows="2" required></textarea>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="notes" class="form-label">Order Notes (Optional)</label>
+                                    <textarea class="form-control" id="notes" name="notes" rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-3">
+                            <button type="button" class="btn btn-outline-secondary" id="back-to-summary">Back</button>
+                            <button type="button" class="btn btn-primary" id="continue-to-payment">Place Order</button>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Order Summary</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="orderSummaryStep2">
+                                    <p>No products added yet.</p>
+                                </div>
+                                <hr>
+                                <div class="d-flex justify-content-between">
+                                    <h5>Total:</h5>
+                                    <h5 id="orderTotalStep2">₹0.00</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Payment Method -->
+            <div class="checkout-step" id="checkout-step-3">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Payment Method</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-4">
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="radio" name="paymentMethod" id="cashOnDelivery" value="Cash on Delivery" checked>
+                                        <label class="form-check-label" for="cashOnDelivery">
+                                            <i class="fas fa-money-bill-wave me-2"></i> Cash on Delivery
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="paymentMethod" id="razorpay" value="Razorpay">
+                                        <label class="form-check-label" for="razorpay">
+                                            <i class="fas fa-credit-card me-2"></i> Pay Online with Razorpay 
+                                            <img src="https://razorpay.com/assets/razorpay-logo.svg" alt="Razorpay" style="height: 20px; margin-left: 5px;">
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="address-summary mt-4">
+                                    <h6 class="mb-3">Shipping Address</h6>
+                                    <div class="card bg-light">
+                                        <div class="card-body" id="address-confirmation">
+                                            <p>Please complete the address section.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Hidden Product List - Used by JavaScript to store products -->
+                                <div id="productList" style="display: none;">
+                                    <!-- Product items will be added here by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-3">
+                            <button type="button" class="btn btn-outline-secondary" id="back-to-address">Back</button>
+                            <button type="submit" class="btn btn-primary">Complete Order</button>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Order Summary</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="orderSummaryStep3">
+                                    <p>No products added yet.</p>
+                                </div>
+                                <hr>
+                                <div class="d-flex justify-content-between">
+                                    <h5>Total:</h5>
+                                    <h5 id="orderTotalStep3">₹0.00</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
     </div>
 
     <!-- Error Modal -->
