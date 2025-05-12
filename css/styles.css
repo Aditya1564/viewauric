@@ -1499,9 +1499,7 @@ a {
 }
 
 .add-to-wishlist:hover {
-    background: linear-gradient(45deg, #693208, #5E2900);
-    color: white;
-    transform: scale(1.1);
+    /* Removed hover effects as requested */
 }
 
 .product-details {
