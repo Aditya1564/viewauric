@@ -1,4 +1,77 @@
-/* Custom CSS for Checkout Page */
+/* Custom CSS for Multi-step Checkout Page */
+
+/* Progress bar and steps styles */
+.checkout-progress {
+    margin-bottom: 40px;
+}
+
+.step-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #f8f9fa;
+    margin: 0 auto 10px;
+    border: 2px solid #dee2e6;
+    color: #6c757d;
+    font-size: 24px;
+    transition: all 0.3s ease;
+}
+
+.step-icon.active {
+    background-color: #D4AF37;
+    border-color: #D4AF37;
+    color: white;
+}
+
+.step-icon.completed {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: white;
+}
+
+.step-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #6c757d;
+}
+
+.checkout-step {
+    display: none;
+}
+
+.checkout-step.active {
+    display: block;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.progress {
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    background-color: #D4AF37;
+    transition: width 0.6s ease;
+}
+
+/* Address confirmation box */
+.address-summary {
+    margin-top: 20px;
+}
+
+#address-confirmation {
+    font-size: 14px;
+    line-height: 1.5;
+}
 
 /* Order summary styling */
 .order-items-container {
@@ -76,6 +149,22 @@
 
 .cart-item:hover {
     box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+/* Detailed cart item styling for step 1 */
+.cart-item-detail {
+    transition: all 0.3s;
+    border: 1px solid #eee;
+}
+
+.cart-item-detail:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+}
+
+.cart-item-detail .fw-medium {
+    font-weight: 500;
+    color: #666;
 }
 
 .item-subtotal {
