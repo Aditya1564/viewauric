@@ -552,6 +552,12 @@ const WishlistManager = (function() {
                         color: #ff3e6c;
                     }
                     
+                    .add-to-wishlist.active {
+                        background-color: #fff5f8;
+                        border-color: #ff3e6c;
+                    }
+                    
+                    .add-to-wishlist.active .fa-heart,
                     .add-to-wishlist.active .far.fa-heart {
                         font-weight: 900;
                         color: #ff3e6c;
@@ -623,9 +629,23 @@ const WishlistManager = (function() {
                     if (isInWishlist(productId)) {
                         removeFromWishlist(productId);
                         this.classList.remove('active');
+                        // Update icon
+                        const icon = this.querySelector('i');
+                        if (icon) {
+                            icon.classList.add('far');
+                            icon.classList.remove('fas');
+                            icon.classList.remove('active');
+                        }
                     } else {
                         addToWishlist(product);
                         this.classList.add('active');
+                        // Update icon
+                        const icon = this.querySelector('i');
+                        if (icon) {
+                            icon.classList.remove('far');
+                            icon.classList.add('fas');
+                            icon.classList.add('active');
+                        }
                     }
                 }
             });
@@ -713,12 +733,27 @@ const WishlistManager = (function() {
                     };
                     
                     // Toggle wishlist status
+                    const wishlistBtn = e.target.closest('.add-to-wishlist');
                     if (isInWishlist(productId)) {
                         removeFromWishlist(productId);
-                        e.target.closest('.add-to-wishlist').classList.remove('active');
+                        wishlistBtn.classList.remove('active');
+                        // Update icon
+                        const icon = wishlistBtn.querySelector('i');
+                        if (icon) {
+                            icon.classList.add('far');
+                            icon.classList.remove('fas');
+                            icon.classList.remove('active');
+                        }
                     } else {
                         addToWishlist(product);
-                        e.target.closest('.add-to-wishlist').classList.add('active');
+                        wishlistBtn.classList.add('active');
+                        // Update icon
+                        const icon = wishlistBtn.querySelector('i');
+                        if (icon) {
+                            icon.classList.remove('far');
+                            icon.classList.add('fas');
+                            icon.classList.add('active');
+                        }
                     }
                 }
             }
@@ -852,8 +887,22 @@ const WishlistManager = (function() {
                 console.log('Updating wishlist button state for product ID:', productId, 'In wishlist:', isInWishlist(productId));
                 if (isInWishlist(productId)) {
                     wishlistButton.classList.add('active');
+                    // Also ensure the icon is updated
+                    const icon = wishlistButton.querySelector('i');
+                    if (icon) {
+                        icon.classList.remove('far');
+                        icon.classList.add('fas');
+                        icon.classList.add('active');
+                    }
                 } else {
                     wishlistButton.classList.remove('active');
+                    // Reset icon to regular
+                    const icon = wishlistButton.querySelector('i');
+                    if (icon) {
+                        icon.classList.add('far');
+                        icon.classList.remove('fas');
+                        icon.classList.remove('active');
+                    }
                 }
             }
         });
