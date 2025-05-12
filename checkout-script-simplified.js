@@ -341,12 +341,19 @@ document.addEventListener('DOMContentLoaded', function() {
     // Display cart items in the order summary
     function displayCartItems(items) {
         let summaryHTML = '';
+        let detailsHTML = '';
         let total = 0;
+        
+        // Clear product list container first to prevent duplicates
+        if (productListContainer) {
+            productListContainer.innerHTML = '';
+        }
         
         items.forEach(item => {
             const itemTotal = item.price * item.quantity;
             total += itemTotal;
             
+            // HTML for order summary (compact version for sidebar)
             summaryHTML += `
                 <div class="card mb-2 cart-item" data-item-id="${item.id}">
                     <div class="card-body">
@@ -373,6 +380,41 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             `;
             
+            // HTML for order details (larger version for main content area in step 1)
+            detailsHTML += `
+                <div class="card mb-3 cart-item-detail" data-item-id="${item.id}">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-2 mb-3 mb-md-0">
+                                <div style="width: 100px; height: 100px; overflow: hidden; border-radius: 4px; margin: 0 auto;">
+                                    <img src="${item.image}" alt="${item.name}" style="width: 100%; height: 100%; object-fit: cover;">
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3 mb-md-0">
+                                <h5 class="mb-2">${item.name}</h5>
+                                <p class="text-muted mb-0">Product ID: ${item.id}</p>
+                            </div>
+                            <div class="col-md-2 mb-3 mb-md-0 text-center">
+                                <p class="mb-0 fw-medium">Price</p>
+                                <p class="fw-bold mb-0">₹${item.price.toFixed(2)}</p>
+                            </div>
+                            <div class="col-md-2 mb-3 mb-md-0 text-center">
+                                <p class="mb-0 fw-medium">Quantity</p>
+                                <div class="quantity-controls d-flex align-items-center border rounded justify-content-center mx-auto" style="width: fit-content;">
+                                    <button type="button" class="btn btn-sm btn-quantity-minus" data-item-id="${item.id}">-</button>
+                                    <span class="px-3 quantity-value" data-item-id="${item.id}">${item.quantity}</span>
+                                    <button type="button" class="btn btn-sm btn-quantity-plus" data-item-id="${item.id}">+</button>
+                                </div>
+                            </div>
+                            <div class="col-md-2 mb-0 text-center">
+                                <p class="mb-0 fw-medium">Subtotal</p>
+                                <p class="fw-bold mb-0 item-subtotal" data-item-id="${item.id}">₹${itemTotal.toFixed(2)}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
             // Add hidden fields for form submission
             const hiddenItem = document.createElement('input');
             hiddenItem.type = 'hidden';
@@ -384,7 +426,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 name: item.name,
                 price: item.price,
                 quantity: item.quantity,
-                total: itemTotal
+                total: itemTotal,
+                image: item.image
             });
             
             if (productListContainer) {
@@ -392,16 +435,31 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
+        // Update order summary (sidebar)
         if (orderSummaryContainer) {
-            orderSummaryContainer.innerHTML = summaryHTML;
-            
-            // Add event listeners to quantity buttons
-            setupQuantityControls(items);
+            if (items.length > 0) {
+                orderSummaryContainer.innerHTML = summaryHTML;
+            } else {
+                orderSummaryContainer.innerHTML = '<p>No products added yet.</p>';
+            }
         }
         
+        // Update order details (main content area in step 1)
+        if (orderSummaryDetails) {
+            if (items.length > 0) {
+                orderSummaryDetails.innerHTML = detailsHTML;
+            } else {
+                orderSummaryDetails.innerHTML = '<p>No products added yet. Please add products to your cart before checkout.</p>';
+            }
+        }
+        
+        // Update all total price displays
         if (orderTotalElement) {
             orderTotalElement.textContent = `₹${total.toFixed(2)}`;
         }
+        
+        // Add event listeners to quantity buttons
+        setupQuantityControls(items);
     }
     
     // Set up quantity control buttons
@@ -587,6 +645,14 @@ document.addEventListener('DOMContentLoaded', function() {
         // Log cart items to see what we're working with
         console.log("Cart items being saved to order:", cartItems);
         
+        // Build the full address from the new address fields
+        const houseNumber = formData.get('houseNumber') || '';
+        const roadName = formData.get('roadName') || '';
+        const city = formData.get('city') || '';
+        const state = formData.get('state') || '';
+        const pinCode = formData.get('pinCode') || '';
+        const fullAddress = `${houseNumber}, ${roadName}, ${city}, ${state} - ${pinCode}`;
+        
         // Prepare order data with customer info and products
         const orderData = {
             customer: {
@@ -594,10 +660,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 lastName: formData.get('lastName') || '',
                 email: formData.get('email') || '',
                 phone: formData.get('phone') || '',
-                address: formData.get('address') || '',
-                city: formData.get('city') || '',
-                state: formData.get('state') || '',
-                postalCode: formData.get('postalCode') || ''
+                address: fullAddress,
+                city: city,
+                state: state,
+                postalCode: pinCode,
+                houseNumber: houseNumber,
+                roadName: roadName
             },
             paymentMethod: paymentMethod,
             products: cartItems.map(item => {
@@ -1075,6 +1143,150 @@ document.addEventListener('DOMContentLoaded', function() {
         confirmationModal.show();
     }
     
+    // Function to go to a specific checkout step
+    function goToStep(stepNumber) {
+        console.log('Going to step', stepNumber);
+        
+        // Hide all steps
+        step1.classList.remove('active');
+        step2.classList.remove('active');
+        step3.classList.remove('active');
+        
+        // Reset step icons
+        stepIcon1.classList.remove('active', 'completed');
+        stepIcon2.classList.remove('active', 'completed');
+        stepIcon3.classList.remove('active', 'completed');
+        
+        // Show the current step
+        if (stepNumber === 1) {
+            step1.classList.add('active');
+            stepIcon1.classList.add('active');
+            progressBar.style.width = '33%';
+        } else if (stepNumber === 2) {
+            step2.classList.add('active');
+            stepIcon1.classList.add('completed');
+            stepIcon2.classList.add('active');
+            progressBar.style.width = '66%';
+            
+            // Copy order summary to step 2
+            if (orderSummaryContainer && orderSummaryStep2) {
+                orderSummaryStep2.innerHTML = orderSummaryContainer.innerHTML;
+            }
+            if (orderTotalElement && orderTotalStep2) {
+                orderTotalStep2.textContent = orderTotalElement.textContent;
+            }
+        } else if (stepNumber === 3) {
+            step3.classList.add('active');
+            stepIcon1.classList.add('completed');
+            stepIcon2.classList.add('completed');
+            stepIcon3.classList.add('active');
+            progressBar.style.width = '100%';
+            
+            // Copy order summary to step 3
+            if (orderSummaryContainer && orderSummaryStep3) {
+                orderSummaryStep3.innerHTML = orderSummaryContainer.innerHTML;
+            }
+            if (orderTotalElement && orderTotalStep3) {
+                orderTotalStep3.textContent = orderTotalElement.textContent;
+            }
+            
+            // Update address confirmation in payment step
+            updateAddressConfirmation();
+        }
+    }
+    
+    // Update the address confirmation display in the payment step
+    function updateAddressConfirmation() {
+        if (addressConfirmation) {
+            const firstName = document.getElementById('firstName').value || '';
+            const lastName = document.getElementById('lastName').value || '';
+            const phone = document.getElementById('phone').value || '';
+            const pinCode = document.getElementById('pinCode').value || '';
+            const state = document.getElementById('state').value || '';
+            const city = document.getElementById('city').value || '';
+            const houseNumber = document.getElementById('houseNumber').value || '';
+            const roadName = document.getElementById('roadName').value || '';
+            
+            if (firstName && lastName && phone && pinCode && state && city && houseNumber && roadName) {
+                addressConfirmation.innerHTML = `
+                    <p><strong>${firstName} ${lastName}</strong></p>
+                    <p>${houseNumber}, ${roadName}</p>
+                    <p>${city}, ${state} - ${pinCode}</p>
+                    <p>Phone: ${phone}</p>
+                `;
+            } else {
+                addressConfirmation.innerHTML = '<p>Please complete all address fields.</p>';
+            }
+        }
+    }
+    
+    // Set up checkout step navigation
+    function setupCheckoutStepNavigation() {
+        // Step 1 to Step 2
+        if (continueToAddressBtn) {
+            continueToAddressBtn.addEventListener('click', function() {
+                // Validate that cart has items
+                if (window.checkoutCartItems && window.checkoutCartItems.length > 0) {
+                    goToStep(2);
+                } else {
+                    showErrorModal('Your cart is empty. Please add products before continuing.');
+                }
+            });
+        }
+        
+        // Step 2 to Step 1
+        if (backToSummaryBtn) {
+            backToSummaryBtn.addEventListener('click', function() {
+                goToStep(1);
+            });
+        }
+        
+        // Step 2 to Step 3
+        if (continueToPaymentBtn) {
+            continueToPaymentBtn.addEventListener('click', function() {
+                // Simple validation for required address fields
+                const firstName = document.getElementById('firstName').value;
+                const lastName = document.getElementById('lastName').value;
+                const email = document.getElementById('email').value;
+                const phone = document.getElementById('phone').value;
+                const pinCode = document.getElementById('pinCode').value;
+                const state = document.getElementById('state').value;
+                const city = document.getElementById('city').value;
+                const houseNumber = document.getElementById('houseNumber').value;
+                const roadName = document.getElementById('roadName').value;
+                
+                if (!firstName || !lastName || !email || !phone || !pinCode || !state || !city || !houseNumber || !roadName) {
+                    showErrorModal('Please fill in all required address fields.');
+                    return;
+                }
+                
+                // Email validation
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    showErrorModal('Please enter a valid email address.');
+                    return;
+                }
+                
+                // Phone validation - simple check for numeric value
+                const phoneRegex = /^\d{10}$/;
+                if (!phoneRegex.test(phone)) {
+                    showErrorModal('Please enter a valid 10-digit phone number.');
+                    return;
+                }
+                
+                // If all validations pass, proceed to step 3
+                goToStep(3);
+            });
+        }
+        
+        // Step 3 to Step 2
+        if (backToAddressBtn) {
+            backToAddressBtn.addEventListener('click', function() {
+                goToStep(2);
+            });
+        }
+    }
+    
     // Initialize the page
     async function init() {
         console.log('Initializing checkout page...');
@@ -1113,6 +1325,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 checkoutForm._hasSubmitHandler = true;
                 console.log('Added submit handler to checkout form');
             }
+            
+            // Initialize checkout step navigation
+            setupCheckoutStepNavigation();
+            
+            // Start at step 1
+            goToStep(1);
             
             console.log('Checkout page initialized with cart items:', cartItems?.length || 0);
         } catch (error) {
