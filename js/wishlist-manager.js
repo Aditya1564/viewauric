@@ -553,7 +553,7 @@ const WishlistManager = (function() {
                     }
                     
                     .add-to-wishlist.active {
-                        background-color: transparent;
+                        background-color: #fff5f8;
                         border-color: transparent;
                     }
                     
