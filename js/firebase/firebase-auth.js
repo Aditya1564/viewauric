@@ -191,10 +191,12 @@ window.FirebaseAuth = (function() {
         });
       } else {
         // Create new user profile
+        // Get name from email (part before @) if no display name provided
+        const nameFromEmail = user.email ? user.email.split('@')[0] : '';
         userProfile = {
           uid: user.uid,
           email: user.email,
-          displayName: user.displayName || 'User',
+          displayName: user.displayName || nameFromEmail || 'User',
           photoURL: user.photoURL,
           createdAt: firebase.firestore.Timestamp.now(),
           updatedAt: firebase.firestore.Timestamp.now(),
