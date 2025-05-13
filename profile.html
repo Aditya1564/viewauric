@@ -495,32 +495,41 @@
             }
           }
         });
-          
-          // Also check if we have a session, if not redirect immediately
-          const session = FirebaseAuth.getSession();
-          if (!session || !session.uid) {
-            console.log("No session found, redirecting to login page");
-            window.location.href = "login.html";
-          }
-        }
       });
       
       // Load user profile data
-      async function loadUserProfile() {
-        // Get session data (already checked above)
-        const session = FirebaseAuth.getSession();
+      async function loadUserProfile(userId) {
+        let userIdToUse = userId;
         
-        if (!session || !session.uid) {
-          console.error("No valid session found");
+        // If no userId provided, try to get it from session or current user
+        if (!userIdToUse) {
+          // Try to get from current Firebase user first
+          const currentUser = firebase.auth().currentUser;
+          if (currentUser) {
+            userIdToUse = currentUser.uid;
+            console.log("Using current Firebase user ID:", userIdToUse);
+          } else {
+            // Fall back to session
+            const session = FirebaseAuth.getSession();
+            if (session && session.uid) {
+              userIdToUse = session.uid;
+              console.log("Using session user ID:", userIdToUse);
+            }
+          }
+        }
+        
+        // If we still don't have a user ID, redirect to login
+        if (!userIdToUse) {
+          console.error("No valid user ID found");
           window.location.href = "login.html";
           return;
         }
         
-        console.log("Loading profile for user:", session.uid);
+        console.log("Loading profile for user:", userIdToUse);
         
         try {
           // Get user profile from auth manager
-          const profileResult = await FirebaseAuth.getUserProfile(session.uid);
+          const profileResult = await FirebaseAuth.getUserProfile(userIdToUse);
           
           if (profileResult.success) {
             // Display user information
@@ -627,13 +636,34 @@
       
       // Load and display user orders
       async function loadUserOrders(userId) {
+        let userIdToUse = userId;
+        
+        // If no userId provided, try to get it from session or current user
+        if (!userIdToUse) {
+          // Try to get from current Firebase user first
+          const currentUser = firebase.auth().currentUser;
+          if (currentUser) {
+            userIdToUse = currentUser.uid;
+            console.log("Using current Firebase user ID for orders:", userIdToUse);
+          } else {
+            // Fall back to session
+            const session = FirebaseAuth.getSession();
+            if (session && session.uid) {
+              userIdToUse = session.uid;
+              console.log("Using session user ID for orders:", userIdToUse);
+            } else {
+              console.error("No valid user ID found for loading orders");
+              return;
+            }
+          }
+        }
+      
         const ordersContainer = document.getElementById('orders');
         if (!ordersContainer) return;
         
         try {
-          // Get orders from auth manager
           // Get orders from Firestore at path: users/{userId}/orders
-          const ordersSnapshot = await firebase.firestore().collection("users").doc(userId).collection("orders").get();
+          const ordersSnapshot = await firebase.firestore().collection("users").doc(userIdToUse).collection("orders").get();
           const ordersResult = {
             success: true,
             orders: ordersSnapshot.docs.map(doc => ({
