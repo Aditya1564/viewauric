@@ -250,7 +250,13 @@
       });
     </script>
     
-    <!-- Firebase SDK -->
+    <!-- Navigation script -->
+    <script src="js/navigation.js?v=1.0.4"></script>
+    
+    <!-- Banner rotator script -->
+    <script src="js/banner-rotator.js?v=1.0.1"></script>
+    
+    <!-- Firebase SDK - These must come before any firebase modules -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
@@ -271,13 +277,7 @@
       firebase.initializeApp(firebaseConfig);
     </script>
     
-    <!-- Navigation script -->
-    <script src="js/navigation.js?v=1.0.4"></script>
-    
-    <!-- Banner rotator script -->
-    <script src="js/banner-rotator.js?v=1.0.1"></script>
-    
-    <!-- Firebase Auth Global Module -->
+    <!-- Firebase Auth Global Module - Must come after Firebase SDK and initialization -->
     <script src="js/firebase/firebase-auth.js"></script>
     
     <!-- Cart System -->
