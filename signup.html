@@ -381,7 +381,7 @@
               }, 1000);
             } else {
               // Handle error
-              console.error("Registration failed:", result.error);
+              console.error("Registration failed:", result.error, "Code:", result.code);
               handleAuthError(result);
             }
           } catch (error) {
@@ -447,9 +447,12 @@
         let errorMessage = 'Registration failed. Please try again.';
         
         if (result.code) {
+          console.log("Auth error code:", result.code);
           switch(result.code) {
             case 'auth/email-already-in-use':
               errorMessage = 'This email address is already in use. Please try logging in instead.';
+              // Add link to login page
+              errorMessage += ' <a href="login.html" class="login-link">Go to login</a>';
               break;
             case 'auth/invalid-email':
               errorMessage = 'Invalid email address format.';
