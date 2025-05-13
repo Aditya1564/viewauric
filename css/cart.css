@@ -236,7 +236,7 @@
 
 .cart-count, .wishlist-count {
   position: absolute;
-  top: -8px;
+  top: -10px; /* Moved up from -8px to -10px */
   right: -8px;
   background: #c8a97e;
   color: white;
@@ -248,7 +248,7 @@
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  /* Always show the count badge */
+  /* Always show the count badge, even when 0 */
   visibility: visible !important;
   opacity: 1 !important;
 }

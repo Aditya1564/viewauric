@@ -537,7 +537,7 @@ const WishlistManager = (function() {
                     
                     .wishlist-count {
                         position: absolute;
-                        top: -8px;
+                        top: -10px; /* Moved up from -8px to -10px */
                         right: -8px;
                         background: #c8a97e; /* Match cart badge golden color */
                         color: #fff;
