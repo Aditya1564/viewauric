@@ -429,6 +429,12 @@
       
       // Initialize Firebase
       firebase.initializeApp(firebaseConfig);
+      
+      // Enable session persistence
+      firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .catch(error => {
+          console.error("Auth persistence error:", error);
+        });
     </script>
     
     <!-- Firebase Auth Global Module -->
@@ -457,40 +463,38 @@
       
       // Main initialization
       document.addEventListener('DOMContentLoaded', () => {
-        // First check if we have a current Firebase user
-        const currentUser = firebase.auth().currentUser;
+        // Set up a temporary loading state
+        const profileContent = document.querySelector('.profile-content');
+        if (profileContent) {
+          profileContent.innerHTML = `
+            <div class="loading-container" style="text-align: center; padding: 40px;">
+              <div class="spinner" style="margin: 0 auto;"></div>
+              <p>Loading your profile...</p>
+            </div>
+          `;
+        }
         
-        if (currentUser) {
-          console.log("Firebase user is logged in, loading profile:", currentUser.uid);
-          loadUserProfile();
-          setupProfilePage();
-        } else {
-          // No current Firebase user, let's check onAuthStateChanged
-          console.log("No current Firebase user, waiting for auth state change...");
-          
-          // Set up a temporary loading state
-          const profileContent = document.querySelector('.profile-content');
-          if (profileContent) {
-            profileContent.innerHTML = `
-              <div class="loading-container" style="text-align: center; padding: 40px;">
-                <div class="spinner" style="margin: 0 auto;"></div>
-                <p>Loading your profile...</p>
-              </div>
-            `;
-          }
-          
-          // Set up auth state listener
-          const unsubscribe = FirebaseAuth.observeAuthState((user) => {
-            if (user) {
-              console.log("Auth state changed: user is signed in:", user.uid);
-              unsubscribe(); // Remove listener since we don't need it anymore
+        // Use direct Firebase auth to check authentication state
+        firebase.auth().onAuthStateChanged((user) => {
+          if (user) {
+            console.log("Auth state: user is signed in:", user.uid);
+            loadUserProfile();
+            setupProfilePage();
+          } else {
+            console.log("Auth state: user is signed out, checking session...");
+            
+            // Also check the FirebaseAuth session as a backup
+            const session = FirebaseAuth.getSession();
+            if (session && session.uid) {
+              console.log("Found user in session, loading profile for:", session.uid);
               loadUserProfile();
               setupProfilePage();
             } else {
-              console.log("Auth state changed: user is signed out, redirecting to login");
+              console.log("No authenticated user found, redirecting to login");
               window.location.href = "login.html";
             }
-          });
+          }
+        });
           
           // Also check if we have a session, if not redirect immediately
           const session = FirebaseAuth.getSession();

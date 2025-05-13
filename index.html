@@ -675,6 +675,12 @@
       
       // Initialize Firebase
       firebase.initializeApp(firebaseConfig);
+      
+      // Enable session persistence
+      firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .catch(error => {
+          console.error("Auth persistence error:", error);
+        });
     </script>
 
     <!-- Firebase Authentication Check -->
