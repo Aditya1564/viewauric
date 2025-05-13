@@ -677,44 +677,9 @@
                     });
                 }
                 
-                // Add to Wishlist button click handler
-                let isAddingToWishlist = false; // Flag to prevent multiple simultaneous wishlist operations
-                addToWishlistBtn.addEventListener('click', async function() {
-                    // Prevent duplicate operations if a click is already being processed
-                    if (isAddingToWishlist) {
-                        console.log('Wishlist operation already in progress');
-                        return;
-                    }
-                    
-                    isAddingToWishlist = true; // Set flag to prevent duplicates
-                    
-                    try {
-                        // Check if WishlistManager is available
-                        if (typeof WishlistManager !== 'undefined' && WishlistManager.addToWishlist) {
-                            console.log('Using WishlistManager to add/remove product from wishlist');
-                            
-                            // Check if product is already in wishlist
-                            if (WishlistManager.isInWishlist(productDetails.id)) {
-                                await WishlistManager.removeFromWishlist(productDetails.id);
-                                // Don't change the button appearance
-                                showToast('Product removed from wishlist!');
-                            } else {
-                                await WishlistManager.addToWishlist(productDetails);
-                                // Don't change the button appearance
-                                showToast('Product added to wishlist!');
-                            }
-                        } else {
-                            console.error('WishlistManager not available');
-                            showToast('Error updating wishlist. Please try again.', 'error');
-                        }
-                    } catch (error) {
-                        console.error('Error in wishlist operation:', error);
-                        showToast('Error updating wishlist. Please try again.', 'error');
-                    } finally {
-                        // Always reset the flag when done
-                        isAddingToWishlist = false;
-                    }
-                });
+                // NOTE: The wishlist button click handler is managed by WishlistManager.js
+                // We're removing the duplicate event listener here to prevent conflicts
+                // The button will still work through the centralized WishlistManager
             }, 500); // 500ms delay to ensure Firebase is loaded
         });
     </script>
