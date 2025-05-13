@@ -539,11 +539,11 @@ const WishlistManager = (function() {
                         position: absolute;
                         top: -8px;
                         right: -8px;
-                        background: #000;
+                        background: #c8a97e; /* Match cart badge golden color */
                         color: #fff;
                         border-radius: 50%;
-                        width: 18px;
-                        height: 18px;
+                        width: 16px;
+                        height: 16px;
                         display: flex;
                         align-items: center;
                         justify-content: center;
