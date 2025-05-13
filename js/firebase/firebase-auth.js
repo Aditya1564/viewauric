@@ -11,15 +11,46 @@ window.FirebaseAuth = (function() {
   let auth, db, googleProvider;
   
   function init() {
+    // First, make sure Firebase is initialized
+    if (window.FirebaseInit && !FirebaseInit.isInitialized()) {
+      FirebaseInit.initFirebase();
+    }
+    
     if (!window.firebase) {
-      console.error('Firebase not initialized');
+      console.error('Firebase SDK not found');
       return false;
     }
     
     try {
+      // Try to get existing Firebase app
+      try {
+        firebase.app();
+      } catch (appError) {
+        // If no app exists, this will fail and we need to initialize
+        if (appError.code === 'app-compat/no-app') {
+          console.error('Firebase app not initialized before auth module');
+          // If FirebaseInit exists, try using it
+          if (window.FirebaseInit) {
+            const initSuccess = FirebaseInit.initFirebase(true); // Force new initialization
+            if (!initSuccess) {
+              console.error('Failed to initialize Firebase through FirebaseInit');
+              return false;
+            }
+          } else {
+            console.error('FirebaseInit module not found');
+            return false;
+          }
+        } else {
+          throw appError; // Rethrow unexpected errors
+        }
+      }
+      
+      // Now initialize auth components
       auth = firebase.auth();
       db = firebase.firestore();
       googleProvider = new firebase.auth.GoogleAuthProvider();
+      
+      console.log('Firebase Auth initialized successfully');
       return true;
     } catch (error) {
       console.error('Error initializing Firebase Auth:', error);
@@ -72,13 +103,59 @@ window.FirebaseAuth = (function() {
    * @param {Object} userData - Additional user data (name, etc.)
    * @returns {Promise<Object>} - Created user data
    */
+  /**
+   * Register a new user with email and password
+   * @param {string} email - User's email
+   * @param {string} password - User's password
+   * @param {Object} userData - Additional user data like displayName
+   * @returns {Promise<Object>} Success status and user data or error information
+   */
   async function registerWithEmail(email, password, userData) {
-    if (!init()) return { success: false, error: 'Firebase not initialized' };
+    // Validate inputs first
+    if (!email || !password) {
+      return { 
+        success: false, 
+        error: 'Email and password are required',
+        code: 'auth/invalid-input' 
+      };
+    }
+    
+    // Initialize Firebase
+    if (!init()) {
+      return { 
+        success: false, 
+        error: 'Firebase not initialized. Please check your internet connection and try again.',
+        code: 'auth/initialization-failed'
+      };
+    }
     
     try {
+      console.log("Attempting to register user with email:", email);
+      
+      // First check if email already exists to provide a better error message
+      // This isn't strictly necessary as Firebase will throw an error,
+      // but it provides a cleaner error handling path
+      try {
+        const emailCheck = await firebase.auth().fetchSignInMethodsForEmail(email);
+        if (emailCheck && emailCheck.length > 0) {
+          console.log("Email already in use:", email, "Sign in methods:", emailCheck);
+          return {
+            success: false,
+            error: 'This email address is already registered. Please try logging in instead.',
+            code: 'auth/email-already-in-use'
+          };
+        }
+      } catch (emailCheckError) {
+        // If we can't check the email, just continue with registration
+        // Firebase will throw the appropriate error if needed
+        console.warn("Could not check if email exists:", emailCheckError);
+      }
+      
       // Create Firebase Auth user
       const userCredential = await auth.createUserWithEmailAndPassword(email, password);
       const user = userCredential.user;
+      
+      console.log("User registered successfully, creating profile");
       
       // Create user profile in Firestore at the path: users/{userId}
       // Get name from email (part before @) if no display name provided
@@ -102,10 +179,40 @@ window.FirebaseAuth = (function() {
         loggedIn: true
       });
       
+      console.log("User registration complete with profile:", userProfile);
       return { success: true, user: userProfile };
     } catch (error) {
       console.error("Registration error:", error);
-      return { success: false, error: error.message, code: error.code };
+      
+      // Enhanced error handling with more specific messages
+      let errorMessage = error.message || 'An error occurred during registration';
+      let errorCode = error.code || 'auth/unknown-error';
+      
+      // Handle specific Firebase errors with more user-friendly messages
+      switch(errorCode) {
+        case 'auth/email-already-in-use':
+          errorMessage = 'This email address is already registered. Please try logging in instead.';
+          break;
+        case 'auth/invalid-email':
+          errorMessage = 'The email address is not valid. Please enter a valid email.';
+          break;
+        case 'auth/weak-password':
+          errorMessage = 'The password is too weak. Please choose a stronger password.';
+          break;
+        case 'auth/network-request-failed':
+          errorMessage = 'Network error. Please check your internet connection and try again.';
+          break;
+        case 'auth/too-many-requests':
+          errorMessage = 'Too many failed attempts. Please try again later.';
+          break;
+      }
+      
+      return { 
+        success: false, 
+        error: errorMessage,
+        code: errorCode,
+        originalError: error // Include original error for debugging
+      };
     }
   }
 

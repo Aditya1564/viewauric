@@ -417,7 +417,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     
-    <!-- Initialize Firebase -->
+    <!-- Firebase Configuration -->
     <script>
       // Firebase configuration
       const firebaseConfig = {
@@ -429,22 +429,10 @@
         appId: "1:878979958342:web:e6092f7522488d21eaec47",
         measurementId: "G-ZYZ750JHMB"
       };
-      
-      // Check if Firebase is already initialized
-      if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0) {
-        console.log("Firebase already initialized, using existing app");
-      } else {
-        // Initialize Firebase
-        console.log("Initializing Firebase for the first time");
-        firebase.initializeApp(firebaseConfig);
-      }
-      
-      // Enable session persistence
-      firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-        .catch(error => {
-          console.error("Auth persistence error:", error);
-        });
     </script>
+    
+    <!-- Firebase Initialization Module -->
+    <script src="js/firebase/firebase-init.js"></script>
     
     <!-- Firebase Auth Global Module -->
     <script src="js/firebase/firebase-auth.js"></script>

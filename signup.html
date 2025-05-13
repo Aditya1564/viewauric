@@ -272,16 +272,10 @@
         appId: "1:878979958342:web:e6092f7522488d21eaec47",
         measurementId: "G-ZYZ750JHMB"
       };
-      
-      // Initialize Firebase
-      firebase.initializeApp(firebaseConfig);
-      
-      // Enable session persistence
-      firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-        .catch(error => {
-          console.error("Auth persistence error:", error);
-        });
     </script>
+    
+    <!-- Firebase Initialization Module -->
+    <script src="js/firebase/firebase-init.js"></script>
     
     <!-- Firebase Auth Global Module - Must come after Firebase SDK and initialization -->
     <script src="js/firebase/firebase-auth.js"></script>
