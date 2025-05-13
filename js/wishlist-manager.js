@@ -552,18 +552,20 @@ const WishlistManager = (function() {
                     }
                     
                     .fa-heart.active {
-                        color: #ff3e6c;
+                        /* Keep original color or match to gold theme */
+                        color: inherit;
                     }
                     
                     .add-to-wishlist.active {
-                        background-color: #fff5f8;
+                        background-color: transparent;
                         border-color: transparent;
                     }
                     
                     .add-to-wishlist.active .fa-heart,
                     .add-to-wishlist.active .far.fa-heart {
                         font-weight: 900;
-                        color: #ff3e6c;
+                        /* No color change */
+                        color: inherit;
                     }
                     
                     .add-to-wishlist-btn.active {
@@ -740,22 +742,26 @@ const WishlistManager = (function() {
                     if (isInWishlist(productId)) {
                         removeFromWishlist(productId);
                         wishlistBtn.classList.remove('active');
-                        // Update icon
+                        // Update icon but don't change color
                         const icon = wishlistBtn.querySelector('i');
                         if (icon) {
+                            // Change the icon style (solid vs regular) but don't add active class
                             icon.classList.add('far');
                             icon.classList.remove('fas');
+                            // No longer changing to pink
                             icon.classList.remove('active');
                         }
                     } else {
                         addToWishlist(product);
                         wishlistBtn.classList.add('active');
-                        // Update icon
+                        // Update icon without changing color
                         const icon = wishlistBtn.querySelector('i');
                         if (icon) {
+                            // Change icon from regular to solid, but don't add active class
                             icon.classList.remove('far');
                             icon.classList.add('fas');
-                            icon.classList.add('active');
+                            // No longer adding active class to avoid color change
+                            // icon.classList.add('active');
                         }
                     }
                 }
@@ -893,13 +899,15 @@ const WishlistManager = (function() {
             if (productId && wishlistButton) {
                 console.log('Updating wishlist button state for product ID:', productId, 'In wishlist:', isInWishlist(productId));
                 if (isInWishlist(productId)) {
+                    // Still toggle the active class on the button container
                     wishlistButton.classList.add('active');
-                    // Also ensure the icon is updated
+                    // Update the icon style but not color
                     const icon = wishlistButton.querySelector('i');
                     if (icon) {
                         icon.classList.remove('far');
                         icon.classList.add('fas');
-                        icon.classList.add('active');
+                        // No longer adding active class to prevent color change
+                        // icon.classList.add('active');
                     }
                 } else {
                     wishlistButton.classList.remove('active');
@@ -931,11 +939,14 @@ const WishlistManager = (function() {
             }
         }
         
-        // Update navigation wishlist icon
+        // Update navigation wishlist icon - don't change the color
         const navWishlistIcon = document.querySelector('.nav-icons .fa-heart');
         if (navWishlistIcon) {
+            // No longer adding 'active' class to avoid color change
+            // Only update the count indicator
             if (wishlistItems.length > 0) {
-                navWishlistIcon.classList.add('active');
+                // Don't add active class to keep original color
+                // navWishlistIcon.classList.add('active');
             } else {
                 navWishlistIcon.classList.remove('active');
             }
