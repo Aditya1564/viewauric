@@ -1499,8 +1499,8 @@ a {
 }
 
 .add-to-wishlist.active {
-    background-color: #FF69B4; /* Pink background for active state */
-    color: white;
+    background-color: white; /* White background */
+    color: #FF69B4; /* Pink color for the heart icon */
     border-color: #FF69B4;
 }
 
