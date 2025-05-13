@@ -1323,20 +1323,28 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             console.log('Processing Razorpay payment for order:', orderData.orderReference);
             
-            // Create a Razorpay order using Netlify Functions
-            const result = await window.netlifyHelpers.callNetlifyFunction('create-razorpay-order', {
-                method: 'POST',
-                body: JSON.stringify({
-                    amount: orderData.orderTotal,
-                    currency: 'INR',
-                    receipt: orderData.orderReference,
-                    notes: {
-                        orderReference: orderData.orderReference,
-                        customerEmail: orderData.customer.email,
-                        customerPhone: orderData.customer.phone
-                    }
-                })
+            // Set a timeout for API calls to prevent infinite loading
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Payment gateway timed out. Please try again.')), 15000);
             });
+            
+            // Create a Razorpay order using Netlify Functions with timeout
+            const result = await Promise.race([
+                window.netlifyHelpers.callNetlifyFunction('create-razorpay-order', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        amount: orderData.orderTotal,
+                        currency: 'INR',
+                        receipt: orderData.orderReference,
+                        notes: {
+                            orderReference: orderData.orderReference,
+                            customerEmail: orderData.customer.email,
+                            customerPhone: orderData.customer.phone
+                        }
+                    })
+                }),
+                timeoutPromise
+            ]);
             
             if (!result.success) {
                 throw new Error(result.message || 'Failed to create Razorpay order');
@@ -1396,9 +1404,34 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Open Razorpay checkout
             const razorpay = new Razorpay(options);
-            razorpay.open();
             
-            // Handle payment cancellation
+            // Handle modal closed/cancelled by user
+            razorpay.on('payment.cancel', function() {
+                console.log('Razorpay payment cancelled by user');
+                showErrorModal('Payment was cancelled. Please try again.');
+                
+                // Reset button state
+                const submitButton = checkoutForm.querySelector('button[type="submit"]');
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Place Order';
+            });
+            
+            // Handle modal closed without explicit cancel (user clicked outside or closed browser)
+            razorpay.on('modal.close', function() {
+                console.log('Razorpay modal closed');
+                setTimeout(() => {
+                    // Check if payment is still processing after a short delay
+                    // If the payment succeeded, the successful handler would have been called
+                    const submitButton = checkoutForm.querySelector('button[type="submit"]');
+                    if (submitButton && submitButton.disabled) {
+                        console.log('Modal closed but payment not completed, resetting button');
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = 'Place Order';
+                    }
+                }, 2000);
+            });
+            
+            // Handle payment cancellation or failure
             razorpay.on('payment.failed', function(response) {
                 console.error('Razorpay payment failed:', response.error);
                 showErrorModal('Payment failed: ' + response.error.description);
@@ -1408,6 +1441,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 submitButton.disabled = false;
                 submitButton.innerHTML = 'Place Order';
             });
+            
+            // Open the payment modal
+            razorpay.open();
             
         } catch (error) {
             console.error('Error processing Razorpay payment:', error);
@@ -1429,15 +1465,23 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             console.log('Razorpay payment successful:', response.razorpay_payment_id);
             
-            // Verify the payment with Netlify Function
-            const verifyResult = await window.netlifyHelpers.callNetlifyFunction('verify-razorpay-payment', {
-                method: 'POST',
-                body: JSON.stringify({
-                    razorpay_payment_id: response.razorpay_payment_id,
-                    razorpay_order_id: response.razorpay_order_id,
-                    razorpay_signature: response.razorpay_signature
-                })
+            // Set a timeout for verification to prevent infinite loading
+            const verifyTimeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Payment verification timed out but your payment may have gone through. Please check your email for confirmation.')), 15000);
             });
+            
+            // Verify the payment with Netlify Function
+            const verifyResult = await Promise.race([
+                window.netlifyHelpers.callNetlifyFunction('verify-razorpay-payment', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        razorpay_payment_id: response.razorpay_payment_id,
+                        razorpay_order_id: response.razorpay_order_id,
+                        razorpay_signature: response.razorpay_signature
+                    })
+                }),
+                verifyTimeoutPromise
+            ]);
             
             if (!verifyResult.success) {
                 throw new Error(verifyResult.message || 'Payment verification failed');
