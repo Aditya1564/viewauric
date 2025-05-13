@@ -354,8 +354,22 @@
             return;
           }
           
+          // Enhanced password validation
           if (password.length < 6) {
             showError('Password must be at least 6 characters long');
+            return;
+          }
+          
+          if (password.length > 30) {
+            showError('Password cannot be longer than 30 characters');
+            return;
+          }
+          
+          // Check password strength 
+          const hasLetter = /[A-Za-z]/.test(password);
+          const hasNumber = /\d/.test(password);
+          if (!hasLetter || !hasNumber) {
+            showError('Password must contain at least one letter and one number');
             return;
           }
           
@@ -372,24 +386,26 @@
             // This will store user data at "users/{userId}" path in Firestore
             const result = await FirebaseAuth.registerWithEmail(email, password, { displayName: name });
             
-            if (result.success) {
-              showSuccess('Account created successfully!');
-              
-              // Redirect to home page
-              setTimeout(() => {
-                window.location.href = 'index.html';
-              }, 1000);
-            } else {
+            // Always check for errors first - no automatic redirects
+            if (!result.success) {
               // Handle error
               console.error("Registration failed:", result.error, "Code:", result.code);
               handleAuthError(result);
-              // Remove automatic redirect on error
               setLoadingState(false);
+              return; // Stop execution if there's an error
             }
+            
+            // Only proceed if success is true
+            showSuccess('Account created successfully!');
+            
+            // Redirect to home page after a delay
+            setTimeout(() => {
+              window.location.href = 'index.html';
+            }, 2000); // Longer delay to ensure user sees the success message
+            
           } catch (error) {
             console.error("Registration error:", error);
             showError('An unexpected error occurred. Please try again.');
-          } finally {
             setLoadingState(false);
           }
         });
