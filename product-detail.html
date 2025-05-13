@@ -498,11 +498,15 @@
             // Wait a short time to ensure Firebase is properly initialized
             setTimeout(function() {
                 // Get the product details
+                // Get the main product image
+                const productImageEl = document.querySelector('.main-image-container img');
+                const productImage = productImageEl ? productImageEl.src : '';
+                
                 const productDetails = {
                     id: 'EM-ST-2025', // SKU as ID
                     name: document.querySelector('.product-title').textContent,
                     price: parseFloat(document.querySelector('.price-value').textContent.replace('₹', '').replace(',', '')),
-                    image: document.querySelector('.main-image-container img').src,
+                    image: productImage,
                 };
                 
                 console.log('Product details loaded:', productDetails);
@@ -526,11 +530,12 @@
                 
                 // Get DOM elements
                 const addToCartBtn = document.querySelector('.add-to-cart-btn');
-                const buyNowBtn = document.querySelector('.buy-now-btn');
                 const addToWishlistBtn = document.querySelector('.add-to-wishlist-btn');
                 const quantityInput = document.querySelector('.quantity-input');
                 const incrementBtn = document.querySelector('.quantity-btn.increment');
                 const decrementBtn = document.querySelector('.quantity-btn.decrement');
+                // Get Buy Now button
+                const buyNowBtn = document.querySelector('.buy-now-btn');
                 
                 // Quantity controls
                 incrementBtn.addEventListener('click', function() {

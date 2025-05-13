@@ -671,7 +671,9 @@ const WishlistManager = (function() {
                     const productName = detailContainer.querySelector('.product-title').textContent;
                     const priceElement = detailContainer.querySelector('.price-value');
                     const productPrice = parseFloat(priceElement ? priceElement.textContent.replace(/[^0-9.]/g, '') : 0);
-                    const productImage = document.querySelector('.main-product-image img').src;
+                    // Fix for image selector - the image is directly on the element with class main-product-image
+                    const productImageEl = document.querySelector('.main-image-container img');
+                    const productImage = productImageEl ? productImageEl.src : '';
                     
                     console.log('Detail product found:', { id: productId, name: productName, price: productPrice, image: productImage });
                     
