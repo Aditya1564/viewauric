@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const orderSummaryContainer = document.getElementById('orderSummary');
     const orderSummaryStep2 = document.getElementById('orderSummaryStep2');
     const orderSummaryStep3 = document.getElementById('orderSummaryStep3');
-    const orderSummaryDetails = document.getElementById('orderSummaryDetails');
+    // 'orderSummaryDetails' has been removed as we no longer have 'Your Items' section
     const orderTotalElement = document.getElementById('orderTotal');
     const orderTotalStep2 = document.getElementById('orderTotalStep2');
     const orderTotalStep3 = document.getElementById('orderTotalStep3');
