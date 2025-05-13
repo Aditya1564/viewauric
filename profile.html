@@ -598,8 +598,12 @@
       
       // Display user information on the profile page
       function displayUserInfo(profile) {
+        // Use email as fallback if no display name, and extract name part from email
+        const nameFromEmail = profile.email ? profile.email.split('@')[0] : '';
+        const displayName = profile.displayName || nameFromEmail || 'User';
+        
         if (profileName) {
-          profileName.textContent = profile.displayName || 'User';
+          profileName.textContent = displayName;
         }
         
         if (profileEmail) {
@@ -609,13 +613,10 @@
         if (profileAvatar) {
           if (profile.photoURL) {
             // If user has a photo URL, display it
-            profileAvatar.innerHTML = `<img src="${profile.photoURL}" alt="${profile.displayName}" class="avatar-image">`;
-          } else if (profile.displayName) {
-            // Otherwise show the first letter of their name
-            profileAvatar.textContent = profile.displayName.charAt(0).toUpperCase();
+            profileAvatar.innerHTML = `<img src="${profile.photoURL}" alt="${displayName}" class="avatar-image">`;
           } else {
-            // Fallback
-            profileAvatar.textContent = 'U';
+            // Show the first letter of their name or email
+            profileAvatar.textContent = displayName.charAt(0).toUpperCase();
           }
         }
       }

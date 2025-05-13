@@ -81,10 +81,12 @@ window.FirebaseAuth = (function() {
       const user = userCredential.user;
       
       // Create user profile in Firestore at the path: users/{userId}
+      // Get name from email (part before @) if no display name provided
+      const nameFromEmail = user.email ? user.email.split('@')[0] : '';
       const userProfile = {
         uid: user.uid,
         email: user.email,
-        displayName: userData.displayName || userData.name || 'User',
+        displayName: userData.displayName || userData.name || nameFromEmail || 'User',
         createdAt: firebase.firestore.Timestamp.now(),
         updatedAt: firebase.firestore.Timestamp.now()
       };
@@ -135,10 +137,12 @@ window.FirebaseAuth = (function() {
         });
       } else {
         // User doesn't exist in Firestore, create profile at users/{user.uid}
+        // Get name from email (part before @) if no display name provided
+        const nameFromEmail = user.email ? user.email.split('@')[0] : '';
         userProfile = {
           uid: user.uid,
           email: user.email,
-          displayName: user.displayName || 'User',
+          displayName: user.displayName || nameFromEmail || 'User',
           createdAt: firebase.firestore.Timestamp.now(),
           updatedAt: firebase.firestore.Timestamp.now(),
           lastLogin: firebase.firestore.Timestamp.now()
