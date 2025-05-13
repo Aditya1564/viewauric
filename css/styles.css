@@ -1296,6 +1296,13 @@ a {
     border-color: #7B410A;
 }
 
+/* Ensure the wishlist button on product detail page maintains original appearance when active */
+.add-to-wishlist-btn.active {
+    background-color: #f8f8f5 !important;
+    color: #603000 !important;
+    border: 1px solid #603000 !important;
+}
+
 .specifications {
     margin-bottom: 30px;
 }
@@ -1498,14 +1505,18 @@ a {
     transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
 }
 
+/* 
+   Removing wishlist color change styles to maintain consistent appearance
+   This ensures the wishlist button doesn't turn pink when active
+*/
 .add-to-wishlist.active {
-    background-color: white !important; /* White background, forced */
-    color: #FF69B4 !important; /* Pink color for the heart icon, forced */
-    border-color: #FF69B4 !important;
+    background-color: white !important; /* Keep white background */
+    color: #333 !important; /* Keep original color */
+    border-color: #ddd !important; /* Keep original border */
 }
 
 .add-to-wishlist.active i {
-    color: #FF69B4 !important; /* Ensure icon is pink */
+    color: #333 !important; /* Keep icon color consistent */
 }
 
 .add-to-wishlist:hover {
