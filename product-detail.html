@@ -511,18 +511,11 @@
                 
                 console.log('Product details loaded:', productDetails);
                 
-                // Check if the product is already in the wishlist and update button state
+                // Check if the product is already in the wishlist 
+                // Keep this function but don't change the button appearance
                 function updateWishlistButtonState() {
-                    const wishlistBtn = document.querySelector('.add-to-wishlist-btn');
-                    if (wishlistBtn && typeof WishlistManager !== 'undefined' && WishlistManager.isInWishlist) {
-                        if (WishlistManager.isInWishlist(productDetails.id)) {
-                            wishlistBtn.innerHTML = '<i class="fas fa-heart"></i> REMOVE FROM WISHLIST';
-                            wishlistBtn.classList.add('active');
-                        } else {
-                            wishlistBtn.innerHTML = '<i class="fas fa-heart"></i> ADD TO WISHLIST';
-                            wishlistBtn.classList.remove('active');
-                        }
-                    }
+                    // We're keeping the function but not changing button appearance as requested
+                    console.log('Wishlist button will maintain its original appearance');
                 }
                 
                 // Initial update of wishlist button state
@@ -650,7 +643,8 @@
                 
                 // Buy Now button click handler
                 let isBuyingNow = false; // Flag to prevent multiple simultaneous buys
-                buyNowBtn.addEventListener('click', async function() {
+                if (buyNowBtn) {
+                    buyNowBtn.addEventListener('click', async function() {
                     // Prevent duplicate operations if a click is already being processed
                     if (isBuyingNow || isAddingToCart) {
                         console.log('Buy now operation already in progress');
@@ -679,8 +673,8 @@
                     } finally {
                         // Always reset the flag when done
                         isBuyingNow = false;
-                    }
-                });
+                    });
+                }
                 
                 // Add to Wishlist button click handler
                 let isAddingToWishlist = false; // Flag to prevent multiple simultaneous wishlist operations
@@ -701,13 +695,11 @@
                             // Check if product is already in wishlist
                             if (WishlistManager.isInWishlist(productDetails.id)) {
                                 await WishlistManager.removeFromWishlist(productDetails.id);
-                                this.innerHTML = '<i class="fas fa-heart"></i> ADD TO WISHLIST';
-                                this.classList.remove('active');
+                                // Don't change the button appearance
                                 showToast('Product removed from wishlist!');
                             } else {
                                 await WishlistManager.addToWishlist(productDetails);
-                                this.innerHTML = '<i class="fas fa-heart"></i> REMOVE FROM WISHLIST';
-                                this.classList.add('active');
+                                // Don't change the button appearance
                                 showToast('Product added to wishlist!');
                             }
                         } else {
