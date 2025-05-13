@@ -607,8 +607,8 @@
                     }, 3000);
                 }
                 
-                // Get reference to buy now button
-                const buyNowBtn = document.querySelector('.buy-now-btn');
+                // We already have a reference to buy now button from above
+                // No need to declare buyNowBtn again
                 
                 // Add to cart button click handler - fixed to prevent duplicate adds
                 let isAddingToCart = false; // Flag to prevent multiple simultaneous adds
@@ -673,6 +673,7 @@
                     } finally {
                         // Always reset the flag when done
                         isBuyingNow = false;
+                    }
                     });
                 }
                 
