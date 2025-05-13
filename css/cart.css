@@ -229,12 +229,12 @@
 }
 
 /* ================ CART ICON WITH COUNT ================ */
-.cart-icon-container {
+.cart-icon-container, .wishlist-icon-container {
   position: relative;
   display: inline-flex;
 }
 
-.cart-count {
+.cart-count, .wishlist-count {
   position: absolute;
   top: -8px;
   right: -8px;
