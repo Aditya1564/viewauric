@@ -117,8 +117,8 @@
             <p class="auth-subtitle">Join Auric to explore exclusive jewellery collections</p>
         </div>
         
-        <div id="error-message" class="error-message" style="display: none; margin-bottom: 20px;"></div>
-        <div id="success-message" class="success-message" style="display: none; margin-bottom: 20px;"></div>
+        <div id="error-message" class="error-message" style="display: none; margin-bottom: 20px; background-color: #ffebee; color: #d32f2f; padding: 15px; border-radius: 5px; border-left: 4px solid #d32f2f; font-weight: 500;"></div>
+        <div id="success-message" class="success-message" style="display: none; margin-bottom: 20px; background-color: #e8f5e9; color: #2e7d32; padding: 15px; border-radius: 5px; border-left: 4px solid #2e7d32; font-weight: 500;"></div>
         
         <!-- Debug instructions for users, hidden by default -->
         <div class="error-message" style="display: none;" id="debug-instructions">
@@ -470,31 +470,47 @@
           console.log("Auth error code:", result.code);
           switch(result.code) {
             case 'auth/email-already-in-use':
-              errorMessage = 'This email address is already in use. Please try logging in instead.';
-              // Add link to login page
-              errorMessage += ' <a href="login.html" class="login-link">Go to login</a>';
+              errorMessage = 'This email address is already registered. Please try logging in instead.';
+              // Add link to login page with prominent styling
+              errorMessage += ' <a href="login.html" class="login-link" style="display: inline-block; margin-top: 10px; color: #007bff; font-weight: bold; text-decoration: underline;">Go to login page</a>';
               break;
             case 'auth/invalid-email':
-              errorMessage = 'Invalid email address format.';
+              errorMessage = 'Invalid email address format. Please enter a valid email.';
               break;
             case 'auth/weak-password':
-              errorMessage = 'Password is too weak. Please choose a stronger password.';
+              errorMessage = 'Password is too weak. Please choose a stronger password with letters and numbers.';
               break;
             case 'auth/popup-closed-by-user':
               errorMessage = 'Sign-up window was closed. Please try again.';
               break;
             case 'auth/unauthorized-domain':
-              errorMessage = 'Authentication not allowed from this domain.';
-              document.getElementById('debug-instructions').style.display = 'block';
+              errorMessage = 'Authentication not allowed from this domain. Please contact support.';
+              if (document.getElementById('debug-instructions')) {
+                document.getElementById('debug-instructions').style.display = 'block';
+              }
               break;
             case 'auth/network-request-failed':
-              errorMessage = 'Network error. Please check your internet connection.';
-              document.getElementById('debug-instructions').style.display = 'block';
+              errorMessage = 'Network error. Please check your internet connection and try again.';
+              if (document.getElementById('debug-instructions')) {
+                document.getElementById('debug-instructions').style.display = 'block';
+              }
+              break;
+            case 'auth/operation-not-allowed':
+              errorMessage = 'This login method is not enabled. Please contact support.';
+              break;
+            default:
+              errorMessage = result.error || 'An error occurred during registration. Please try again later.';
               break;
           }
+        } else if (result.error) {
+          errorMessage = result.error;
         }
         
+        // Show error with the improved error message display
         showError(errorMessage);
+        
+        // Log the error for debugging
+        console.error("Registration error details:", result);
       }
       
       function showError(message) {
