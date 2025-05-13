@@ -117,8 +117,8 @@
             <p class="auth-subtitle">Join Auric to explore exclusive jewellery collections</p>
         </div>
         
-        <div id="error-message" class="error-message" style="display: none;"></div>
-        <div id="success-message" class="success-message" style="display: none;"></div>
+        <div id="error-message" class="error-message" style="display: none; margin-bottom: 20px;"></div>
+        <div id="success-message" class="success-message" style="display: none; margin-bottom: 20px;"></div>
         
         <!-- Debug instructions for users, hidden by default -->
         <div class="error-message" style="display: none;" id="debug-instructions">
@@ -383,6 +383,8 @@
               // Handle error
               console.error("Registration failed:", result.error, "Code:", result.code);
               handleAuthError(result);
+              // Remove automatic redirect on error
+              setLoadingState(false);
             }
           } catch (error) {
             console.error("Registration error:", error);
@@ -418,6 +420,8 @@
               // Handle error
               console.error("Google login failed:", result.error);
               handleAuthError(result);
+              // Don't redirect on error
+              // Reset button state happens in finally block
             }
           } catch (error) {
             console.error("Google sign-up error:", error);
@@ -479,16 +483,17 @@
       
       function showError(message) {
         if (errorMessageEl) {
-          errorMessageEl.textContent = message;
+          errorMessageEl.innerHTML = message; // Use innerHTML to support HTML content
           errorMessageEl.style.display = 'block';
           
           if (successMessageEl) {
             successMessageEl.style.display = 'none';
           }
           
+          // Keep error message visible longer
           setTimeout(() => {
             errorMessageEl.style.display = 'none';
-          }, 5000);
+          }, 10000); // 10 seconds to give users enough time to read
         } else {
           alert(message);
         }
