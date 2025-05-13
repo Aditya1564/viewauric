@@ -839,13 +839,9 @@ const WishlistManager = (function() {
             // Set the count text
             wishlistCount.textContent = wishlistItems.length;
             
-            // Show/hide counter based on count
-            if (wishlistItems.length === 0) {
-                wishlistCount.style.display = 'none';
-            } else {
-                wishlistCount.style.display = 'flex';
-                console.log('Wishlist count updated to:', wishlistItems.length);
-            }
+            // Always show counter even when count is zero
+            wishlistCount.style.display = 'flex';
+            console.log('Wishlist count updated to:', wishlistItems.length);
         } else {
             console.log('Warning: Wishlist count element not found in DOM');
         }
