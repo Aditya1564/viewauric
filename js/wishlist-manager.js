@@ -688,11 +688,13 @@ const WishlistManager = (function() {
                     if (isInWishlist(productId)) {
                         removeFromWishlist(productId);
                         // Don't add active class to maintain original appearance
+                        // Update text to show correct action
                         this.innerHTML = '<i class="fas fa-heart"></i> ADD TO WISHLIST';
                     } else {
                         addToWishlist(product);
                         // Don't add active class to maintain original appearance
-                        this.innerHTML = '<i class="fas fa-heart"></i> ADD TO WISHLIST';
+                        // Update text to show correct action
+                        this.innerHTML = '<i class="fas fa-heart"></i> REMOVE FROM WISHLIST';
                     }
                 }
             });
@@ -931,9 +933,9 @@ const WishlistManager = (function() {
             
             if (productId && wishlistButton) {
                 // Don't add or remove active class to avoid color changes
-                // Only update text if needed
+                // But update the text to show correct action
                 if (isInWishlist(productId)) {
-                    wishlistButton.innerHTML = '<i class="fas fa-heart"></i> ADD TO WISHLIST';
+                    wishlistButton.innerHTML = '<i class="fas fa-heart"></i> REMOVE FROM WISHLIST';
                 } else {
                     wishlistButton.innerHTML = '<i class="fas fa-heart"></i> ADD TO WISHLIST';
                 }
