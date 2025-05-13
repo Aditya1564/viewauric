@@ -1498,6 +1498,12 @@ a {
     transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
 }
 
+.add-to-wishlist.active {
+    background-color: #FF69B4; /* Pink background for active state */
+    color: white;
+    border-color: #FF69B4;
+}
+
 .add-to-wishlist:hover {
     /* Removed hover effects as requested */
 }
