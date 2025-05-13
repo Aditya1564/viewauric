@@ -341,7 +341,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Display cart items in the order summary
     function displayCartItems(items) {
         let summaryHTML = '';
-        let detailsHTML = '';
+        // No longer need detailsHTML since we removed the 'Your Items' section
         let total = 0;
         
         // Clear product list container first to prevent duplicates
@@ -380,40 +380,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             `;
             
-            // HTML for order details (larger version for main content area in step 1)
-            detailsHTML += `
-                <div class="card mb-3 cart-item-detail" data-item-id="${item.id}">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-md-2 mb-3 mb-md-0">
-                                <div style="width: 100px; height: 100px; overflow: hidden; border-radius: 4px; margin: 0 auto;">
-                                    <img src="${item.image}" alt="${item.name}" style="width: 100%; height: 100%; object-fit: cover;">
-                                </div>
-                            </div>
-                            <div class="col-md-4 mb-3 mb-md-0">
-                                <h5 class="mb-2">${item.name}</h5>
-                                <p class="text-muted mb-0">Product ID: ${item.id}</p>
-                            </div>
-                            <div class="col-md-2 mb-3 mb-md-0 text-center">
-                                <p class="mb-0 fw-medium">Price</p>
-                                <p class="fw-bold mb-0">₹${item.price.toFixed(2)}</p>
-                            </div>
-                            <div class="col-md-2 mb-3 mb-md-0 text-center">
-                                <p class="mb-0 fw-medium">Quantity</p>
-                                <div class="quantity-controls d-flex align-items-center border rounded justify-content-center mx-auto" style="width: fit-content;">
-                                    <button type="button" class="btn btn-sm btn-quantity-minus" data-item-id="${item.id}">-</button>
-                                    <span class="px-3 quantity-value" data-item-id="${item.id}">${item.quantity}</span>
-                                    <button type="button" class="btn btn-sm btn-quantity-plus" data-item-id="${item.id}">+</button>
-                                </div>
-                            </div>
-                            <div class="col-md-2 mb-0 text-center">
-                                <p class="mb-0 fw-medium">Subtotal</p>
-                                <p class="fw-bold mb-0 item-subtotal" data-item-id="${item.id}">₹${itemTotal.toFixed(2)}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
+            // We no longer need detailsHTML since we removed the 'Your Items' section
             
             // Add hidden fields for form submission
             const hiddenItem = document.createElement('input');
@@ -444,14 +411,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
-        // Update order details (main content area in step 1)
-        if (orderSummaryDetails) {
-            if (items.length > 0) {
-                orderSummaryDetails.innerHTML = detailsHTML;
-            } else {
-                orderSummaryDetails.innerHTML = '<p>No products added yet. Please add products to your cart before checkout.</p>';
-            }
-        }
+        // We no longer update orderSummaryDetails since we removed the 'Your Items' section
         
         // Update all total price displays
         if (orderTotalElement) {
