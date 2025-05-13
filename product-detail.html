@@ -590,6 +590,9 @@
                     }, 3000);
                 }
                 
+                // Get reference to buy now button
+                const buyNowBtn = document.querySelector('.buy-now-btn');
+                
                 // Add to cart button click handler - fixed to prevent duplicate adds
                 let isAddingToCart = false; // Flag to prevent multiple simultaneous adds
                 addToCartBtn.addEventListener('click', async function() {
@@ -618,6 +621,40 @@
                     } finally {
                         // Always reset the flag when done
                         isAddingToCart = false;
+                    }
+                });
+                
+                // Buy Now button click handler
+                let isBuyingNow = false; // Flag to prevent multiple simultaneous buys
+                buyNowBtn.addEventListener('click', async function() {
+                    // Prevent duplicate operations if a click is already being processed
+                    if (isBuyingNow || isAddingToCart) {
+                        console.log('Buy now operation already in progress');
+                        return;
+                    }
+                    
+                    isBuyingNow = true; // Set flag to prevent duplicates
+                    const quantity = parseInt(quantityInput.value);
+                    
+                    try {
+                        // Check if CartManager is available
+                        if (typeof CartManager !== 'undefined' && CartManager.addToCart) {
+                            console.log('Using CartManager to add product to cart for buy now');
+                            await CartManager.addToCart(productDetails, quantity);
+                            
+                            // Redirect to checkout page
+                            console.log('Redirecting to checkout page');
+                            window.location.href = 'checkout.html';
+                        } else {
+                            console.error('CartManager not available for buy now');
+                            showToast('Error processing order. Please try again.', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error in buy now flow:', error);
+                        showToast('Error processing order. Please try again.', 'error');
+                    } finally {
+                        // Always reset the flag when done
+                        isBuyingNow = false;
                     }
                 });
             }, 500); // 500ms delay to ensure Firebase is loaded
