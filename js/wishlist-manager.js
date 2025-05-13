@@ -375,9 +375,12 @@ const WishlistManager = (function() {
             
             // Add wishlist counter if it doesn't exist
             if (!iconLink.querySelector('.wishlist-count')) {
-                const countHTML = `<span class="wishlist-count">0</span>`;
+                const countHTML = `<div class="wishlist-count">0</div>`;
                 iconLink.insertAdjacentHTML('beforeend', countHTML);
             }
+            
+            // Make sure the container has the right class
+            iconLink.classList.add('wishlist-icon-container');
         }
         
         // Add CSS for wishlist panel if not present
@@ -827,14 +830,18 @@ const WishlistManager = (function() {
         // Update wishlist counter
         const wishlistCount = document.querySelector('.wishlist-count');
         if (wishlistCount) {
+            // Set the count text
             wishlistCount.textContent = wishlistItems.length;
             
-            // Hide counter if empty
+            // Show/hide counter based on count
             if (wishlistItems.length === 0) {
                 wishlistCount.style.display = 'none';
             } else {
                 wishlistCount.style.display = 'flex';
+                console.log('Wishlist count updated to:', wishlistItems.length);
             }
+        } else {
+            console.log('Warning: Wishlist count element not found in DOM');
         }
         
         // Update wishlist panel items
