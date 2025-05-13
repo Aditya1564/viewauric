@@ -895,18 +895,20 @@ const WishlistManager = (function() {
             if (productId && wishlistButton) {
                 console.log('Updating wishlist button state for product ID:', productId, 'In wishlist:', isInWishlist(productId));
                 if (isInWishlist(productId)) {
-                    // Still toggle the active class on the button container
+                    // Toggle the active class on the button container
                     wishlistButton.classList.add('active');
-                    // Update the icon style but not color
+                    wishlistButton.style.backgroundColor = 'white'; // Force white background
+                    wishlistButton.style.color = '#FF69B4'; // Force pink color for icon
+                    // Update the icon style
                     const icon = wishlistButton.querySelector('i');
                     if (icon) {
                         icon.classList.remove('far');
                         icon.classList.add('fas');
-                        // No longer adding active class to prevent color change
-                        // icon.classList.add('active');
                     }
                 } else {
                     wishlistButton.classList.remove('active');
+                    wishlistButton.style.backgroundColor = 'white'; // Keep white background
+                    wishlistButton.style.color = '#333'; // Reset to default color
                     // Reset icon to regular
                     const icon = wishlistButton.querySelector('i');
                     if (icon) {
