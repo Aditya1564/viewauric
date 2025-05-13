@@ -1060,6 +1060,15 @@ document.addEventListener('DOMContentLoaded', function() {
         confirmationModalElement.addEventListener('shown.bs.modal', function() {
             console.log('Order confirmation modal shown, ensuring cart is cleared');
             
+            // Add click event listener for the return to homepage button
+            const closeConfirmationBtn = document.getElementById('closeConfirmationBtn');
+            if (closeConfirmationBtn) {
+                closeConfirmationBtn.addEventListener('click', function() {
+                    console.log('Return to homepage button clicked');
+                    window.location.href = 'index.html';
+                });
+            }
+            
             // Ensure the cart is cleared (this is a backup in case the first clear didn't work)
             setTimeout(() => {
                 // Clear cart items from storage
