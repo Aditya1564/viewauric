@@ -633,23 +633,23 @@ const WishlistManager = (function() {
                     // Toggle wishlist status
                     if (isInWishlist(productId)) {
                         removeFromWishlist(productId);
-                        this.classList.remove('active');
-                        // Update icon
+                        // Don't add active class to maintain original appearance
+                        // Only change icon type to indicate status
                         const icon = this.querySelector('i');
                         if (icon) {
                             icon.classList.add('far');
                             icon.classList.remove('fas');
-                            icon.classList.remove('active');
+                            // Don't add active class to prevent color change
                         }
                     } else {
                         addToWishlist(product);
-                        this.classList.add('active');
-                        // Update icon
+                        // Don't add active class to maintain original appearance
+                        // Only change icon type to indicate status
                         const icon = this.querySelector('i');
                         if (icon) {
                             icon.classList.remove('far');
                             icon.classList.add('fas');
-                            icon.classList.add('active');
+                            // Don't add active class to prevent color change
                         }
                     }
                 }
@@ -687,12 +687,12 @@ const WishlistManager = (function() {
                     // Toggle wishlist status
                     if (isInWishlist(productId)) {
                         removeFromWishlist(productId);
-                        this.classList.remove('active');
+                        // Don't add active class to maintain original appearance
                         this.innerHTML = '<i class="fas fa-heart"></i> ADD TO WISHLIST';
                     } else {
                         addToWishlist(product);
-                        this.classList.add('active');
-                        this.innerHTML = '<i class="fas fa-heart"></i> REMOVE FROM WISHLIST';
+                        // Don't add active class to maintain original appearance
+                        this.innerHTML = '<i class="fas fa-heart"></i> ADD TO WISHLIST';
                     }
                 }
             });
@@ -791,10 +791,10 @@ const WishlistManager = (function() {
                     // Toggle wishlist status
                     if (isInWishlist(productId)) {
                         removeFromWishlist(productId);
-                        e.target.closest('.add-to-wishlist-btn').classList.remove('active');
+                        // Don't change button appearance
                     } else {
                         addToWishlist(product);
-                        e.target.closest('.add-to-wishlist-btn').classList.add('active');
+                        // Don't change button appearance
                     }
                 }
             }
@@ -896,29 +896,30 @@ const WishlistManager = (function() {
             
             if (productId && wishlistButton) {
                 console.log('Updating wishlist button state for product ID:', productId, 'In wishlist:', isInWishlist(productId));
-                if (isInWishlist(productId)) {
-                    // Toggle the active class on the button container
-                    wishlistButton.classList.add('active');
-                    wishlistButton.style.backgroundColor = 'white'; // Force white background
-                    wishlistButton.style.color = '#FF69B4'; // Force pink color for icon
-                    // Update the icon style
-                    const icon = wishlistButton.querySelector('i');
-                    if (icon) {
+                // We need to maintain consistent appearance regardless of wishlist state
+                // Only change the icon type (solid vs regular) to indicate status
+                
+                // Keep wishlist button styling consistent
+                wishlistButton.style.backgroundColor = 'white'; // Force white background
+                wishlistButton.style.color = '#333'; // Default text color
+                
+                const icon = wishlistButton.querySelector('i');
+                if (icon) {
+                    if (isInWishlist(productId)) {
+                        // Use solid icon for items in wishlist
                         icon.classList.remove('far');
                         icon.classList.add('fas');
-                    }
-                } else {
-                    wishlistButton.classList.remove('active');
-                    wishlistButton.style.backgroundColor = 'white'; // Keep white background
-                    wishlistButton.style.color = '#333'; // Reset to default color
-                    // Reset icon to regular
-                    const icon = wishlistButton.querySelector('i');
-                    if (icon) {
+                    } else {
+                        // Use regular icon for items not in wishlist
                         icon.classList.add('far');
                         icon.classList.remove('fas');
-                        icon.classList.remove('active');
                     }
+                    // Never add active class
+                    icon.classList.remove('active');
                 }
+                
+                // Remove active class from button
+                wishlistButton.classList.remove('active');
             }
         });
         
