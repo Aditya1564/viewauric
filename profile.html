@@ -537,7 +537,7 @@
             displayUserInfo(userData);
             
             // Load user orders
-            await loadUserOrders(session.uid);
+            await loadUserOrders(userIdToUse);
             
             // Display addresses and payment methods
             if (userData.addresses) {
