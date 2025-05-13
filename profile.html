@@ -427,8 +427,14 @@
         measurementId: "G-ZYZ750JHMB"
       };
       
-      // Initialize Firebase
-      firebase.initializeApp(firebaseConfig);
+      // Check if Firebase is already initialized
+      if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0) {
+        console.log("Firebase already initialized, using existing app");
+      } else {
+        // Initialize Firebase
+        console.log("Initializing Firebase for the first time");
+        firebase.initializeApp(firebaseConfig);
+      }
       
       // Enable session persistence
       firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
@@ -564,7 +570,7 @@
               const userData = {
                 uid: user.uid,
                 email: user.email,
-                displayName: user.displayName || session.displayName || 'User',
+                displayName: user.displayName || FirebaseAuth.getSession()?.displayName || 'User',
                 photoURL: user.photoURL,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
@@ -593,7 +599,18 @@
           }
         } catch (error) {
           console.error("Error loading profile:", error);
-          showError("An error occurred while loading your profile. Please try again later.");
+          
+          // Check if this is a Firebase initialization error
+          if (error.code === 'app-compat/no-app' || error.message?.includes('Firebase')) {
+            console.error("Firebase initialization error. Attempting to recover...");
+            // Reload the page to reinitialize Firebase
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
+          } else {
+            // Other errors
+            showError("An error occurred while loading your profile. Please try again later.");
+          }
         }
       }
       
