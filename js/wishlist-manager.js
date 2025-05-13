@@ -929,11 +929,11 @@ const WishlistManager = (function() {
             const wishlistButton = document.querySelector('.add-to-wishlist-btn');
             
             if (productId && wishlistButton) {
+                // Don't add or remove active class to avoid color changes
+                // Only update text if needed
                 if (isInWishlist(productId)) {
-                    wishlistButton.classList.add('active');
-                    wishlistButton.innerHTML = '<i class="fas fa-heart"></i> REMOVE FROM WISHLIST';
+                    wishlistButton.innerHTML = '<i class="fas fa-heart"></i> ADD TO WISHLIST';
                 } else {
-                    wishlistButton.classList.remove('active');
                     wishlistButton.innerHTML = '<i class="fas fa-heart"></i> ADD TO WISHLIST';
                 }
             }
