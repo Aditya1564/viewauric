@@ -1499,9 +1499,13 @@ a {
 }
 
 .add-to-wishlist.active {
-    background-color: white; /* White background */
-    color: #FF69B4; /* Pink color for the heart icon */
-    border-color: #FF69B4;
+    background-color: white !important; /* White background, forced */
+    color: #FF69B4 !important; /* Pink color for the heart icon, forced */
+    border-color: #FF69B4 !important;
+}
+
+.add-to-wishlist.active i {
+    color: #FF69B4 !important; /* Ensure icon is pink */
 }
 
 .add-to-wishlist:hover {
