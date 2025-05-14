@@ -751,7 +751,7 @@
       }
       
       .cart-panel.active {
-        right: 0;
+        right: 0 !important; /* Force override any inline styles */
       }
       
       /* Cart Panel Header */
@@ -881,18 +881,17 @@
       </div>
     </div>
     
-    <!-- Custom Cart Script - Direct Approach -->
+    <!-- Simple Cart Implementation - Based on the working approach from simple-cart.html -->
     <script>
-      // Direct approach with global functions
+      // Global functions for cart interaction
       function openCart() {
-        console.log("Opening cart - direct function");
+        console.log("Opening cart - simplified function");
         var cartPanel = document.querySelector('.cart-panel');
         var cartOverlay = document.querySelector('.cart-overlay');
         
         if (cartPanel && cartOverlay) {
-          cartPanel.style.right = "0";
-          cartOverlay.style.opacity = "1";
-          cartOverlay.style.visibility = "visible";
+          cartPanel.classList.add('active');
+          cartOverlay.classList.add('active');
           document.body.style.overflow = 'hidden';
         } else {
           console.error("Cart panel or overlay not found");
@@ -900,60 +899,82 @@
       }
       
       function closeCart() {
-        console.log("Closing cart - direct function");
+        console.log("Closing cart - simplified function");
         var cartPanel = document.querySelector('.cart-panel');
         var cartOverlay = document.querySelector('.cart-overlay');
         
         if (cartPanel && cartOverlay) {
-          cartPanel.style.right = "-400px";
-          cartOverlay.style.opacity = "0";
-          cartOverlay.style.visibility = "hidden";
+          cartPanel.classList.remove('active');
+          cartOverlay.classList.remove('active');
           document.body.style.overflow = '';
         } else {
           console.error("Cart panel or overlay not found");
         }
       }
       
-      // Direct event assignment
-      window.onload = function() {
-        console.log("Window loaded - setting up cart events");
+      // Set up event listeners when the DOM is fully loaded
+      document.addEventListener('DOMContentLoaded', function() {
+        console.log("DOM fully loaded - setting up cart events");
         
         // Get elements
-        var cartIcon = document.querySelector('.cart-icon-container');
-        var closeBtn = document.querySelector('.close-cart-btn');
-        var overlay = document.querySelector('.cart-overlay');
+        var cartToggle = document.getElementById('cartToggleButton');
+        var closeCartBtn = document.querySelector('.close-cart-btn');
+        var cartOverlay = document.querySelector('.cart-overlay');
         
         // Debugging - log elements
-        console.log("Cart icon:", cartIcon);
-        console.log("Close button:", closeBtn);
-        console.log("Overlay:", overlay);
+        console.log("Cart toggle button:", cartToggle);
+        console.log("Close cart button:", closeCartBtn);
+        console.log("Cart overlay:", cartOverlay);
         
-        // Add direct onclick event handlers
-        if (cartIcon) {
-          cartIcon.onclick = function(e) {
+        // Cart toggle button click event
+        if (cartToggle) {
+          cartToggle.addEventListener('click', function(e) {
             e.preventDefault();
-            console.log("Cart icon clicked");
+            console.log("Cart toggle clicked");
             openCart();
             return false;
-          };
+          });
         }
         
-        if (closeBtn) {
-          closeBtn.onclick = function() {
+        // Close button click event
+        if (closeCartBtn) {
+          closeCartBtn.addEventListener('click', function() {
             console.log("Close button clicked");
             closeCart();
             return false;
-          };
+          });
         }
         
-        if (overlay) {
-          overlay.onclick = function() {
+        // Overlay click event
+        if (cartOverlay) {
+          cartOverlay.addEventListener('click', function() {
             console.log("Overlay clicked");
             closeCart();
             return false;
-          };
+          });
         }
-      };
+      });
+      
+      // Fallback - also attach events on window load
+      window.addEventListener('load', function() {
+        console.log("Window loaded - checking cart events");
+        
+        // Get cart button element
+        var cartToggle = document.getElementById('cartToggleButton');
+        
+        // Add click event if not already attached
+        if (cartToggle && !cartToggle._hasClickEvent) {
+          cartToggle._hasClickEvent = true;
+          cartToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log("Cart toggle clicked (window.onload handler)");
+            openCart();
+            return false;
+          });
+          
+          console.log("Added cart click event from window.onload");
+        }
+      });
     </script>
   </body>
 </html>
