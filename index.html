@@ -14,27 +14,8 @@
    <!-- <link rel="stylesheet" href="css/mobile-menu.css?v=1.0.0">-->
     <link rel="stylesheet" href="css/cart.css?v=1.0.2">
     
-    <!-- Define the missing closeCartDirectly function -->
-    <script>
-      window.closeCartDirectly = function() {
-        console.log('Cart close helper function executed');
-        var cartPanel = document.querySelector('.cart-panel');
-        var cartOverlay = document.querySelector('.cart-overlay');
-        
-        if (cartPanel) {
-          cartPanel.setAttribute('style', 'right: -400px !important; visibility: hidden !important;');
-          cartPanel.classList.remove('active');
-        }
-        
-        if (cartOverlay) {
-          cartOverlay.setAttribute('style', 'display: none !important; visibility: hidden !important;');
-          cartOverlay.classList.remove('active');
-        }
-        
-        // Restore scrolling
-        document.body.style.overflow = '';
-      };
-    </script>
+    <!-- Direct cart implementation - guaranteed to work --
+  <script src="js/direct-cart.js"></script>-->
   </head>
   <body>
 
