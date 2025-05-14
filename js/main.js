@@ -1,5 +1,61 @@
+// Direct function to toggle cart
+function toggleCartDirectly() {
+    console.log('Direct cart toggle called');
+    const cartPanel = document.querySelector('.cart-panel');
+    const cartOverlay = document.querySelector('.cart-overlay');
+    
+    if (cartPanel && cartOverlay) {
+        if (cartPanel.classList.contains('active')) {
+            // Close cart
+            cartPanel.classList.remove('active');
+            cartOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        } else {
+            // Open cart
+            cartPanel.style.right = '0px';
+            cartPanel.classList.add('active');
+            cartOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+    } else {
+        console.error('Cart panel or overlay not found:', 
+                     cartPanel ? 'Panel found' : 'Panel MISSING', 
+                     cartOverlay ? 'Overlay found' : 'Overlay MISSING');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded - initializing menu system');
+    
+    // Add direct event listeners for cart toggle buttons
+    const cartButtons = document.querySelectorAll('.cart-toggle, .cart-icon-container, #cartToggleButton, .mobile-cart-toggle');
+    cartButtons.forEach(button => {
+        console.log('Adding direct event listener to cart button:', button);
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Cart button clicked directly');
+            toggleCartDirectly();
+        });
+    });
+    
+    // Add direct event listeners for close button and overlay
+    document.addEventListener('click', function(e) {
+        // Close cart when close button, overlay, or continue shopping button is clicked
+        if (e.target.closest('.close-cart-btn') || 
+            e.target.classList.contains('cart-overlay') || 
+            e.target.closest('.continue-shopping-btn')) {
+            
+            console.log('Close button, overlay, or continue shopping clicked directly');
+            const cartPanel = document.querySelector('.cart-panel');
+            const cartOverlay = document.querySelector('.cart-overlay');
+            
+            if (cartPanel && cartOverlay) {
+                cartPanel.classList.remove('active');
+                cartOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+    });
     
     // Initialize CartManager if available
     if (window.CartManager && typeof CartManager.init === 'function') {
