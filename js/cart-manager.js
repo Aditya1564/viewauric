@@ -596,10 +596,26 @@ window.CartManager = (function() {
         const cartPanel = document.querySelector('.cart-panel');
         const cartOverlay = document.querySelector('.cart-overlay');
         
+        console.log('Opening cart panel:', cartPanel ? 'Panel found' : 'Panel NOT found');
+        console.log('Cart overlay:', cartOverlay ? 'Overlay found' : 'Overlay NOT found');
+        
         if (cartPanel && cartOverlay) {
+            // Ensure any inline styles are removed
+            cartPanel.style.removeProperty('right');
+            
+            // Add active classes
             cartPanel.classList.add('active');
             cartOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden'; // Prevent scrolling
+            
+            // Force the right position with inline style for maximum compatibility
+            cartPanel.style.right = '0px';
+            
+            // Prevent scrolling
+            document.body.style.overflow = 'hidden';
+            
+            console.log('Cart panel activated');
+        } else {
+            console.error('Cart panel or overlay not found in the DOM');
         }
     }
     
