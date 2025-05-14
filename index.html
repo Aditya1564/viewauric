@@ -11,6 +11,50 @@
     <link rel="stylesheet" href="css/navbar.css?v=1.1.1">
     <link rel="stylesheet" href="css/mobile-menu.css?v=1.0.0">
     <link rel="stylesheet" href="css/cart.css?v=1.0.2">
+    
+    <!-- Early script to define cart functions before DOM loads -->
+    <script>
+      // Define global cart functions
+      function openCartDirect() {
+        console.log('Early openCartDirect called');
+        setTimeout(function() {
+          const cartPanel = document.querySelector('.cart-panel');
+          const cartOverlay = document.querySelector('.cart-overlay');
+          
+          if (cartPanel && cartOverlay) {
+            cartPanel.style.cssText = 'right: 0 !important; display: flex !important; visibility: visible !important; z-index: 999999 !important; opacity: 1 !important;';
+            cartPanel.classList.add('active');
+            cartOverlay.style.cssText = 'display: block !important; visibility: visible !important;';
+            cartOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            console.log('Cart panel opened early with direct styling');
+          }
+        }, 50);
+      }
+      
+      function closeCart() {
+        console.log('Early closeCart called');
+        const cartPanel = document.querySelector('.cart-panel');
+        const cartOverlay = document.querySelector('.cart-overlay');
+        
+        if (cartPanel) cartPanel.classList.remove('active');
+        if (cartOverlay) cartOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+      
+      // Run on page load
+      window.addEventListener('load', function() {
+        console.log('Window loaded, initializing cart handlers');
+        const cartButtons = document.querySelectorAll('.cart-toggle, .cart-icon-container, #cartToggleButton, .mobile-cart-toggle');
+        cartButtons.forEach(function(btn) {
+          btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            openCartDirect();
+            return false;
+          });
+        });
+      });
+    </script>
   </head>
   <body>
 
@@ -71,7 +115,7 @@
                         <a href="#" class="mobile-account-link wishlist-toggle">
                             <i class="fas fa-heart"></i> Wishlist (<span class="mobile-wishlist-count">0</span>)
                         </a>
-                        <a href="#" class="mobile-account-link mobile-cart-toggle">
+                        <a href="#" class="mobile-account-link mobile-cart-toggle" onclick="openCartDirect(); return false;">
                             <i class="fas fa-shopping-bag"></i> Shopping Bag (<span class="mobile-cart-count">0</span>)
                         </a>
                     
@@ -86,7 +130,7 @@
                         <i class="fa-solid fa-heart"></i>
                         <div class="wishlist-count">0</div>
                     </a>
-                    <a href="#" class="icon-link cart-icon-container cart-toggle" id="cartToggleButton">
+                    <a href="#" class="icon-link cart-icon-container cart-toggle" id="cartToggleButton" onclick="openCartDirect(); return false;">
                         <i class="fa-solid fa-bag-shopping"></i>
                         <div class="cart-count">0</div>
                     </a>
@@ -908,11 +952,11 @@
       });
     </script>
     
-    <!-- Cart Panel with direct JS implementation -->
-    <div class="cart-panel">
+    <!-- Cart Panel - exact copy from product-detail.html -->
+    <div class="cart-panel" style="z-index:999999; visibility:visible;">
       <div class="cart-panel-header">
         <h3>Your Shopping Bag</h3>
-        <button class="close-cart-btn" onclick="document.querySelector('.cart-panel').classList.remove('active'); document.querySelector('.cart-overlay').classList.remove('active'); document.body.style.overflow = '';">×</button>
+        <button class="close-cart-btn" onclick="closeCart()">×</button>
       </div>
       <div class="cart-items">
         <!-- Cart items will be inserted here by JavaScript -->
@@ -924,38 +968,70 @@
           <span class="subtotal-amount">₹0.00</span>
         </div>
         <div class="cart-panel-buttons">
-          <button class="view-cart-btn continue-shopping-btn" onclick="document.querySelector('.cart-panel').classList.remove('active'); document.querySelector('.cart-overlay').classList.remove('active'); document.body.style.overflow = '';">Continue Shopping</button>
+          <button class="view-cart-btn continue-shopping-btn" onclick="closeCart()">Continue Shopping</button>
           <a href="checkout.html" class="checkout-btn">Checkout</a>
         </div>
       </div>
     </div>
     
     <!-- Cart Overlay -->
-    <div class="cart-overlay" onclick="document.querySelector('.cart-panel').classList.remove('active'); document.querySelector('.cart-overlay').classList.remove('active'); document.body.style.overflow = '';"></div>
+    <div class="cart-overlay" onclick="closeCart()"></div>
     
-    <!-- Direct cart functionality -->
+    <!-- Direct cart toggle functions -->
     <script>
+    // Define the cart functions globally so they're available to inline onclick handlers
+    function openCartDirect() {
+      console.log('Direct openCart called');
+      const cartPanel = document.querySelector('.cart-panel');
+      const cartOverlay = document.querySelector('.cart-overlay');
+      
+      if (cartPanel && cartOverlay) {
+        // Force inline styles for maximum visibility and position
+        cartPanel.style.cssText = 'right: 0 !important; display: flex !important; visibility: visible !important; z-index: 999999 !important; opacity: 1 !important; transform: none !important;';
+        cartPanel.classList.add('active');
+        
+        // Show overlay
+        cartOverlay.style.cssText = 'display: block !important; visibility: visible !important; z-index: 999998 !important; opacity: 1 !important;';
+        cartOverlay.classList.add('active');
+        
+        // Prevent body scrolling
+        document.body.style.overflow = 'hidden';
+        
+        // Log success
+        console.log('Cart panel forced open with inline styles');
+      } else {
+        console.error('Cart panel or overlay missing in DOM');
+      }
+    }
+    
+    function closeCart() {
+      console.log('Direct closeCart called');
+      const cartPanel = document.querySelector('.cart-panel');
+      const cartOverlay = document.querySelector('.cart-overlay');
+      
+      if (cartPanel) {
+        cartPanel.classList.remove('active');
+        cartPanel.style.right = '-400px';
+      }
+      
+      if (cartOverlay) {
+        cartOverlay.classList.remove('active');
+      }
+      
+      document.body.style.overflow = '';
+    }
+    
+    // Add click handlers to cart buttons when DOM is loaded
     document.addEventListener('DOMContentLoaded', function() {
-      // Direct cart button functionality
+      // Select all cart toggle buttons
       const cartButtons = document.querySelectorAll('.cart-toggle, .cart-icon-container, #cartToggleButton, .mobile-cart-toggle');
       
-      cartButtons.forEach(button => {
+      // Add click event to each button
+      cartButtons.forEach(function(button) {
         button.addEventListener('click', function(e) {
           e.preventDefault();
-          console.log('Direct cart button click');
-          
-          const cartPanel = document.querySelector('.cart-panel');
-          const cartOverlay = document.querySelector('.cart-overlay');
-          
-          if (cartPanel && cartOverlay) {
-            cartPanel.style.cssText = 'right: 0 !important; display: flex !important; visibility: visible !important;';
-            cartPanel.classList.add('active');
-            cartOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            console.log('Cart panel activated directly');
-          } else {
-            console.error('Cart panel or overlay missing');
-          }
+          console.log('Cart button clicked');
+          openCartDirect();
         });
       });
     });
