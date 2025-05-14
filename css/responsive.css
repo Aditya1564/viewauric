@@ -2,9 +2,9 @@
 
 /* Small devices (smartphones and small tablets) */
 @media (max-width: 680px) {
-    /* Mobile Menu takes 90% width on small screens as requested */
+    /* Mobile Menu takes 70% width on small screens as requested */
     .mobile-menu {
-        width: 90%;
+        width: 70%;
     }
     
     /* Menu Header adjustments */
