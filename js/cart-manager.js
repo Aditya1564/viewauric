@@ -371,8 +371,12 @@ window.CartManager = (function() {
             document.body.insertAdjacentHTML('beforeend', '<div class="cart-overlay"></div>');
         }
         
-        // Create cart panel HTML if it doesn't exist
-        if (!document.querySelector('.cart-panel')) {
+        // Check if the cart panel exists but don't create a new one if it already exists
+        // This ensures we respect the existing cart panel in pages like index.html
+        const existingCartPanel = document.querySelector('.cart-panel');
+        
+        if (!existingCartPanel) {
+            // Create cart panel HTML if it doesn't exist
             const cartPanelHTML = `
                 <div class="cart-panel">
                     <div class="cart-panel-header">
@@ -606,7 +610,7 @@ window.CartManager = (function() {
         console.log('Cart overlay:', cartOverlay ? 'Overlay found' : 'Overlay NOT found');
         
         if (cartPanel && cartOverlay) {
-            // Ensure any inline styles are removed
+            // Ensure any inline styles are removed that could interfere
             cartPanel.style.removeProperty('right');
             
             // Add active classes
@@ -622,6 +626,30 @@ window.CartManager = (function() {
             console.log('Cart panel activated');
         } else {
             console.error('Cart panel or overlay not found in the DOM');
+            
+            // Try to create them if they don't exist (fallback)
+            if (!cartPanel) {
+                setupCartPanel();
+                // Try again with the newly created panel
+                const newCartPanel = document.querySelector('.cart-panel');
+                if (newCartPanel) {
+                    newCartPanel.classList.add('active');
+                    newCartPanel.style.right = '0px';
+                    console.log('Created and activated new cart panel');
+                }
+            }
+            
+            if (!cartOverlay) {
+                document.body.insertAdjacentHTML('beforeend', '<div class="cart-overlay"></div>');
+                const newOverlay = document.querySelector('.cart-overlay');
+                if (newOverlay) {
+                    newOverlay.classList.add('active');
+                    console.log('Created and activated new cart overlay');
+                }
+            }
+            
+            // Prevent scrolling in any case
+            document.body.style.overflow = 'hidden';
         }
     }
     
@@ -635,21 +663,22 @@ window.CartManager = (function() {
         console.log('Closing cart panel:', cartPanel ? 'Panel found' : 'Panel NOT found');
         console.log('Cart overlay:', cartOverlay ? 'Overlay found' : 'Overlay NOT found');
         
-        if (cartPanel && cartOverlay) {
+        if (cartPanel) {
             // Remove active classes
             cartPanel.classList.remove('active');
-            cartOverlay.classList.remove('active');
             
             // Force position with inline style to ensure it's moved off-screen
             cartPanel.style.right = '-400px';
             
-            // Restore scrolling
-            document.body.style.overflow = '';
-            
             console.log('Cart panel closed');
-        } else {
-            console.error('Cart panel or overlay not found in the DOM');
         }
+        
+        if (cartOverlay) {
+            cartOverlay.classList.remove('active');
+        }
+        
+        // Restore scrolling in any case
+        document.body.style.overflow = '';
         
         // Create a global function for direct HTML onclick access if it doesn't exist
         if (typeof window.closeCart !== 'function') {
