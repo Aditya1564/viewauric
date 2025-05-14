@@ -14,7 +14,7 @@
    <!-- <link rel="stylesheet" href="css/mobile-menu.css?v=1.0.0">-->
     <link rel="stylesheet" href="css/cart.css?v=1.0.2">
     
-    <!-- Direct cart implementation for cart functionality -->
+
     
   </head>
   <body>
@@ -706,9 +706,10 @@
               userIcon.href = "login.html";
               userIcon.classList.remove('logged-in');
             }
-          }
         
-        });
+          });
+        
+        
           // Also set up auth state observer for real-time updates
           FirebaseAuth.observeAuthState((user) => {
             if (user) {
