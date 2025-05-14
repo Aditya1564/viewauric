@@ -610,6 +610,9 @@ window.CartManager = (function() {
         console.log('Cart overlay:', cartOverlay ? 'Overlay found' : 'Overlay NOT found');
         
         if (cartPanel && cartOverlay) {
+            // Force display to ensure visibility (needed for index.html)
+            cartPanel.style.display = 'flex';
+            
             // Ensure any inline styles are removed that could interfere
             cartPanel.style.removeProperty('right');
             
@@ -619,11 +622,12 @@ window.CartManager = (function() {
             
             // Force the right position with inline style for maximum compatibility
             cartPanel.style.right = '0px';
+            cartPanel.style.zIndex = '9999';
             
             // Prevent scrolling
             document.body.style.overflow = 'hidden';
             
-            console.log('Cart panel activated');
+            console.log('Cart panel activated with forced display');
         } else {
             console.error('Cart panel or overlay not found in the DOM');
             
@@ -669,6 +673,15 @@ window.CartManager = (function() {
             
             // Force position with inline style to ensure it's moved off-screen
             cartPanel.style.right = '-400px';
+            
+            // Ensure display style does not override the removal of active class
+            // Wait a bit to allow transition to complete
+            setTimeout(() => {
+                if (!cartPanel.classList.contains('active')) {
+                    // Only modify these if still inactive
+                    cartPanel.style.zIndex = '9998'; // Lower z-index when closed
+                }
+            }, 300); // Match transition time
             
             console.log('Cart panel closed');
         }
