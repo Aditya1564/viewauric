@@ -855,9 +855,6 @@ const WishlistManager = (function() {
         if (mobileWishlistCount) {
             // Set the count text
             mobileWishlistCount.textContent = wishlistItems.length;
-            
-            // Always show counter even when count is zero
-            mobileWishlistCount.style.display = 'inline-block';
             console.log('Mobile wishlist count updated to:', wishlistItems.length);
         }
         
