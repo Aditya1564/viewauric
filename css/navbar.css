@@ -273,6 +273,11 @@
 
 /* Tablet to Small Desktop */
 @media (max-width: 991px) {
+    /* Show mobile account links on smaller screens */
+    .mobile-account-links {
+        display: block;
+    }
+    
     .hamburger {
         display: block;
         order: 0; /* First item on left side */
@@ -409,6 +414,7 @@
         left: 0;
         width: 100%;
         padding: 0 20px;
+        display: none; /* Hidden by default on larger screens */
     }
     
     .mobile-account-link {
