@@ -66,16 +66,16 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             
             const dropdown = this.closest('.dropdown');
-            const dropdownMenu = dropdown.querySelector('.dropdown-menu');
-            const chevronIcon = this.querySelector('i');
+            
+            // Close all other dropdowns first
+            document.querySelectorAll('.dropdown.active').forEach(item => {
+                if (item !== dropdown) {
+                    item.classList.remove('active');
+                }
+            });
             
             // Toggle active class on dropdown
             dropdown.classList.toggle('active');
-            
-            // Rotate chevron icon
-            if (chevronIcon) {
-                chevronIcon.style.transform = dropdown.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0)';
-            }
         }
     }
     
