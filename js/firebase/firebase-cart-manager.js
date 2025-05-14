@@ -93,10 +93,16 @@ const FirebaseCartManager = (function() {
                 });
                 
                 // Race between Firebase request and timeout
-                const cartDoc = await Promise.race([
-                    cartRef.get(),
-                    timeoutPromise
-                ]);
+                let cartDoc;
+                try {
+                    cartDoc = await Promise.race([
+                        cartRef.get(),
+                        timeoutPromise
+                    ]);
+                } catch (raceError) {
+                    console.warn('Firebase operation timed out:', raceError);
+                    throw raceError; // Re-throw for the outer catch block to handle
+                }
                 
                 if (cartDoc.exists) {
                     const cartData = cartDoc.data();
