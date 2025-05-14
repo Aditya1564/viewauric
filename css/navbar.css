@@ -409,12 +409,14 @@
     
     /* Mobile Menu Bottom Account Links */
     .mobile-account-links {
-        position: absolute;
-        bottom: 30px; /* More bottom spacing */
+        position: relative; /* Changed from absolute to better ensure visibility */
+        margin-top: 20px; /* Add some space above the links */
         left: 0;
         width: 100%;
         padding: 0 20px;
         display: none; /* Hidden by default on larger screens */
+        border-top: 1px solid #eee; /* Add a separator line */
+        padding-top: 15px; /* Add padding above the links */
     }
     
     .mobile-account-link {
