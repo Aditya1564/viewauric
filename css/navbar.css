@@ -35,7 +35,7 @@
 
 /* Hamburger Menu */
 .hamburger {
-    display: none;
+    display: none; /* Hidden by default, shown in media query */
     cursor: pointer;
     width: 30px;
     height: 24px;
@@ -44,6 +44,7 @@
     background: transparent;
     border: none;
     padding: 0;
+    z-index: 1000; /* Ensure it's above other elements */
 }
 
 .hamburger span {
@@ -319,7 +320,7 @@
         max-width: 380px;
         height: 100vh;
         background-color: #fff;
-        z-index: 1000;
+        z-index: 9999; /* Ensure it's above everything else */
         transition: left 0.3s ease; /* Changed transition property */
         box-shadow: 0 0 15px rgba(0, 0, 0, 0.15); /* Subtle shadow like in image */
         overflow-y: auto;
