@@ -615,12 +615,12 @@
       window.addEventListener('online', () => {
         console.log('Network connection restored');
         isOnline = true;
-        document.dispatchEvent(new CustomEvent('network-status-changed', { detail: { online: true }}));
+        document.dispatchEvent(new CustomEvent('network-status-changed', { detail: { online: true } }));
       });
       window.addEventListener('offline', () => {
         console.log('Network connection lost');
         isOnline = false;
-        document.dispatchEvent(new CustomEvent('network-status-changed', { detail: { online: false }}));
+        document.dispatchEvent(new CustomEvent('network-status-changed', { detail: { online: false } }));
       });
     </script>
     
