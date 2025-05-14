@@ -908,11 +908,11 @@
       });
     </script>
     
-    <!-- Cart Panel with simplified structure (like login.html) -->
+    <!-- Cart Panel with direct JS implementation -->
     <div class="cart-panel">
       <div class="cart-panel-header">
         <h3>Your Shopping Bag</h3>
-        <button class="close-cart-btn" onclick="closeCart()">×</button>
+        <button class="close-cart-btn" onclick="document.querySelector('.cart-panel').classList.remove('active'); document.querySelector('.cart-overlay').classList.remove('active'); document.body.style.overflow = '';">×</button>
       </div>
       <div class="cart-items">
         <!-- Cart items will be inserted here by JavaScript -->
@@ -924,15 +924,41 @@
           <span class="subtotal-amount">₹0.00</span>
         </div>
         <div class="cart-panel-buttons">
-          <button class="view-cart-btn continue-shopping-btn" onclick="closeCart()">Continue Shopping</button>
+          <button class="view-cart-btn continue-shopping-btn" onclick="document.querySelector('.cart-panel').classList.remove('active'); document.querySelector('.cart-overlay').classList.remove('active'); document.body.style.overflow = '';">Continue Shopping</button>
           <a href="checkout.html" class="checkout-btn">Checkout</a>
         </div>
       </div>
     </div>
     
     <!-- Cart Overlay -->
-    <div class="cart-overlay" onclick="closeCart()"></div>
+    <div class="cart-overlay" onclick="document.querySelector('.cart-panel').classList.remove('active'); document.querySelector('.cart-overlay').classList.remove('active'); document.body.style.overflow = '';"></div>
     
-    <!-- End of scripts -->
+    <!-- Direct cart functionality -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Direct cart button functionality
+      const cartButtons = document.querySelectorAll('.cart-toggle, .cart-icon-container, #cartToggleButton, .mobile-cart-toggle');
+      
+      cartButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+          e.preventDefault();
+          console.log('Direct cart button click');
+          
+          const cartPanel = document.querySelector('.cart-panel');
+          const cartOverlay = document.querySelector('.cart-overlay');
+          
+          if (cartPanel && cartOverlay) {
+            cartPanel.style.cssText = 'right: 0 !important; display: flex !important; visibility: visible !important;';
+            cartPanel.classList.add('active');
+            cartOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            console.log('Cart panel activated directly');
+          } else {
+            console.error('Cart panel or overlay missing');
+          }
+        });
+      });
+    });
+    </script>
   </body>
 </html>
