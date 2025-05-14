@@ -647,7 +647,5 @@ const CartManager = (function() {
     };
 })();
 
-// Initialize cart when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    CartManager.init();
-});
+// We'll initialize CartManager from main.js to ensure a single initialization point
+// This prevents double initialization issues

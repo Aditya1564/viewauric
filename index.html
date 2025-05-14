@@ -94,7 +94,7 @@
                     </a>
                     <a href="#" class="icon-link cart-icon-container cart-toggle" id="cartToggleButton">
                         <i class="fas fa-shopping-bag"></i>
-                        <div class="cart-count">1</div>
+                        <div class="cart-count">0</div>
                     </a>
                 </div>
             </div>
@@ -861,50 +861,46 @@
     </style>
     <!-- Cart Panel will be dynamically created by CartManager.js -->
     
-    <!-- Initialize Cart and Wishlist Manager -->
+    <!-- Additional cart initialization handled in main.js -->
     <script>
-      // Initialize cart and wishlist managers when DOM is fully loaded
+      // We now handle all cart initialization in main.js to avoid duplicates
       document.addEventListener('DOMContentLoaded', function() {
-        console.log("DOM fully loaded - initializing cart and wishlist managers");
+        console.log("DOM fully loaded - cart initialization delegated to main.js");
         
-        // Initialize CartManager if available
-        if (window.CartManager && typeof CartManager.init === 'function') {
-          CartManager.init();
-          console.log("CartManager initialized");
-          
-          // Make CartManager functions available globally
-          window.openCart = function() {
-            console.log("Global openCart called");
-            CartManager.openCartPanel();
-          };
-          
-          window.closeCart = function() {
-            console.log("Global closeCart called");
-            CartManager.closeCartPanel();
-          };
-          
-          window.toggleCart = function() {
-            console.log("Global toggleCart called");
-            CartManager.toggleCartPanel();
-          };
-          
-          // Fix cart toggle button
-          var cartToggleButton = document.getElementById('cartToggleButton');
-          if (cartToggleButton) {
-            // Remove inline onclick attribute
-            cartToggleButton.removeAttribute('onclick');
+        // Fix cart toggle button separately to ensure it works
+        var cartToggleButton = document.getElementById('cartToggleButton');
+        if (cartToggleButton) {
+          cartToggleButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log("Cart toggle button clicked");
             
-            // Add event listener
-            cartToggleButton.addEventListener('click', function(e) {
-              e.preventDefault();
-              console.log("Cart toggle button clicked");
-              CartManager.openCartPanel();
-              return false;
-            });
-            console.log("Added event listener to cart toggle button");
-          }
-        } else {
-          console.error("CartManager not available");
+            // Use global openCart function which is set up in main.js
+            if (typeof window.openCart === 'function') {
+              window.openCart();
+            } else {
+              console.error("Cart functionality not initialized yet");
+            }
+            return false;
+          });
+          console.log("Added event listener to cart toggle button");
+        }
+        
+        // Handle mobile cart toggle
+        var mobileCartToggle = document.querySelector('.mobile-cart-toggle');
+        if (mobileCartToggle) {
+          mobileCartToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log("Mobile cart toggle clicked");
+            
+            // Use global openCart function which is set up in main.js
+            if (typeof window.openCart === 'function') {
+              window.openCart();
+            } else {
+              console.error("Cart functionality not initialized yet");
+            }
+            return false;
+          });
+          console.log("Added event listener to mobile cart toggle");
         }
       });
     </script>

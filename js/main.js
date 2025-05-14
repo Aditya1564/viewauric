@@ -3,8 +3,27 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize CartManager if available
     if (window.CartManager && typeof CartManager.init === 'function') {
+        // Initialize cart manager
         CartManager.init();
         console.log("CartManager initialized from main.js");
+        
+        // Ensure cart counts are updated immediately
+        setTimeout(function() {
+            // Update cart counts
+            const cartCount = CartManager.getItemCount();
+            console.log("Initial cart count:", cartCount);
+            
+            // Update all cart count badges
+            document.querySelectorAll('.cart-count').forEach(function(el) {
+                el.textContent = cartCount;
+            });
+            
+            // Update mobile cart count
+            const mobileCountElement = document.querySelector('.mobile-cart-count');
+            if (mobileCountElement) {
+                mobileCountElement.textContent = cartCount;
+            }
+        }, 100); // Short delay to ensure everything is loaded
         
         // Make cart functions available globally
         window.openCart = function() {
