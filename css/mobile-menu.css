@@ -3,7 +3,7 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 70%; /* Fixed 70% width for mobile menu */
+    width: 90%; /* Updated to 90% width for mobile menu */
     height: 100vh;
     background-color: white;
     z-index: 1000;
@@ -276,7 +276,7 @@
 /* Small phones (up to 480px) */
 @media (max-width: 480px) {
     .mobile-menu {
-        width: 70%;
+        width: 90%;
     }
     .menu-footer {
         width: 100%;
