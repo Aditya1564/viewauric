@@ -4,21 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>My Profile - Auric - Timeless & Classic Jewellery</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpLGCJKypKP/lLCgB9MlH/lX+/Pvw2DNA" crossorigin="anonymous">
+    <!-- Fallback font awesome icons if CDN fails -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lato:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css?v=1.0.4">
     <link rel="stylesheet" href="css/responsive.css?v=1.0.4">
     <link rel="stylesheet" href="css/navbar.css?v=1.1.1">
     <link rel="stylesheet" href="css/cart.css?v=1.0.2">
     <link rel="stylesheet" href="css/auth.css">
-
-      <!-- Simple Initialization Script -->
-      <script>
-          // Simple script with no storage dependencies
-          (function() {
-              console.log('Flag check: No persistence needed');
-          })();
-      </script>
+    
+    <!-- Simple Initialization Script -->
+    <script>
+        // Simple script with no storage dependencies
+        (function() {
+            console.log('Flag check: No persistence needed');
+        })();
+    </script>
     <style>
       .profile-container {
         max-width: 1000px;
@@ -985,10 +987,10 @@
     </style>
     
     <!-- Cart Panel -->
-    <div class="cart-panel">
+    <div id="auricCartPanel" class="cart-panel" style="position:fixed !important; top:0 !important; right:-400px !important; width:400px !important; max-width:90% !important; height:100% !important; background:#ffffff !important; box-shadow:-2px 0 10px rgba(0,0,0,0.3) !important; z-index:999999 !important; transition:right 0.3s ease-in-out !important; display:flex !important; flex-direction:column !important; overflow:hidden !important; visibility:visible !important; pointer-events:auto !important;">
       <div class="cart-panel-header">
         <h3>Your Shopping Bag</h3>
-        <button class="close-cart-btn" onclick="closeCart()">×</button>
+        <button class="close-cart-btn" onclick="closeCartDirectly(); return false;">×</button>
       </div>
       <div class="cart-items">
         <!-- Cart items will be inserted here by JavaScript -->
@@ -1000,13 +1002,23 @@
           <span class="subtotal-amount">₹0.00</span>
         </div>
         <div class="cart-panel-buttons">
-          <button class="view-cart-btn continue-shopping-btn" onclick="closeCart()">Continue Shopping</button>
+          <button class="view-cart-btn continue-shopping-btn" onclick="closeCartDirectly(); return false;">Continue Shopping</button>
           <a href="checkout.html" class="checkout-btn">Checkout</a>
         </div>
       </div>
     </div>
     
-    <!-- Cart Overlay -->
-    <div class="cart-overlay" onclick="closeCart()"></div>
+    <!-- Ultra-direct Cart Overlay with ALL inline styles -->
+    <div id="auricCartOverlay" class="cart-overlay" onclick="closeCartDirectly(); return false;" style="position:fixed !important; top:0 !important; left:0 !important; width:100% !important; height:100% !important; background:rgba(0,0,0,0.5) !important; z-index:999998 !important; display:none !important; visibility:hidden !important;"></div>
   </body>
+  <!-- Fix for closeCartDirectly error -->
+  <script>
+    // Define the missing closeCartDirectly function
+    window.closeCartDirectly = function() {
+      // Call the regular closeCart function
+      if (window.closeCart) {
+        return window.closeCart();
+      }
+    };
+  </script>
 </html>
