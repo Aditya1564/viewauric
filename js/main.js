@@ -1,6 +1,28 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded - initializing menu system');
     
+    // Initialize CartManager if available
+    if (window.CartManager && typeof CartManager.init === 'function') {
+        CartManager.init();
+        console.log("CartManager initialized from main.js");
+        
+        // Make cart functions available globally
+        window.openCart = function() {
+            console.log("Global openCart called");
+            CartManager.openCartPanel();
+        };
+        
+        window.closeCart = function() {
+            console.log("Global closeCart called");
+            CartManager.closeCartPanel();
+        };
+        
+        window.toggleCart = function() {
+            console.log("Global toggleCart called");
+            CartManager.toggleCartPanel();
+        };
+    }
+    
     // Menu elements
     const menuToggle = document.getElementById('menuToggle');
     const closeMenu = document.getElementById('closeMenu');

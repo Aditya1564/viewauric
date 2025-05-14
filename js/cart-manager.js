@@ -359,10 +359,14 @@ const CartManager = (function() {
      * Set up the cart panel UI
      */
     function setupCartPanel() {
+        // First check for overlay
+        if (!document.querySelector('.cart-overlay')) {
+            document.body.insertAdjacentHTML('beforeend', '<div class="cart-overlay"></div>');
+        }
+        
         // Create cart panel HTML if it doesn't exist
         if (!document.querySelector('.cart-panel')) {
             const cartPanelHTML = `
-                <div class="cart-overlay"></div>
                 <div class="cart-panel">
                     <div class="cart-panel-header">
                         <h3>Your Cart</h3>
@@ -412,8 +416,8 @@ const CartManager = (function() {
     function setupEventListeners() {
         // Delegate events to document to handle dynamically added elements
         document.addEventListener('click', function(e) {
-            // Open cart panel when cart icon is clicked
-            if (e.target.closest('.cart-toggle')) {
+            // Open cart panel when cart icon is clicked (from main nav or mobile nav)
+            if (e.target.closest('.cart-toggle') || e.target.closest('.mobile-cart-toggle')) {
                 e.preventDefault();
                 toggleCartPanel();
             }
@@ -524,8 +528,14 @@ const CartManager = (function() {
         // Update mobile menu shopping bag count
         const mobileMenuShoppingBag = document.querySelector('.mobile-account-link i.fa-shopping-bag');
         if (mobileMenuShoppingBag) {
-            const parentLink = mobileMenuShoppingBag.parentNode;
-            parentLink.innerHTML = `<i class="fas fa-shopping-bag"></i> Shopping Bag (${itemCount})`;
+            const mobileCountElement = document.querySelector('.mobile-cart-count');
+            if (mobileCountElement) {
+                mobileCountElement.textContent = itemCount;
+            } else {
+                // Fallback to updating the entire link if span not found
+                const parentLink = mobileMenuShoppingBag.parentNode;
+                parentLink.innerHTML = `<i class="fas fa-shopping-bag"></i> Shopping Bag (<span class="mobile-cart-count">${itemCount}</span>)`;
+            }
         }
         
         // Update cart items display

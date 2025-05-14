@@ -78,8 +78,8 @@
                         <a href="#" class="mobile-account-link">
                             <i class="fas fa-heart"></i> Wishlist
                         </a>
-                        <a href="#" class="mobile-account-link">
-                            <i class="fas fa-shopping-bag"></i> Shopping Bag (0)
+                        <a href="#" class="mobile-account-link mobile-cart-toggle">
+                            <i class="fas fa-shopping-bag"></i> Shopping Bag (<span class="mobile-cart-count">0</span>)
                         </a>
                     </div>
                 </div>
@@ -92,7 +92,7 @@
                         <i class="far fa-heart"></i>
                         <div class="wishlist-count">0</div>
                     </a>
-                    <a href="#" class="icon-link cart-icon-container cart-toggle" id="cartToggleButton" onclick="openCart(); return false;">
+                    <a href="#" class="icon-link cart-icon-container cart-toggle" id="cartToggleButton">
                         <i class="fas fa-shopping-bag"></i>
                         <div class="cart-count">1</div>
                     </a>
@@ -859,120 +859,52 @@
         justify-content: center;
       }
     </style>
-    <!-- Cart Panel -->
-    <div class="cart-overlay"></div>
-    <div class="cart-panel">
-      <div class="cart-panel-header">
-        <h3>Your Cart</h3>
-        <button class="close-cart-btn" onclick="closeCart(); return false;">&times;</button>
-      </div>
-      <div class="cart-items">
-        <!-- Cart items will be generated here -->
-      </div>
-      <div class="cart-panel-footer">
-        <div class="cart-panel-subtotal">
-          <span>Subtotal:</span>
-          <span class="subtotal-amount">₹0.00</span>
-        </div>
-        <div class="cart-panel-buttons">
-          <a href="#" class="view-cart-btn">Continue Shopping</a>
-          <a href="checkout.html" class="checkout-btn">Checkout</a>
-        </div>
-      </div>
-    </div>
+    <!-- Cart Panel will be dynamically created by CartManager.js -->
     
-    <!-- Simple Cart Implementation - Based on the working approach from simple-cart.html -->
+    <!-- Initialize Cart and Wishlist Manager -->
     <script>
-      // Global functions for cart interaction
-      function openCart() {
-        console.log("Opening cart - simplified function");
-        var cartPanel = document.querySelector('.cart-panel');
-        var cartOverlay = document.querySelector('.cart-overlay');
-        
-        if (cartPanel && cartOverlay) {
-          cartPanel.classList.add('active');
-          cartOverlay.classList.add('active');
-          document.body.style.overflow = 'hidden';
-        } else {
-          console.error("Cart panel or overlay not found");
-        }
-      }
-      
-      function closeCart() {
-        console.log("Closing cart - simplified function");
-        var cartPanel = document.querySelector('.cart-panel');
-        var cartOverlay = document.querySelector('.cart-overlay');
-        
-        if (cartPanel && cartOverlay) {
-          cartPanel.classList.remove('active');
-          cartOverlay.classList.remove('active');
-          document.body.style.overflow = '';
-        } else {
-          console.error("Cart panel or overlay not found");
-        }
-      }
-      
-      // Set up event listeners when the DOM is fully loaded
+      // Initialize cart and wishlist managers when DOM is fully loaded
       document.addEventListener('DOMContentLoaded', function() {
-        console.log("DOM fully loaded - setting up cart events");
+        console.log("DOM fully loaded - initializing cart and wishlist managers");
         
-        // Get elements
-        var cartToggle = document.getElementById('cartToggleButton');
-        var closeCartBtn = document.querySelector('.close-cart-btn');
-        var cartOverlay = document.querySelector('.cart-overlay');
-        
-        // Debugging - log elements
-        console.log("Cart toggle button:", cartToggle);
-        console.log("Close cart button:", closeCartBtn);
-        console.log("Cart overlay:", cartOverlay);
-        
-        // Cart toggle button click event
-        if (cartToggle) {
-          cartToggle.addEventListener('click', function(e) {
-            e.preventDefault();
-            console.log("Cart toggle clicked");
-            openCart();
-            return false;
-          });
-        }
-        
-        // Close button click event
-        if (closeCartBtn) {
-          closeCartBtn.addEventListener('click', function() {
-            console.log("Close button clicked");
-            closeCart();
-            return false;
-          });
-        }
-        
-        // Overlay click event
-        if (cartOverlay) {
-          cartOverlay.addEventListener('click', function() {
-            console.log("Overlay clicked");
-            closeCart();
-            return false;
-          });
-        }
-      });
-      
-      // Fallback - also attach events on window load
-      window.addEventListener('load', function() {
-        console.log("Window loaded - checking cart events");
-        
-        // Get cart button element
-        var cartToggle = document.getElementById('cartToggleButton');
-        
-        // Add click event if not already attached
-        if (cartToggle && !cartToggle._hasClickEvent) {
-          cartToggle._hasClickEvent = true;
-          cartToggle.addEventListener('click', function(e) {
-            e.preventDefault();
-            console.log("Cart toggle clicked (window.onload handler)");
-            openCart();
-            return false;
-          });
+        // Initialize CartManager if available
+        if (window.CartManager && typeof CartManager.init === 'function') {
+          CartManager.init();
+          console.log("CartManager initialized");
           
-          console.log("Added cart click event from window.onload");
+          // Make CartManager functions available globally
+          window.openCart = function() {
+            console.log("Global openCart called");
+            CartManager.openCartPanel();
+          };
+          
+          window.closeCart = function() {
+            console.log("Global closeCart called");
+            CartManager.closeCartPanel();
+          };
+          
+          window.toggleCart = function() {
+            console.log("Global toggleCart called");
+            CartManager.toggleCartPanel();
+          };
+          
+          // Fix cart toggle button
+          var cartToggleButton = document.getElementById('cartToggleButton');
+          if (cartToggleButton) {
+            // Remove inline onclick attribute
+            cartToggleButton.removeAttribute('onclick');
+            
+            // Add event listener
+            cartToggleButton.addEventListener('click', function(e) {
+              e.preventDefault();
+              console.log("Cart toggle button clicked");
+              CartManager.openCartPanel();
+              return false;
+            });
+            console.log("Added event listener to cart toggle button");
+          }
+        } else {
+          console.error("CartManager not available");
         }
       });
     </script>
