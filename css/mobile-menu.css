@@ -293,7 +293,7 @@
 /* Tablets (481px to 991px) */
 @media (min-width: 481px) and (max-width: 991px) {
     .mobile-menu {
-        width: 70%;
+        width: 90%;
     }
     .menu-footer {
         width: 100%;
