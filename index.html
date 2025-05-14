@@ -12,8 +12,8 @@
     <link rel="stylesheet" href="css/mobile-menu.css?v=1.0.0">
     <link rel="stylesheet" href="css/cart.css?v=1.0.2">
     
-    <!-- Navigation coordinator script - loads early to fix all navigation issues -->
-    <script src="js/navigation-fix.js"></script>
+    <!-- Direct cart implementation - guaranteed to work -->
+    <script src="js/direct-cart.js"></script>
   </head>
   <body>
 
@@ -911,8 +911,8 @@
       });
     </script>
     
-    <!-- Completely standalone Cart Panel with inline styles -->
-    <div class="cart-panel" style="position:fixed; top:0; right:-400px; width:400px; max-width:90%; height:100%; background:#ffffff; box-shadow:-2px 0 10px rgba(0,0,0,0.3); z-index:999999; transition:right 0.3s ease-in-out; display:flex; flex-direction:column; overflow:hidden; visibility:visible; pointer-events:auto;">
+    <!-- Ultra-direct Cart Panel with ALL inline styles -->
+    <div id="auricCartPanel" class="cart-panel" style="position:fixed !important; top:0 !important; right:-400px !important; width:400px !important; max-width:90% !important; height:100% !important; background:#ffffff !important; box-shadow:-2px 0 10px rgba(0,0,0,0.3) !important; z-index:999999 !important; transition:right 0.3s ease-in-out !important; display:flex !important; flex-direction:column !important; overflow:hidden !important; visibility:visible !important; pointer-events:auto !important;">
       <div class="cart-panel-header">
         <h3>Your Shopping Bag</h3>
         <button class="close-cart-btn" onclick="closeCartDirectly(); return false;">×</button>
@@ -932,68 +932,20 @@
         </div>
       </div>
     </div>
+
+    <!-- Ultra-direct Cart Overlay with ALL inline styles -->
+    <div id="auricCartOverlay" class="cart-overlay" onclick="closeCartDirectly(); return false;" style="position:fixed !important; top:0 !important; left:0 !important; width:100% !important; height:100% !important; background:rgba(0,0,0,0.5) !important; z-index:999998 !important; display:none !important; visibility:hidden !important;"></div>
     
-    <!-- Cart Overlay with inline styles -->
-    <div class="cart-overlay" onclick="closeCartDirectly(); return false;" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999998; display:none; visibility:hidden;"></div>
-    
-    <!-- Cart initialization - simplified to work with navigation-fix.js -->
+    <!-- Cart initialization - loading from storage -->
     <script>
     (function() {
-      console.log('Cart system initializing with navigation coordinator');
+      console.log('Cart storage initialization');
       
       // Ensure cart items are loaded from storage if cart manager is available
       document.addEventListener('DOMContentLoaded', function() {
         if (window.CartManager && typeof window.CartManager.loadCart === 'function') {
           window.CartManager.loadCart();
         }
-      });
-      
-      // Additional script to ensure cart functionality
-      window.addEventListener('load', function() {
-        console.log('Making sure cart functions are properly defined');
-        
-        // Backup implementation in case navigation-fix.js fails to load
-        if (!window.openCartDirectly) {
-          window.openCartDirectly = function() {
-            console.log('Backup cart open function');
-            var cartPanel = document.querySelector('.cart-panel');
-            var cartOverlay = document.querySelector('.cart-overlay');
-            
-            if (cartPanel && cartOverlay) {
-              cartPanel.style.right = '0';
-              cartPanel.style.display = 'flex';
-              cartPanel.classList.add('active');
-              
-              cartOverlay.style.display = 'block';
-              cartOverlay.classList.add('active');
-              
-              document.body.style.overflow = 'hidden';
-            }
-          };
-        }
-        
-        if (!window.closeCartDirectly) {
-          window.closeCartDirectly = function() {
-            console.log('Backup cart close function');
-            var cartPanel = document.querySelector('.cart-panel');
-            var cartOverlay = document.querySelector('.cart-overlay');
-            
-            if (cartPanel) {
-              cartPanel.style.right = '-400px';
-              cartPanel.classList.remove('active');
-            }
-            
-            if (cartOverlay) {
-              cartOverlay.classList.remove('active');
-            }
-            
-            document.body.style.overflow = '';
-          };
-        }
-        
-        // Ensure consistent naming for cart functions
-        window.openCart = window.openCartDirectly;
-        window.closeCart = window.closeCartDirectly;
       });
     })();
     </script>
