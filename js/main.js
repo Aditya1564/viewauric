@@ -40,6 +40,28 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log("Global toggleCart called");
             CartManager.toggleCartPanel();
         };
+        
+        // Set up event listeners for cart buttons
+        const cartToggleButton = document.getElementById('cartToggleButton');
+        if (cartToggleButton) {
+            cartToggleButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log("Cart toggle button clicked");
+                toggleCart();
+            });
+            console.log("Added event listener to cart toggle button");
+        }
+        
+        // Mobile cart toggle
+        const mobileCartToggle = document.querySelector('.mobile-cart-toggle');
+        if (mobileCartToggle) {
+            mobileCartToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log("Mobile cart toggle clicked");
+                toggleCart();
+            });
+            console.log("Added event listener to mobile cart toggle");
+        }
     }
     
     // Menu elements
