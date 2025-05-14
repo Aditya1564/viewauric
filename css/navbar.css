@@ -428,6 +428,21 @@
         color: #000; /* Ensure icons are dark */
         font-size: 18px; /* Larger icons */
     }
+    
+    /* Mobile wishlist count */
+    .mobile-wishlist-count {
+        display: inline-block;
+        background-color: #c8a97e; /* Match cart badge golden color */
+        color: #fff;
+        font-size: 10px;
+        min-width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 18px;
+        margin-left: 5px;
+        font-weight: 500;
+    }
 }
 
 /* Mobile Landscape (767px and below) */
