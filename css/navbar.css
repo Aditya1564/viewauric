@@ -351,8 +351,8 @@
         position: fixed;
         top: 0;
         left: -100%; /* Start from left instead of right */
-        width: 90%; /* Updated to 90% width for mobile menu */
-        max-width: 90%; /* Match the width */
+        width: 70%; /* Back to 70% width for mobile menu */
+        max-width: 380px; /* Standard max-width */
         height: 100vh;
         background-color: #fff;
         z-index: 9999; /* Ensure it's above everything else */
@@ -529,8 +529,8 @@
     }
     
     .nav-menu {
-        width: 90%;
-        right: -90%; /* Right-side menu */
+        width: 70%;
+        right: -70%; /* Right-side menu */
         padding: 50px 15px 15px;
     }
     

@@ -97,9 +97,9 @@
 
 /* Medium devices (tablets) */
 @media (min-width: 768px) and (max-width: 991px) {
-    /* Menu width for tablets - 90% as requested */
+    /* Menu width for tablets - 70% as requested */
     .mobile-menu {
-        width: 90%;
+        width: 70%;
     }
     
     /* Desktop navigation hidden on tablets */
