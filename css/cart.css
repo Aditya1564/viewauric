@@ -13,18 +13,20 @@
   height: 100%;
   background: #ffffff;
   box-shadow: -2px 0 10px rgba(0,0,0,0.3);
-  z-index: 9999; /* High z-index to ensure it's above everything */
+  z-index: 10000; /* Extra high z-index to ensure it's above everything */
   transition: right 0.3s ease-in-out;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  visibility: visible;
 }
 
+/* Ensure cart panel is visible and properly positioned when active */
 .cart-panel.active {
-  right: 0 !important; /* Force override any inline styles */
+  right: 0;
   display: flex !important;
   visibility: visible !important;
+  opacity: 1 !important;
+  transform: translateX(0) !important;
 }
 
 /* Semi-transparent overlay behind cart panel */

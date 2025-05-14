@@ -11,14 +11,6 @@
     <link rel="stylesheet" href="css/navbar.css?v=1.1.1">
     <link rel="stylesheet" href="css/mobile-menu.css?v=1.0.0">
     <link rel="stylesheet" href="css/cart.css?v=1.0.2">
-    
-    <!-- Cart Persistence Script -->
-    <script>
-        // Simplified cart initialization - no storage or persistence
-        (function() {
-            console.log('Flag check: No persistence needed');
-        })();
-    </script>
   </head>
   <body>
 
@@ -907,7 +899,7 @@
       });
     </script>
     
-    <!-- Cart Panel -->
+    <!-- Cart Panel with simplified structure (like login.html) -->
     <div class="cart-panel">
       <div class="cart-panel-header">
         <h3>Your Shopping Bag</h3>
@@ -923,7 +915,7 @@
           <span class="subtotal-amount">₹0.00</span>
         </div>
         <div class="cart-panel-buttons">
-          <button onclick="closeCart()" class="view-cart-btn">Continue Shopping</button>
+          <button class="view-cart-btn continue-shopping-btn" onclick="closeCart()">Continue Shopping</button>
           <a href="checkout.html" class="checkout-btn">Checkout</a>
         </div>
       </div>
@@ -932,7 +924,7 @@
     <!-- Cart Overlay -->
     <div class="cart-overlay" onclick="closeCart()"></div>
     
-    <!-- Main JavaScript file for cart initialization - moved to end of body for proper initialization -->
+    <!-- Main JavaScript file for cart initialization -->
     <script src="js/main.js"></script>
   </body>
 </html>
