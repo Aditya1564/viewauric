@@ -272,10 +272,38 @@
     margin: 0;
 }
 
+/* Mobile only elements - hidden on desktop */
+.mobile-only {
+    display: none; /* Hidden by default on desktop */
+}
+
+/* Styling for account links in the main mobile menu */
+.nav-item.mobile-only {
+    border-top: 1px solid #f0f0f0;
+    margin-top: 5px;
+}
+
+.nav-item.mobile-only:first-of-type {
+    margin-top: 15px;
+}
+
+.nav-item.mobile-only a {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+}
+
+.nav-item.mobile-only i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
 /* Tablet to Small Desktop */
 @media (max-width: 991px) {
-    /* Show mobile account links on smaller screens */
-    .mobile-account-links {
+    /* Show mobile account links and mobile-only elements on smaller screens */
+    .mobile-account-links,
+    .mobile-only {
         display: block;
     }
     
