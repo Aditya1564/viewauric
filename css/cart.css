@@ -212,6 +212,9 @@
   background: #f5f5f5;
   color: #333;
   border: 1px solid #ddd;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
 }
 
 .checkout-btn {
