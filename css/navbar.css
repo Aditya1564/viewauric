@@ -455,6 +455,11 @@
         padding-top: 15px; /* Add padding above the links */
     }
     
+    /* Ensure mobile links are displayed when menu is active */
+    .nav-menu.active .mobile-account-links {
+        display: block;
+    }
+    
     .mobile-account-link {
         display: flex;
         align-items: center;

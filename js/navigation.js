@@ -37,6 +37,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // Toggle body scroll
         if (navMenu.classList.contains('active')) {
             document.body.style.overflow = 'hidden';
+            
+            // Show mobile account links when menu is active
+            const mobileAccountLinks = document.querySelector('.mobile-account-links');
+            if (mobileAccountLinks) {
+                mobileAccountLinks.style.display = 'block';
+            }
         } else {
             document.body.style.overflow = '';
         }
@@ -55,6 +61,15 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Restore body scroll
         document.body.style.overflow = '';
+        
+        // Hide mobile account links when menu is closed
+        const mobileAccountLinks = document.querySelector('.mobile-account-links');
+        if (mobileAccountLinks) {
+            // Hide only on mobile viewport
+            if (window.innerWidth <= 991) {
+                mobileAccountLinks.style.display = 'none';
+            }
+        }
     }
     
     /**
