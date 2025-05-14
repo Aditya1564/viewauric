@@ -629,7 +629,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     
-    <!-- Firebase Configuration & Initialization -->
+    <!-- Initialize Firebase -->
     <script>
       // Firebase configuration
       const firebaseConfig = {
@@ -641,10 +641,18 @@
         appId: "1:878979958342:web:e6092f7522488d21eaec47",
         measurementId: "G-ZYZ750JHMB"
       };
+      
+      // Initialize Firebase directly (like in login.html)
+      firebase.initializeApp(firebaseConfig);
+      
+      // Enable session persistence
+      firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .catch(error => {
+          console.error("Auth persistence error:", error);
+        });
     </script>
     
-    <!-- Firebase Initialization Module -->
-    <script src="js/firebase/firebase-init.js"></script>
+    <!-- Firebase Auth Global Module -->
     
     <!-- Firebase Auth Module -->
     <script src="js/firebase/firebase-auth.js"></script>
@@ -658,6 +666,7 @@
     <script src="js/wishlist-local-storage.js?v=1.0.0"></script>
     <script src="js/firebase/firebase-wishlist-manager.js?v=1.0.0"></script>
     <script src="js/wishlist-manager.js?v=1.0.0"></script>
+    <script src="js/main.js"></script>
 
     <!-- Firebase Authentication Check -->
     <script>
@@ -924,7 +933,6 @@
     <!-- Cart Overlay -->
     <div class="cart-overlay" onclick="closeCart()"></div>
     
-    <!-- Main JavaScript file for cart initialization -->
-    <script src="js/main.js"></script>
+    <!-- End of scripts -->
   </body>
 </html>

@@ -4,29 +4,32 @@
  */
 
 /* ================ CART PANEL CONTAINER ================ */
+/* Cart panel with absolute highest priority */
 .cart-panel {
   position: fixed;
   top: 0;
-  right: -400px; /* Hidden by default, moves to 0 when active */
+  right: -400px; /* Hidden by default */
   width: 400px;
   max-width: 90%; /* Responsive for smaller screens */
   height: 100%;
   background: #ffffff;
   box-shadow: -2px 0 10px rgba(0,0,0,0.3);
-  z-index: 10000; /* Extra high z-index to ensure it's above everything */
+  z-index: 999999; /* Extremely high z-index */
   transition: right 0.3s ease-in-out;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  pointer-events: auto !important;
 }
 
-/* Ensure cart panel is visible and properly positioned when active */
+/* Ensure cart panel is visible when active */
 .cart-panel.active {
-  right: 0;
+  right: 0 !important;
   display: flex !important;
   visibility: visible !important;
   opacity: 1 !important;
-  transform: translateX(0) !important;
+  transform: none !important;
+  pointer-events: auto !important;
 }
 
 /* Semi-transparent overlay behind cart panel */
