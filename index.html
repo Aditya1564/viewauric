@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="css/cart.css?v=1.0.2">
     
     <!-- Direct cart implementation for cart functionality -->
-    <script src="js/direct-cart.js"></script>
+    
   </head>
   <body>
 
@@ -698,14 +698,17 @@
               console.log("User is logged in from session");
               userIcon.href = "profile.html";
               userIcon.classList.add('logged-in');
-            } else {
+            }
+          }
+          } else {
               // No session found
               console.log("No user session found");
               userIcon.href = "login.html";
               userIcon.classList.remove('logged-in');
             }
           }
-          
+        
+        });
           // Also set up auth state observer for real-time updates
           FirebaseAuth.observeAuthState((user) => {
             if (user) {
@@ -731,8 +734,11 @@
               userIcon.classList.remove('logged-in');
             }
           });
-        }
-      });
+        
+                                    
+    
+        
+    
     </script>
     
     <!-- Add styles for logged-in user icon and cart panel -->
@@ -866,54 +872,10 @@
         align-items: center;
         justify-content: center;
       }
-    </style>
-    <!-- Cart Panel will be dynamically created by CartManager.js -->
-    
-    <!-- Additional cart initialization handled in main.js -->
-    <script>
-      // We now handle all cart initialization in main.js to avoid duplicates
-   /*document.addEventListener('DOMContentLoaded', function() {
-        console.log("DOM fully loaded - cart initialization delegated to main.js");
+        /* Add spinner styles */
         
-        // Fix cart toggle button separately to ensure it works
-        var cartToggleButton = document.getElementById('cartToggleButton');
-        if (cartToggleButton) {
-          cartToggleButton.addEventListener('click', function(e) {
-            e.preventDefault();
-            console.log("Cart toggle button clicked");
-            
-            // Use global openCart function which is set up in main.js
-            if (typeof window.openCart === 'function') {
-              window.openCart();
-            } else {
-              console.error("Cart functionality not initialized yet");
-            }
-            return false;
-          });
-          console.log("Added event listener to cart toggle button");
-        }
+
         
-        // Handle mobile cart toggle
-        var mobileCartToggle = document.querySelector('.mobile-cart-toggle');
-        if (mobileCartToggle) {
-          mobileCartToggle.addEventListener('click', function(e) {
-            e.preventDefault();
-            console.log("Mobile cart toggle clicked");
-            
-            // Use global openCart function which is set up in main.js
-            if (typeof window.openCart === 'function') {
-              window.openCart();
-            } else {
-              console.error("Cart functionality not initialized yet");
-            }
-            return false;
-          });
-          console.log("Added event listener to mobile cart toggle");
-        }
-      });*/
-    </script>
-        <!-- Add spinner styles -->
-    <style>
       .spinner {
         display: inline-block;
         width: 16px;
@@ -944,7 +906,7 @@
             <span class="subtotal-amount">₹0.00</span>
           </div>
           <div class="cart-panel-buttons">
-            <button class="view-cart-btn continue-shopping-btn"onclick="closeCartDirectly(); return false;" >Continue Shopping</button>
+            <button class="view-cart-btn continue-shopping-btn" onclick="closeCartDirectly(); return false;">Continue Shopping</button>
             <a href="checkout.html" class="checkout-btn">Checkout</a>
           </div>
         </div>
@@ -953,19 +915,6 @@
     <!-- Ultra-direct Cart Overlay with ALL inline styles -->
     <div id="auricCartOverlay" class="cart-overlay" onclick="closeCartDirectly(); return false;" style="position:fixed !important; top:0 !important; left:0 !important; width:100% !important; height:100% !important; background:rgba(0,0,0,0.5) !important; z-index:999998 !important; display:none !important; visibility:hidden !important;"></div>
     
-    <!-- Cart initialization - loading from storage -->
-    <script>
-  /*  (function() {
-      console.log('Cart storage initialization');
-      
-      // Ensure cart items are loaded from storage if cart manager is available
-      document.addEventListener('DOMContentLoaded', function() {
-        if (window.CartManager && typeof window.CartManager.loadCart === 'function') {
-          window.CartManager.loadCart();
-        }
-      });
-    })();*/
-    </script>
     
     <!-- Fix for closeCartDirectly error -->
     <script>
