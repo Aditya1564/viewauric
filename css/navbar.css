@@ -272,22 +272,39 @@
     margin: 0;
 }
 
-/* Mobile account links styling */
-.mobile-account-links {
+/* Mobile only elements - hidden on desktop */
+.mobile-only {
+    display: none; /* Hidden by default on desktop */
+}
+
+/* Style for account links in the navigation */
+.account-nav-link {
+    display: flex !important;
+    align-items: center;
+    padding: 12px 15px !important;
     border-top: 1px solid #f0f0f0;
-    margin-top: 15px;
-    padding-top: 10px;
-    position: relative; /* Changed from absolute to better ensure visibility */
-    left: 0;
-    width: 100%;
-    padding: 15px 0 5px 0;
-    display: none; /* Hidden by default on larger screens */
+}
+
+.account-nav-link:first-of-type {
+    margin-top: 10px;
+}
+
+.account-nav-link i {
+    margin-right: 15px;
+    width: 20px;
+    text-align: center;
+    font-size: 18px;
+}
+
+/* Mobile account links styling (legacy) */
+.mobile-account-links {
+    display: none;
 }
 
 /* Tablet to Small Desktop */
 @media (max-width: 991px) {
-    /* Show mobile account links on smaller screens */
-    .mobile-account-links {
+    /* Show mobile-only elements on smaller screens */
+    .mobile-only {
         display: block;
     }
     
