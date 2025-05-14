@@ -8,7 +8,8 @@
  * - Firebase cart data is stored at path: users/{userId}/carts/current
  */
 
-const CartManager = (function() {
+// Make the CartManager available as a global variable
+window.CartManager = (function() {
     // Private cart data storage
     let cartItems = [];
     let isAuthListenerSet = false;
