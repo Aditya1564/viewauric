@@ -966,5 +966,16 @@
       });
     })();*/
     </script>
+    
+    <!-- Fix for closeCartDirectly error -->
+    <script>
+      // Define the missing closeCartDirectly function
+      window.closeCartDirectly = function() {
+        // Call the regular closeCart function
+        if (window.closeCart) {
+          return window.closeCart();
+        }
+      };
+    </script>
   </body>
 </html>
