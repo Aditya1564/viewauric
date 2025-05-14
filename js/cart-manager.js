@@ -33,7 +33,13 @@ window.CartManager = (function() {
         // Set up authentication listener
         setupAuthListener();
         
+        // Create global functions for direct HTML access
+        window.openCart = openCartPanel;
+        window.closeCart = closeCartPanel;
+        window.toggleCart = toggleCartPanel;
+        
         console.log('Cart system initialized with', cartItems.length, 'items');
+        console.log('Global cart functions created: openCart, closeCart, toggleCart');
     }
     
     /**
@@ -626,10 +632,29 @@ window.CartManager = (function() {
         const cartPanel = document.querySelector('.cart-panel');
         const cartOverlay = document.querySelector('.cart-overlay');
         
+        console.log('Closing cart panel:', cartPanel ? 'Panel found' : 'Panel NOT found');
+        console.log('Cart overlay:', cartOverlay ? 'Overlay found' : 'Overlay NOT found');
+        
         if (cartPanel && cartOverlay) {
+            // Remove active classes
             cartPanel.classList.remove('active');
             cartOverlay.classList.remove('active');
-            document.body.style.overflow = ''; // Restore scrolling
+            
+            // Force position with inline style to ensure it's moved off-screen
+            cartPanel.style.right = '-400px';
+            
+            // Restore scrolling
+            document.body.style.overflow = '';
+            
+            console.log('Cart panel closed');
+        } else {
+            console.error('Cart panel or overlay not found in the DOM');
+        }
+        
+        // Create a global function for direct HTML onclick access if it doesn't exist
+        if (typeof window.closeCart !== 'function') {
+            window.closeCart = closeCartPanel;
+            console.log('Global closeCart function created');
         }
     }
     
