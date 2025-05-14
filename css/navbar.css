@@ -183,15 +183,33 @@
 }
 
 .icon-link {
-    color: #333;
-    font-size: 22px; /* Increased icon size */
-    margin-left: 20px;
+    color: #000; /* Darker color to match image */
+    font-size: 20px; /* Adjusted size to match image */
+    margin-left: 22px; /* Increased spacing between icons */
     text-decoration: none;
     transition: color 0.3s ease;
+    position: relative; /* For positioning badges/counts */
 }
 
 .icon-link:hover {
-    color: #c59d5f; /* Golden brown for jewelry */
+    color: #555; /* Lighter hover color */
+}
+
+/* Cart and wishlist count styles */
+.wishlist-count, .cart-count {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: #000;
+    color: #fff;
+    font-size: 10px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
 }
 
 /* Menu Overlay */
@@ -248,7 +266,9 @@
     display: none; /* Hidden by default, shown in mobile view */
     z-index: 1001;
     font-weight: 300;
-    line-height: 1;
+    line-height: 0.8; /* Tighter line height */
+    padding: 0;
+    margin: 0;
 }
 
 /* Tablet to Small Desktop */
@@ -296,7 +316,7 @@
         background-color: #fff;
         z-index: 1000;
         transition: left 0.3s ease; /* Changed transition property */
-        box-shadow: 5px 0 15px rgba(0, 0, 0, 0.1); /* Shadow on right side */
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.15); /* Subtle shadow like in image */
         overflow-y: auto;
         padding: 0;
         justify-content: flex-start;
@@ -311,12 +331,12 @@
         flex-direction: column;
         width: 100%;
         margin: 0;
-        padding: 20px 0 0 0;
+        padding: 50px 0 0 0; /* Added more top padding to match image */
     }
     
     .nav-item {
         margin: 0;
-        border-bottom: 1px solid #f0f0f0;
+        border-bottom: 1px solid #eeeeee; /* Lighter border color to match image */
         width: 100%;
         position: relative;
     }
@@ -324,13 +344,14 @@
     .nav-link {
         padding: 18px 20px;
         width: 100%;
-        font-size: 16px;
+        font-size: 15px; /* Slightly smaller to match image */
         text-transform: uppercase;
         font-weight: 500;
         letter-spacing: 0.5px;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        color: #000; /* Darker text color */
     }
     
     /* Style the dropdown toggle plus sign */
@@ -361,16 +382,20 @@
         display: none;
         padding: 5px 0 5px 40px;
         width: 100%;
-        background-color: #f9f9f9;
+        background-color: #f9f9f9; /* Light gray background for dropdown items */
+        border-top: 1px solid #eeeeee;
     }
     
     .dropdown-menu li {
-        padding: 8px 0;
+        padding: 10px 0;
+        border-bottom: none; /* No borders between dropdown items */
     }
     
     .dropdown-menu a {
         font-size: 14px;
         padding: 8px 0;
+        color: #555; /* Slightly lighter text for dropdown items */
+        text-transform: capitalize; /* Only capitalize first letter */
     }
     
     .dropdown.active .dropdown-menu {
@@ -380,7 +405,7 @@
     /* Mobile Menu Bottom Account Links */
     .mobile-account-links {
         position: absolute;
-        bottom: 20px;
+        bottom: 30px; /* More bottom spacing */
         left: 0;
         width: 100%;
         padding: 0 20px;
@@ -390,15 +415,18 @@
         display: flex;
         align-items: center;
         padding: 12px 0;
-        color: #333;
+        color: #000; /* Darker text to match image */
         text-decoration: none;
-        font-size: 16px;
+        font-size: 15px;
+        font-weight: 400;
     }
     
     .mobile-account-link i {
         margin-right: 15px;
         width: 20px;
         text-align: center;
+        color: #000; /* Ensure icons are dark */
+        font-size: 18px; /* Larger icons */
     }
 }
 

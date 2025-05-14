@@ -521,6 +521,13 @@ const CartManager = (function() {
             element.style.display = 'flex';
         });
         
+        // Update mobile menu shopping bag count
+        const mobileMenuShoppingBag = document.querySelector('.mobile-account-link i.fa-shopping-bag');
+        if (mobileMenuShoppingBag) {
+            const parentLink = mobileMenuShoppingBag.parentNode;
+            parentLink.innerHTML = `<i class="fas fa-shopping-bag"></i> Shopping Bag (${itemCount})`;
+        }
+        
         // Update cart items display
         const cartItemsContainer = document.querySelector('.cart-items');
         if (cartItemsContainer) {
