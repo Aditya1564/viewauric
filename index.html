@@ -899,27 +899,27 @@
         to { transform: rotate(360deg); }
       }
     </style>
-        <!-- Cart Panel -->
-        <div id="auricCartPanel" class="cart-panel" style="position:fixed !important; top:0 !important; right:-400px !important; width:400px !important; max-width:90% !important; height:100% !important; background:#ffffff !important; box-shadow:-2px 0 10px rgba(0,0,0,0.3) !important; z-index:999999 !important; transition:right 0.3s ease-in-out !important; display:flex !important; flex-direction:column !important; overflow:hidden !important; visibility:visible !important; pointer-events:auto !important;">
-          <div class="cart-panel-header">
-            <h3>Your Shopping Bag</h3>
-            <button class="close-cart-btn" onclick="closeCartDirectly(); return false;">×</button>
-          </div>
+    <!-- Cart Panel -->
+    <div id="auricCartPanel" class="cart-panel" style="position:fixed !important; top:0 !important; right:-400px !important; width:400px !important; max-width:90% !important; height:100% !important; background:#ffffff !important; box-shadow:-2px 0 10px rgba(0,0,0,0.3) !important; z-index:999999 !important; transition:right 0.3s ease-in-out !important; display:flex !important; flex-direction:column !important; overflow:hidden !important; visibility:visible !important; pointer-events:auto !important;">
+      <div class="cart-panel-header">
+        <h3>Your Shopping Bag</h3>
+        <button class="close-cart-btn" onclick="closeCartDirectly(); return false;">×</button>
+      </div>
       <div class="cart-items">
-      <!-- Cart items will be inserted here by JavaScript -->
-          <div class="empty-cart-message">Your cart is empty</div>
+        <!-- Cart items will be inserted here by JavaScript -->
+        <div class="empty-cart-message">Your cart is empty</div>
+      </div>
+      <div class="cart-panel-footer">
+        <div class="cart-panel-subtotal">
+          <span>Subtotal:</span>
+          <span class="subtotal-amount">₹0.00</span>
         </div>
-        <div class="cart-panel-footer">
-          <div class="cart-panel-subtotal">
-            <span>Subtotal:</span>
-            <span class="subtotal-amount">₹0.00</span>
-          </div>
-          <div class="cart-panel-buttons">
-            <button class="view-cart-btn continue-shopping-btn" onclick="closeCartDirectly(); return false;">Continue Shopping</button>
-            <a href="checkout.html" class="checkout-btn">Checkout</a>
-          </div>
+        <div class="cart-panel-buttons">
+          <button class="view-cart-btn continue-shopping-btn" onclick="closeCartDirectly(); return false;">Continue Shopping</button>
+          <a href="checkout.html" class="checkout-btn">Checkout</a>
         </div>
       </div>
+    </div>
 
     <!-- Ultra-direct Cart Overlay with ALL inline styles -->
     <div id="auricCartOverlay" class="cart-overlay" onclick="closeCartDirectly(); return false;" style="position:fixed !important; top:0 !important; left:0 !important; width:100% !important; height:100% !important; background:rgba(0,0,0,0.5) !important; z-index:999998 !important; display:none !important; visibility:hidden !important;"></div>
