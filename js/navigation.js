@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Show mobile account links when menu is active
             const mobileAccountLinks = document.querySelector('.mobile-account-links');
             if (mobileAccountLinks) {
-                mobileAccountLinks.style.display = 'block';
+                mobileAccountLinks.style.display = 'flex';
             }
         } else {
             document.body.style.overflow = '';

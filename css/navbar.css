@@ -361,6 +361,8 @@
         overflow-y: auto;
         padding: 0;
         justify-content: flex-start;
+        display: flex;
+        flex-direction: column; /* Ensure vertical stacking */
     }
     
     .nav-menu.active {
@@ -373,6 +375,7 @@
         width: 100%;
         margin: 0;
         padding: 50px 0 0 0; /* Added more top padding to match image */
+        display: flex; /* Ensure flex is applied */
     }
     
     .nav-item {
@@ -380,6 +383,7 @@
         border-bottom: 1px solid #eeeeee; /* Lighter border color to match image */
         width: 100%;
         position: relative;
+        /*flex: 0 0 100%; /* Ensure each item takes up full width in vertical layout */
     }
     
     .nav-link {
@@ -453,11 +457,12 @@
         display: none; /* Hidden by default on larger screens */
         border-top: 1px solid #eee; /* Add a separator line */
         padding-top: 15px; /* Add padding above the links */
+        flex-direction: column; /* Ensure vertical layout */
     }
     
     /* Ensure mobile links are displayed when menu is active */
     .nav-menu.active .mobile-account-links {
-        display: block;
+        display: flex; /* Use flex instead of block for better control */
     }
     
     .mobile-account-link {
