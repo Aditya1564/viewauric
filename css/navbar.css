@@ -272,38 +272,22 @@
     margin: 0;
 }
 
-/* Mobile only elements - hidden on desktop */
-.mobile-only {
-    display: none; /* Hidden by default on desktop */
-}
-
-/* Styling for account links in the main mobile menu */
-.nav-item.mobile-only {
+/* Mobile account links styling */
+.mobile-account-links {
     border-top: 1px solid #f0f0f0;
-    margin-top: 5px;
-}
-
-.nav-item.mobile-only:first-of-type {
     margin-top: 15px;
-}
-
-.nav-item.mobile-only a {
-    display: flex;
-    align-items: center;
-    padding: 12px 0;
-}
-
-.nav-item.mobile-only i {
-    margin-right: 10px;
-    width: 20px;
-    text-align: center;
+    padding-top: 10px;
+    position: relative; /* Changed from absolute to better ensure visibility */
+    left: 0;
+    width: 100%;
+    padding: 15px 0 5px 0;
+    display: none; /* Hidden by default on larger screens */
 }
 
 /* Tablet to Small Desktop */
 @media (max-width: 991px) {
-    /* Show mobile account links and mobile-only elements on smaller screens */
-    .mobile-account-links,
-    .mobile-only {
+    /* Show mobile account links on smaller screens */
+    .mobile-account-links {
         display: block;
     }
     
@@ -456,6 +440,13 @@
         text-decoration: none;
         font-size: 15px;
         font-weight: 400;
+        border-bottom: 1px solid #f0f0f0; /* Add separator between links */
+        margin-bottom: 5px; /* Add space below each link */
+    }
+    
+    .mobile-account-link:last-child {
+        border-bottom: none; /* Remove separator from last item */
+        margin-bottom: 0;
     }
     
     .mobile-account-link i {
