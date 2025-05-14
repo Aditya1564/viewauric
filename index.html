@@ -12,49 +12,8 @@
     <link rel="stylesheet" href="css/mobile-menu.css?v=1.0.0">
     <link rel="stylesheet" href="css/cart.css?v=1.0.2">
     
-    <!-- Early script to define cart functions before DOM loads -->
-    <script>
-      // Define global cart functions
-      function openCartDirect() {
-        console.log('Early openCartDirect called');
-        setTimeout(function() {
-          const cartPanel = document.querySelector('.cart-panel');
-          const cartOverlay = document.querySelector('.cart-overlay');
-          
-          if (cartPanel && cartOverlay) {
-            cartPanel.style.cssText = 'right: 0 !important; display: flex !important; visibility: visible !important; z-index: 999999 !important; opacity: 1 !important;';
-            cartPanel.classList.add('active');
-            cartOverlay.style.cssText = 'display: block !important; visibility: visible !important;';
-            cartOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            console.log('Cart panel opened early with direct styling');
-          }
-        }, 50);
-      }
-      
-      function closeCart() {
-        console.log('Early closeCart called');
-        const cartPanel = document.querySelector('.cart-panel');
-        const cartOverlay = document.querySelector('.cart-overlay');
-        
-        if (cartPanel) cartPanel.classList.remove('active');
-        if (cartOverlay) cartOverlay.classList.remove('active');
-        document.body.style.overflow = '';
-      }
-      
-      // Run on page load
-      window.addEventListener('load', function() {
-        console.log('Window loaded, initializing cart handlers');
-        const cartButtons = document.querySelectorAll('.cart-toggle, .cart-icon-container, #cartToggleButton, .mobile-cart-toggle');
-        cartButtons.forEach(function(btn) {
-          btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            openCartDirect();
-            return false;
-          });
-        });
-      });
-    </script>
+    <!-- Navigation coordinator script - loads early to fix all navigation issues -->
+    <script src="js/navigation-fix.js"></script>
   </head>
   <body>
 
@@ -115,7 +74,7 @@
                         <a href="#" class="mobile-account-link wishlist-toggle">
                             <i class="fas fa-heart"></i> Wishlist (<span class="mobile-wishlist-count">0</span>)
                         </a>
-                        <a href="#" class="mobile-account-link mobile-cart-toggle" onclick="openCartDirect(); return false;">
+                        <a href="#" class="mobile-account-link mobile-cart-toggle" onclick="openCartDirectly(); return false;">
                             <i class="fas fa-shopping-bag"></i> Shopping Bag (<span class="mobile-cart-count">0</span>)
                         </a>
                     
@@ -130,7 +89,7 @@
                         <i class="fa-solid fa-heart"></i>
                         <div class="wishlist-count">0</div>
                     </a>
-                    <a href="#" class="icon-link cart-icon-container cart-toggle" id="cartToggleButton" onclick="openCartDirect(); return false;">
+                    <a href="#" class="icon-link cart-icon-container cart-toggle" id="cartToggleButton" onclick="openCartDirectly(); return false;">
                         <i class="fa-solid fa-bag-shopping"></i>
                         <div class="cart-count">0</div>
                     </a>
@@ -956,7 +915,7 @@
     <div class="cart-panel" style="position:fixed; top:0; right:-400px; width:400px; max-width:90%; height:100%; background:#ffffff; box-shadow:-2px 0 10px rgba(0,0,0,0.3); z-index:999999; transition:right 0.3s ease-in-out; display:flex; flex-direction:column; overflow:hidden; visibility:visible; pointer-events:auto;">
       <div class="cart-panel-header">
         <h3>Your Shopping Bag</h3>
-        <button class="close-cart-btn" onclick="closeCart()">×</button>
+        <button class="close-cart-btn" onclick="closeCartDirectly(); return false;">×</button>
       </div>
       <div class="cart-items">
         <!-- Cart items will be inserted here by JavaScript -->
@@ -975,107 +934,67 @@
     </div>
     
     <!-- Cart Overlay with inline styles -->
-    <div class="cart-overlay" onclick="closeCart()" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999998; display:none; visibility:hidden;"></div>
+    <div class="cart-overlay" onclick="closeCartDirectly(); return false;" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999998; display:none; visibility:hidden;"></div>
     
-    <!-- Completely standalone cart implementation - no dependencies on other files -->
+    <!-- Cart initialization - simplified to work with navigation-fix.js -->
     <script>
     (function() {
-      // Execute immediately - no waiting for DOM
-      console.log('Executing standalone cart implementation');
+      console.log('Cart system initializing with navigation coordinator');
       
-      // Create global functions
-      window.openCartDirect = function() {
-        console.log('Standalone openCart called');
-        var cartPanel = document.querySelector('.cart-panel');
-        var cartOverlay = document.querySelector('.cart-overlay');
+      // Ensure cart items are loaded from storage if cart manager is available
+      document.addEventListener('DOMContentLoaded', function() {
+        if (window.CartManager && typeof window.CartManager.loadCart === 'function') {
+          window.CartManager.loadCart();
+        }
+      });
+      
+      // Additional script to ensure cart functionality
+      window.addEventListener('load', function() {
+        console.log('Making sure cart functions are properly defined');
         
-        if (!cartPanel || !cartOverlay) {
-          console.error('Cart panel or overlay not found!');
-          return;
+        // Backup implementation in case navigation-fix.js fails to load
+        if (!window.openCartDirectly) {
+          window.openCartDirectly = function() {
+            console.log('Backup cart open function');
+            var cartPanel = document.querySelector('.cart-panel');
+            var cartOverlay = document.querySelector('.cart-overlay');
+            
+            if (cartPanel && cartOverlay) {
+              cartPanel.style.right = '0';
+              cartPanel.style.display = 'flex';
+              cartPanel.classList.add('active');
+              
+              cartOverlay.style.display = 'block';
+              cartOverlay.classList.add('active');
+              
+              document.body.style.overflow = 'hidden';
+            }
+          };
         }
         
-        // Force display
-        cartPanel.style.display = 'flex';
-        cartPanel.style.visibility = 'visible';
-        cartPanel.style.right = '0';
-        cartPanel.style.zIndex = '999999';
-        cartPanel.style.opacity = '1';
-        cartPanel.style.transform = 'none';
-        cartPanel.style.pointerEvents = 'auto';
-        cartPanel.classList.add('active');
-        
-        // Show overlay
-        cartOverlay.style.display = 'block';
-        cartOverlay.style.visibility = 'visible';
-        cartOverlay.style.zIndex = '999998';
-        cartOverlay.classList.add('active');
-        
-        // Prevent scrolling
-        document.body.style.overflow = 'hidden';
-        
-        console.log('CART OPENED successfully with standalone code');
-      };
-      
-      window.closeCart = function() {
-        console.log('Standalone closeCart called');
-        var cartPanel = document.querySelector('.cart-panel');
-        var cartOverlay = document.querySelector('.cart-overlay');
-        
-        if (cartPanel) {
-          cartPanel.style.right = '-400px';
-          cartPanel.classList.remove('active');
+        if (!window.closeCartDirectly) {
+          window.closeCartDirectly = function() {
+            console.log('Backup cart close function');
+            var cartPanel = document.querySelector('.cart-panel');
+            var cartOverlay = document.querySelector('.cart-overlay');
+            
+            if (cartPanel) {
+              cartPanel.style.right = '-400px';
+              cartPanel.classList.remove('active');
+            }
+            
+            if (cartOverlay) {
+              cartOverlay.classList.remove('active');
+            }
+            
+            document.body.style.overflow = '';
+          };
         }
         
-        if (cartOverlay) {
-          cartOverlay.classList.remove('active');
-        }
-        
-        document.body.style.overflow = '';
-      };
-      
-      // Self-executing function to set up everything
-      function setupCart() {
-        // Re-select cart elements in case DOM has changed
-        var cartPanel = document.querySelector('.cart-panel');
-        var cartOverlay = document.querySelector('.cart-overlay');
-        var cartButtons = document.querySelectorAll('.cart-toggle, .cart-icon-container, #cartToggleButton, .mobile-cart-toggle');
-        
-        if (!cartPanel || !cartOverlay) {
-          console.error('Cart elements not found in document!');
-          // Try again shortly
-          setTimeout(setupCart, 500);
-          return;
-        }
-        
-        console.log('Setting up cart event listeners');
-        
-        // Add event listeners to all cart buttons
-        cartButtons.forEach(function(button) {
-          // Remove any existing listeners to prevent duplicates
-          var newButton = button.cloneNode(true);
-          button.parentNode.replaceChild(newButton, button);
-          
-          // Add new listener
-          newButton.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('Cart button clicked via standalone code');
-            window.openCartDirect();
-            return false;
-          });
-        });
-        
-        console.log('Cart setup complete');
-      }
-      
-      // Set up now and again when window loads
-      document.addEventListener('DOMContentLoaded', setupCart);
-      window.addEventListener('load', setupCart);
-      
-      // Run immediately
-      if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        setupCart();
-      }
+        // Ensure consistent naming for cart functions
+        window.openCart = window.openCartDirectly;
+        window.closeCart = window.closeCartDirectly;
+      });
     })();
     </script>
   </body>
