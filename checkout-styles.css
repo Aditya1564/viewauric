@@ -1,5 +1,54 @@
 /* Custom CSS for Multi-step Checkout Page */
 
+body {
+    font-family: 'Lato', sans-serif;
+    color: #333;
+    background-color: #fafafa;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
+}
+
+.btn {
+    border-radius: 0;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #9c7c38;
+    border-color: #9c7c38;
+}
+
+.btn-primary:hover, .btn-primary:focus {
+    background-color: #85682e;
+    border-color: #85682e;
+}
+
+.btn-outline-secondary {
+    color: #9c7c38;
+    border-color: #9c7c38;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #9c7c38;
+    border-color: #9c7c38;
+    color: white;
+}
+
+.card {
+    border-radius: 0;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.card-header {
+    background-color: white;
+    border-bottom: 1px solid #f0f0f0;
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
 /* Progress bar and steps styles */
 .checkout-progress {
     margin-bottom: 40px;
@@ -14,21 +63,21 @@
     border-radius: 50%;
     background-color: #f8f9fa;
     margin: 0 auto 10px;
-    border: 2px solid #dee2e6;
-    color: #6c757d;
-    font-size: 24px;
+    border: 2px solid #eee;
+    color: #999;
+    font-size: 20px;
     transition: all 0.3s ease;
 }
 
 .step-icon.active {
-    background-color: #D4AF37;
-    border-color: #D4AF37;
+    background-color: #9c7c38;
+    border-color: #9c7c38;
     color: white;
 }
 
 .step-icon.completed {
-    background-color: #28a745;
-    border-color: #28a745;
+    background-color: #85682e;
+    border-color: #85682e;
     color: white;
 }
 
@@ -59,18 +108,22 @@
 }
 
 .progress-bar {
-    background-color: #D4AF37;
+    background-color: #9c7c38;
     transition: width 0.6s ease;
 }
 
 /* Address confirmation box */
 .address-summary {
     margin-top: 20px;
+    background-color: #f9f6f0;
+    padding: 15px;
+    border-left: 3px solid #9c7c38;
 }
 
 #address-confirmation {
     font-size: 14px;
-    line-height: 1.5;
+    line-height: 1.6;
+    color: #333;
 }
 
 /* Order summary styling */
@@ -78,6 +131,24 @@
     max-height: 400px;
     overflow-y: auto;
     padding-right: 5px;
+}
+
+.simple-header {
+    background-color: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+}
+
+.simple-header .logo a {
+    color: #9c7c38;
+    font-family: 'Playfair Display', serif;
+    text-decoration: none;
+}
+
+.checkout-step {
+    background-color: white;
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
 }
 
 .order-item {
@@ -164,11 +235,11 @@
 
 .cart-item-detail .fw-medium {
     font-weight: 500;
-    color: #666;
+    color: #555;
 }
 
 .item-subtotal {
-    color: #198754;
+    color: #9c7c38;
     font-weight: 600;
     min-width: 70px;
     text-align: right;
@@ -180,7 +251,39 @@
 }
 
 .order-item-total {
-    color: #0d6efd;
+    color: #9c7c38;
+}
+
+.form-control {
+    border-radius: 0;
+    border-color: #ddd;
+    padding: 10px 15px;
+}
+
+.form-control:focus {
+    box-shadow: none;
+    border-color: #9c7c38;
+}
+
+.form-label {
+    font-weight: 500;
+    color: #555;
+}
+
+/* Continue shopping button */
+.continue-shopping-btn {
+    display: block;
+    margin: 20px auto;
+    background-color: transparent;
+    color: #9c7c38;
+    border: 1px solid #9c7c38;
+    padding: 8px 16px;
+    transition: all 0.3s ease;
+}
+
+.continue-shopping-btn:hover {
+    background-color: #9c7c38;
+    color: white;
 }
 
 /* Legacy product item styling - keeping for compatibility */
