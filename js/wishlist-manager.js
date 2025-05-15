@@ -618,7 +618,27 @@ const WishlistManager = (function() {
                     const productId = productItem.dataset.productId;
                     const productName = productItem.querySelector('.product-name').textContent;
                     const priceElement = productItem.querySelector('.current-price') || productItem.querySelector('.original-price');
-                    const productPrice = parseFloat(priceElement ? priceElement.textContent.replace(/[^0-9.]/g, '') : 0);
+                    
+                    // Improved price extraction to handle different formats (₹32,500 or Rs. 15,550.00 or ₹15500.00)
+                    let productPrice = 0;
+                    if (priceElement) {
+                        // First try to get from data attribute if available
+                        if (priceElement.dataset.price) {
+                            productPrice = parseFloat(priceElement.dataset.price);
+                        } else {
+                            // Otherwise extract from text content
+                            // First remove currency symbols and spaces
+                            let priceText = priceElement.textContent.trim();
+                            console.log('Raw price text (item):', priceText);
+                            
+                            // Remove all non-numeric characters except for decimals and commas
+                            // Then replace commas with empty string to handle thousand separators
+                            priceText = priceText.replace(/[^0-9.,]/g, '').replace(/,/g, '');
+                            console.log('Cleaned price text (item):', priceText);
+                            
+                            productPrice = parseFloat(priceText);
+                        }
+                    }
                     const productImage = productItem.querySelector('.product-image img').src;
                     
                     console.log('Product found:', { id: productId, name: productName, price: productPrice, image: productImage });
@@ -729,7 +749,27 @@ const WishlistManager = (function() {
                     // Look for .current-price first, then .product-price
                     const priceElement = productCard.querySelector('.current-price') || productCard.querySelector('.product-price');
                     console.log('Price element:', priceElement);
-                    const productPrice = parseFloat(priceElement ? (priceElement.dataset.price || priceElement.textContent.replace(/[^0-9.]/g, '')) : 0);
+                    
+                    // Improved price extraction to handle different formats (₹32,500 or Rs. 15,550.00 or ₹15500.00)
+                    let productPrice = 0;
+                    if (priceElement) {
+                        // First try to get from data attribute if available
+                        if (priceElement.dataset.price) {
+                            productPrice = parseFloat(priceElement.dataset.price);
+                        } else {
+                            // Otherwise extract from text content
+                            // First remove currency symbols and spaces
+                            let priceText = priceElement.textContent.trim();
+                            console.log('Raw price text:', priceText);
+                            
+                            // Remove all non-numeric characters except for decimals and commas
+                            // Then replace commas with empty string to handle thousand separators
+                            priceText = priceText.replace(/[^0-9.,]/g, '').replace(/,/g, '');
+                            console.log('Cleaned price text:', priceText);
+                            
+                            productPrice = parseFloat(priceText);
+                        }
+                    }
                     console.log('Product Price:', productPrice);
                     const productImage = productCard.querySelector('.product-image img').src;
                     console.log('Product Image:', productImage);
@@ -780,7 +820,27 @@ const WishlistManager = (function() {
                     const productName = detailSection.querySelector('.product-title').textContent;
                     // Look for price-value first, then product-price
                     const priceElement = detailSection.querySelector('.price-value') || detailSection.querySelector('.product-price');
-                    const productPrice = parseFloat(priceElement ? (priceElement.dataset.price || priceElement.textContent.replace(/[^0-9.]/g, '')) : 0);
+                    
+                    // Improved price extraction to handle different formats (₹32,500 or Rs. 15,550.00 or ₹15500.00)
+                    let productPrice = 0;
+                    if (priceElement) {
+                        // First try to get from data attribute if available
+                        if (priceElement.dataset.price) {
+                            productPrice = parseFloat(priceElement.dataset.price);
+                        } else {
+                            // Otherwise extract from text content
+                            // First remove currency symbols and spaces
+                            let priceText = priceElement.textContent.trim();
+                            console.log('Raw price text (detail):', priceText);
+                            
+                            // Remove all non-numeric characters except for decimals and commas
+                            // Then replace commas with empty string to handle thousand separators
+                            priceText = priceText.replace(/[^0-9.,]/g, '').replace(/,/g, '');
+                            console.log('Cleaned price text (detail):', priceText);
+                            
+                            productPrice = parseFloat(priceText);
+                        }
+                    }
                     const productImage = document.querySelector('.product-image-main img, .main-product-image img').src;
                     
                     const product = {
