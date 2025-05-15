@@ -97,16 +97,6 @@ function initShop() {
         
         // Toggle dropdown when clicking sort option
         elements.sortOption.addEventListener('click', toggleSortDropdown);
-        
-        // Create a debug button - for testing only
-        const debugButton = document.createElement('button');
-        debugButton.textContent = 'Test Sort';
-        debugButton.style.position = 'fixed';
-        debugButton.style.bottom = '10px';
-        debugButton.style.right = '10px';
-        debugButton.style.zIndex = '9999';
-        debugButton.addEventListener('click', toggleSortDropdown);
-        document.body.appendChild(debugButton);
 
         // Close dropdown when clicking outside
         document.addEventListener('click', function() {

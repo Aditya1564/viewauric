@@ -37,6 +37,15 @@
 /* Make sure sort option has position relative for absolute positioning of dropdown */
 .sort-option {
     position: relative;
+    cursor: pointer;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s ease;
+}
+
+.sort-option:hover {
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* Original product grid with modified spacing for 2 columns */
@@ -172,6 +181,7 @@
     border-radius: 4px;
     border: 1px solid #e0e0e0;
     margin-top: 5px; /* Small gap from the button */
+    transition: opacity 0.3s ease;
 }
 
 .sort-dropdown.active {
@@ -179,17 +189,27 @@
 }
 
 .sort-dropdown-option {
-    padding: 10px 15px;
-    font-family: 'Lato', sans-serif;
-    font-size: 14px;
-    color: #333;
+    padding: 12px 15px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.2s ease;
+    color: #333;
+    font-size: 14px;
 }
 
-.sort-dropdown-option:hover,
+.sort-dropdown-option:hover {
+    background-color: #f9f9f9;
+    color: #B08F4C;
+}
+
+.sort-dropdown-option:not(:last-child) {
+    border-bottom: 1px solid #f0f0f0;
+}
+
+/* Adding .active state for the sort dropdown option */
 .sort-dropdown-option.active {
     background-color: #f5f5f5;
+    color: #B08F4C;
+    font-weight: 600;
 }
 
 /* Filter Modal */
