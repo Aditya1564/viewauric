@@ -1,55 +1,30 @@
 /**
- * Auric Testimonials Scroller
+ * Auric Testimonials Video Player
  * 
- * This script adds scrolling functionality to the testimonials section
- * It allows users to scroll through the testimonial videos using buttons
+ * This script adds functionality to the testimonials video section
+ * It ensures only one video plays at a time
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-    initTestimonialScroller();
+    initTestimonialVideos();
 });
 
-function initTestimonialScroller() {
+function initTestimonialVideos() {
     const scrollContainer = document.querySelector('.testimonials-scroll');
-    const scrollLeftBtn = document.getElementById('scrollLeft');
-    const scrollRightBtn = document.getElementById('scrollRight');
     
     // Exit if the testimonials container doesn't exist on this page
     if (!scrollContainer) return;
     
-    // Scroll left button click handler
-    scrollLeftBtn.addEventListener('click', function() {
-        // Scroll by the width of one testimonial item plus gap
-        scrollContainer.scrollBy({
-            left: -350, // Width of testimonial plus gap
-            behavior: 'smooth'
-        });
-    });
-    
-    // Scroll right button click handler
-    scrollRightBtn.addEventListener('click', function() {
-        // Scroll by the width of one testimonial item plus gap
-        scrollContainer.scrollBy({
-            left: 350, // Width of testimonial plus gap
-            behavior: 'smooth'
-        });
-    });
-    
-    // Make testimonial videos play on click
+    // Make testimonial videos play one at a time
     const videos = document.querySelectorAll('.testimonial-video');
     videos.forEach(video => {
-        video.addEventListener('click', function() {
-            if (video.paused) {
-                // Pause all other videos
-                videos.forEach(v => {
-                    if (v !== video && !v.paused) {
-                        v.pause();
-                    }
-                });
-                video.play();
-            } else {
-                video.pause();
-            }
+        video.addEventListener('play', function() {
+            // Pause all other videos
+            videos.forEach(v => {
+                if (v !== video && !v.paused) {
+                    v.pause();
+                }
+            });
         });
     });
 }
