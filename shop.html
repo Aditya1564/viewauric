@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>Shop - Auric - Timeless & Classic Jewellery</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpLGCJKypKP/lX+/Pvw2DNA" crossorigin="anonymous">
+    <!-- Fallback font awesome icons if CDN fails -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lato:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css?v=1.0.4">
+    <link rel="stylesheet" href="css/responsive.css?v=1.0.4">
+    <link rel="stylesheet" href="css/navbar.css?v=1.1.1">
+    <link rel="stylesheet" href="css/cart.css?v=1.0.2">
+    <link rel="stylesheet" href="css/shop.css?v=1.0.0">
+  </head>
+  <body>
+
+    <!-- Header -->
+    <header class="header">
+        <!-- Promo Banner -->
+        <div class="promo-banner">
+            <button class="banner-arrow banner-prev">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <p>Save 21% on exclusive selections - <a href="#">Shop Now</a></p>
+            <button class="banner-arrow banner-next">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        
+        <!-- New Responsive Navigation -->
+        <nav class="navbar">
+            <div class="nav-container">
+                <!-- Logo -->
+                <a href="index.html" class="brand">Auric</a>
+                
+                <!-- Mobile Toggle Button -->
+                <div class="hamburger" id="navToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                
+                <!-- Navigation Links -->
+                <div class="nav-menu" id="navMenu">
+                    <!-- Close button for mobile menu in the top right corner -->
+                    <button class="close-menu" id="closeMenu">×</button>
+                    
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="#" class="nav-link">New Arrivals</a></li>
+                        <li class="nav-item"><a href="shop.html" class="nav-link">Shop</a></li>
+                        <li class="nav-item"><a href="#" class="nav-link">About</a></li>
+                        <li class="nav-item"><a href="#" class="nav-link">Testimonials</a></li>
+                        <li class="nav-item"><a href="#" class="nav-link">Order Track</a></li>
+                        <li class="nav-item"><a href="#" class="nav-link">Contact</a></li>
+                    </ul>
+                    
+                    <!-- Mobile account links in separate div after Contact -->
+                    <div class="mobile-account-links mobile-special">
+                        <a href="login.html" class="mobile-account-link">
+                            <i class="fas fa-user"></i> Account
+                        </a>
+                        <a href="#" class="mobile-account-link wishlist-toggle">
+                            <i class="fas fa-heart"></i> Wishlist (<span class="mobile-wishlist-count">0</span>)
+                        </a>
+                        <a href="#" class="mobile-account-link mobile-cart-toggle">
+                            <i class="fas fa-shopping-bag"></i> Shopping Bag (<span class="mobile-cart-count">0</span>)
+                        </a>
+                    
+                    </div>
+                </div>
+                
+                <!-- Navigation Icons - Matching the image -->
+                <div class="nav-icons">
+                    <a href="#" class="icon-link"><i class="fa-solid fa-magnifying-glass"></i></a>
+                    <a href="login.html" class="icon-link" id="user-icon"><i class="fa-solid fa-user"></i></a>
+                    <a href="#" class="icon-link wishlist-icon-container">
+                        <i class="fa-solid fa-heart"></i>
+                        <div class="wishlist-count">0</div>
+                    </a>
+                    <a href="#" class="icon-link cart-icon-container cart-toggle" id="cartToggleButton">
+                        <i class="fa-solid fa-bag-shopping"></i>
+                        <div class="cart-count">0</div>
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Overlay for menu background -->
+    <div class="menu-overlay" id="menuOverlay"></div>
+
+    <!-- Shop Banner Section -->
+    <section class="shop-banner">
+        <div class="shop-banner-content">
+            <h1>Premium Necklace Collection</h1>
+            <p>Discover our exquisite selection of gold, diamond, polki and pearl necklaces</p>
+        </div>
+    </section>
+
+    <!-- Shop Filtering Section -->
+    <section class="shop-filter container">
+        <div class="filter-container">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="sort-by">Sort By:</label>
+                    <select id="sort-by" class="filter-select">
+                        <option value="featured">Featured</option>
+                        <option value="price-low-high">Price: Low to High</option>
+                        <option value="price-high-low">Price: High to Low</option>
+                        <option value="newest">Newest</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filter-category">Category:</label>
+                    <select id="filter-category" class="filter-select">
+                        <option value="all">All Necklaces</option>
+                        <option value="gold">Gold</option>
+                        <option value="diamond">Diamond</option>
+                        <option value="polki">Polki</option>
+                        <option value="pearl">Pearl</option>
+                    </select>
+                </div>
+                <div class="results-count">
+                    <span id="product-count">12</span> Products
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Product Grid Section -->
+    <section class="shop-products container">
+        <div class="products-grid" id="products-grid">
+            <!-- Gold Necklaces -->
+            <div class="product-item" data-product-id="GN-01" data-category="gold" data-price="87500" data-date="2025-03-15">
+                <a href="product-detail.html" style="text-decoration: none; color: inherit;">
+                    <div class="product-image">
+                        <img src="images/product-category/IMG_20250504_150241.jpg" alt="Royal Gold Necklace">
+                        <div class="product-badge">SAVE 15%</div>
+                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-name">Royal Gold Necklace</h3>
+                        <div class="product-pricing">
+                            <span class="current-price">₹87,500</span>
+                            <span class="original-price">₹102,950</span>
+                            <span class="discount-tag">-15%</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="product-item" data-product-id="GN-02" data-category="gold" data-price="94200" data-date="2025-02-20">
+                <a href="product-detail.html" style="text-decoration: none; color: inherit;">
+                    <div class="product-image">
+                        <img src="images/product-category/IMG_20250504_150418.jpg" alt="Antique Gold Necklace">
+                        <div class="product-badge">SAVE 12%</div>
+                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-name">Antique Gold Necklace</h3>
+                        <div class="product-pricing">
+                            <span class="current-price">₹94,200</span>
+                            <span class="original-price">₹107,000</span>
+                            <span class="discount-tag">-12%</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="product-item" data-product-id="GN-03" data-category="gold" data-price="75800" data-date="2025-04-10">
+                <a href="product-detail.html" style="text-decoration: none; color: inherit;">
+                    <div class="product-image">
+                        <img src="images/product-category/IMG_20250504_150523.jpg" alt="Classic Gold Necklace">
+                        <div class="product-badge">SAVE 20%</div>
+                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-name">Classic Gold Necklace</h3>
+                        <div class="product-pricing">
+                            <span class="current-price">₹75,800</span>
+                            <span class="original-price">₹94,750</span>
+                            <span class="discount-tag">-20%</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Diamond Necklaces -->
+            <div class="product-item" data-product-id="DN-01" data-category="diamond" data-price="142500" data-date="2025-04-05">
+                <a href="product-detail.html" style="text-decoration: none; color: inherit;">
+                    <div class="product-image">
+                        <img src="images/product-category/IMG_20250504_150655.jpg" alt="Platinum Diamond Necklace">
+                        <div class="product-badge">SAVE 10%</div>
+                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-name">Platinum Diamond Necklace</h3>
+                        <div class="product-pricing">
+                            <span class="current-price">₹142,500</span>
+                            <span class="original-price">₹158,330</span>
+                            <span class="discount-tag">-10%</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="product-item" data-product-id="DN-02" data-category="diamond" data-price="168300" data-date="2025-03-22">
+                <a href="product-detail.html" style="text-decoration: none; color: inherit;">
+                    <div class="product-image">
+                        <img src="images/product-category/IMG_20250504_145717.jpg" alt="Radiant Diamond Necklace">
+                        <div class="product-badge">SAVE 8%</div>
+                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-name">Radiant Diamond Necklace</h3>
+                        <div class="product-pricing">
+                            <span class="current-price">₹168,300</span>
+                            <span class="original-price">₹182,940</span>
+                            <span class="discount-tag">-8%</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="product-item" data-product-id="DN-03" data-category="diamond" data-price="125600" data-date="2025-01-15">
+                <a href="product-detail.html" style="text-decoration: none; color: inherit;">
+                    <div class="product-image">
+                        <img src="images/product-category/IMG_20250504_145745.jpg" alt="Elegant Diamond Necklace">
+                        <div class="product-badge">SAVE 18%</div>
+                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-name">Elegant Diamond Necklace</h3>
+                        <div class="product-pricing">
+                            <span class="current-price">₹125,600</span>
+                            <span class="original-price">₹153,170</span>
+                            <span class="discount-tag">-18%</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Polki Necklaces -->
+            <div class="product-item" data-product-id="PN-01" data-category="polki" data-price="108500" data-date="2025-02-10">
+                <a href="product-detail.html" style="text-decoration: none; color: inherit;">
+                    <div class="product-image">
+                        <img src="images/product-category/IMG_20250504_150226.jpg" alt="Royal Polki Necklace">
+                        <div class="product-badge">SAVE 12%</div>
+                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-name">Royal Polki Necklace</h3>
+                        <div class="product-pricing">
+                            <span class="current-price">₹108,500</span>
+                            <span class="original-price">₹123,290</span>
+                            <span class="discount-tag">-12%</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="product-item" data-product-id="PN-02" data-category="polki" data-price="132400" data-date="2025-03-05">
+                <a href="product-detail.html" style="text-decoration: none; color: inherit;">
+                    <div class="product-image">
+                        <img src="images/product-category/IMG_20250504_150254.jpg" alt="Traditional Polki Necklace">
+                        <div class="product-badge">SAVE 15%</div>
+                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-name">Traditional Polki Necklace</h3>
+                        <div class="product-pricing">
+                            <span class="current-price">₹132,400</span>
+                            <span class="original-price">₹155,760</span>
+                            <span class="discount-tag">-15%</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="product-item" data-product-id="PN-03" data-category="polki" data-price="95700" data-date="2025-04-20">
+                <a href="product-detail.html" style="text-decoration: none; color: inherit;">
+                    <div class="product-image">
+                        <img src="images/category/IMG_20250504_145653.jpg" alt="Bridal Polki Necklace">
+                        <div class="product-badge">SAVE 22%</div>
+                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-name">Bridal Polki Necklace</h3>
+                        <div class="product-pricing">
+                            <span class="current-price">₹95,700</span>
+                            <span class="original-price">₹122,700</span>
+                            <span class="discount-tag">-22%</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Pearl Necklaces -->
+            <div class="product-item" data-product-id="PN-04" data-category="pearl" data-price="58400" data-date="2025-01-25">
+                <a href="product-detail.html" style="text-decoration: none; color: inherit;">
+                    <div class="product-image">
+                        <img src="images/category/Screenshot_20250504_130638.jpg" alt="South Sea Pearl Necklace">
+                        <div class="product-badge">SAVE 25%</div>
+                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-name">South Sea Pearl Necklace</h3>
+                        <div class="product-pricing">
+                            <span class="current-price">₹58,400</span>
+                            <span class="original-price">₹77,870</span>
+                            <span class="discount-tag">-25%</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="product-item" data-product-id="PN-05" data-category="pearl" data-price="72600" data-date="2025-03-10">
+                <a href="product-detail.html" style="text-decoration: none; color: inherit;">
+                    <div class="product-image">
+                        <img src="images/category/Screenshot_20250504_130717.jpg" alt="Multi-Strand Pearl Necklace">
+                        <div class="product-badge">SAVE 18%</div>
+                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-name">Multi-Strand Pearl Necklace</h3>
+                        <div class="product-pricing">
+                            <span class="current-price">₹72,600</span>
+                            <span class="original-price">₹88,540</span>
+                            <span class="discount-tag">-18%</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="product-item" data-product-id="PN-06" data-category="pearl" data-price="64300" data-date="2025-02-28">
+                <a href="product-detail.html" style="text-decoration: none; color: inherit;">
+                    <div class="product-image">
+                        <img src="images/category/Screenshot_20250504_130805.jpg" alt="Designer Pearl Necklace">
+                        <div class="product-badge">SAVE 20%</div>
+                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-name">Designer Pearl Necklace</h3>
+                        <div class="product-pricing">
+                            <span class="current-price">₹64,300</span>
+                            <span class="original-price">₹80,370</span>
+                            <span class="discount-tag">-20%</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter Section -->
+    <section class="newsletter-section">
+        <div class="container">
+            <div class="newsletter-container">
+                <div class="newsletter-content">
+                    <h2>Join Our Newsletter</h2>
+                    <p>Sign up to receive updates on new collections and exclusive offers</p>
+                    <form class="newsletter-form">
+                        <input type="email" placeholder="Your email address" required>
+                        <button type="submit">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>Auric</h3>
+                    <p>Timeless jewelry pieces crafted with passion and precision for the modern woman.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-pinterest-p"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h3>Shop</h3>
+                    <ul>
+                        <li><a href="#">New Arrivals</a></li>
+                        <li><a href="#">Necklaces</a></li>
+                        <li><a href="#">Best Sellers</a></li>
+                        <li><a href="#">Special Offers</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Information</h3>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Testimonials</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">FAQs</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Customer Service</h3>
+                    <ul>
+                        <li><a href="#">Shipping Policy</a></li>
+                        <li><a href="#">Returns & Exchanges</a></li>
+                        <li><a href="#">Terms & Conditions</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Auric. All Rights Reserved.</p>
+                <div class="payment-icons">
+                    <i class="fab fa-cc-visa"></i>
+                    <i class="fab fa-cc-mastercard"></i>
+                    <i class="fab fa-cc-amex"></i>
+                    <i class="fab fa-cc-paypal"></i>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Shop JS for filtering and sorting -->
+    <script src="js/shop.js"></script>
+    
+    <!-- Core JS Files -->
+    <script src="js/navigation.js?v=1.0.4"></script>
+    <script src="js/banner-rotator.js?v=1.0.1"></script>
+    <script src="js/error-handler.js"></script>
+    <script src="js/firebase/firebase-auth.js"></script>
+    <script src="js/cart-local-storage.js?v=1.0.0"></script>
+    <script src="js/firebase/firebase-cart-manager.js?v=1.0.0"></script>
+    <script src="js/cart-manager.js?v=1.0.1"></script>
+    <script src="js/wishlist-local-storage.js?v=1.0.0"></script>
+    <script src="js/firebase/firebase-wishlist-manager.js?v=1.0.0"></script>
+    <script src="js/wishlist-manager.js?v=1.0.0"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>
