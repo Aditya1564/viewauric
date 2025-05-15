@@ -34,6 +34,11 @@
     transform: rotate(180deg);
 }
 
+/* Make sure sort option has position relative for absolute positioning of dropdown */
+.sort-option {
+    position: relative;
+}
+
 /* Original product grid with modified spacing for 2 columns */
 .products-grid {
     display: grid;
@@ -156,14 +161,17 @@
 
 /* Sort Dropdown Menu */
 .sort-dropdown {
-    position: absolute; /* Changed to absolute, JS will position it */
+    position: absolute;
+    top: 100%; /* Position right below the sort option */
+    right: 0;
     width: 220px;
     background-color: white;
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    z-index: 100;
+    z-index: 1000; /* High z-index to stay on top */
     display: none;
     border-radius: 4px;
     border: 1px solid #e0e0e0;
+    margin-top: 5px; /* Small gap from the button */
 }
 
 .sort-dropdown.active {

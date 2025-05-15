@@ -23,8 +23,8 @@ function initShop() {
     const elements = {
         productsGrid: document.getElementById('products-grid'),
         filterOption: document.querySelector('.filter-option'),
-        sortOption: document.querySelector('.sort-option'),
-        sortDropdown: document.querySelector('.sort-dropdown'),
+        sortOption: document.getElementById('sortOption'),
+        sortDropdown: document.getElementById('sortDropdown'),
         sortDropdownOptions: document.querySelectorAll('.sort-dropdown-option'),
         filterModal: document.querySelector('.filter-modal'),
         closeFilterModalBtn: document.getElementById('closeFilterModal') || document.querySelector('.close-filter-modal'),
@@ -69,20 +69,44 @@ function initShop() {
 
     // Setup sort dropdown toggle
     if (elements.sortOption && elements.sortDropdown) {
-        // Toggle dropdown when clicking sort option
-        elements.sortOption.addEventListener('click', function(e) {
-            e.stopPropagation();
-            console.log('Sort option clicked');
+        console.log('Found sort option and dropdown:', elements.sortOption, elements.sortDropdown);
+        
+        // Direct toggle function for the sort dropdown
+        function toggleSortDropdown(event) {
+            if (event) {
+                event.stopPropagation();
+                event.preventDefault();
+            }
+            
+            console.log('Toggle sort dropdown called');
             elements.sortOption.classList.toggle('active');
             elements.sortDropdown.classList.toggle('active');
             
-            // Position the dropdown more precisely if needed
+            // Position the dropdown properly
             if (elements.sortDropdown.classList.contains('active')) {
                 const sortRect = elements.sortOption.getBoundingClientRect();
+                console.log('Sort option position:', sortRect);
+                elements.sortDropdown.style.position = 'fixed';
                 elements.sortDropdown.style.top = (sortRect.bottom + window.scrollY) + 'px';
                 elements.sortDropdown.style.right = '20px';
+                console.log('Dropdown now visible at position:', 
+                    elements.sortDropdown.style.top, 
+                    elements.sortDropdown.style.right);
             }
-        });
+        }
+        
+        // Toggle dropdown when clicking sort option
+        elements.sortOption.addEventListener('click', toggleSortDropdown);
+        
+        // Create a debug button - for testing only
+        const debugButton = document.createElement('button');
+        debugButton.textContent = 'Test Sort';
+        debugButton.style.position = 'fixed';
+        debugButton.style.bottom = '10px';
+        debugButton.style.right = '10px';
+        debugButton.style.zIndex = '9999';
+        debugButton.addEventListener('click', toggleSortDropdown);
+        document.body.appendChild(debugButton);
 
         // Close dropdown when clicking outside
         document.addEventListener('click', function() {
