@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>About - Auric - Timeless & Classic Jewellery</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpLGCJKypKP/lX+/Pvw2DNA" crossorigin="anonymous">
+    <!-- Fallback font awesome icons if CDN fails -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lato:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css?v=1.0.4">
+    <link rel="stylesheet" href="css/responsive.css?v=1.0.4">
+    <link rel="stylesheet" href="css/navbar.css?v=1.1.1">
+    <link rel="stylesheet" href="css/cart.css?v=1.0.2">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    
+    <!-- Initialize Firebase -->
+    <script>
+      // Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyCrLCButDevLeILcBjrUCd9e7amXVjW-uI",
+        authDomain: "auric-a0c92.firebaseapp.com",
+        projectId: "auric-a0c92",
+        storageBucket: "auric-a0c92.appspot.com",
+        messagingSenderId: "878979958342",
+        appId: "1:878979958342:web:e6092f7522488d21eaec47",
+        measurementId: "G-ZYZ750JHMB"
+      };
+      
+      // Initialize Firebase directly (like in login.html)
+      firebase.initializeApp(firebaseConfig);
+      
+      // Enable session persistence
+      firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .catch(error => {
+          console.error("Auth persistence error:", error);
+        });
+    </script>
+    <style>
+      /* Custom styles for the about page */
+      .about-section {
+        padding: 80px 0;
+      }
+      
+      .about-header {
+        text-align: center;
+        margin-bottom: 60px;
+      }
+      
+      .about-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 36px;
+        color: #5E2900;
+        margin-bottom: 20px;
+      }
+      
+      .about-subtitle {
+        font-family: 'Lato', sans-serif;
+        font-size: 18px;
+        color: #8a8a8a;
+        max-width: 700px;
+        margin: 0 auto;
+        line-height: 1.6;
+      }
+      
+      .founder-section {
+        display: flex;
+        align-items: center;
+        gap: 60px;
+        margin-bottom: 80px;
+      }
+      
+      .founder-image {
+        flex: 1;
+        max-width: 450px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        border: 10px solid #fff;
+        position: relative;
+      }
+      
+      .founder-image:after {
+        content: '';
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        right: -10px;
+        bottom: -10px;
+        border: 2px solid rgba(176, 143, 76, 0.3);
+        pointer-events: none;
+        z-index: -1;
+      }
+      
+      .founder-image img {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+      
+      .founder-content {
+        flex: 1;
+      }
+      
+      .founder-name {
+        font-family: 'Playfair Display', serif;
+        font-size: 28px;
+        color: #5E2900;
+        margin-bottom: 15px;
+      }
+      
+      .founder-title {
+        font-family: 'Lato', sans-serif;
+        font-size: 17px;
+        color: #B08F4C;
+        margin-bottom: 25px;
+        display: block;
+      }
+      
+      .founder-bio {
+        font-family: 'Lato', sans-serif;
+        font-size: 16px;
+        line-height: 1.8;
+        color: #555;
+        margin-bottom: 25px;
+      }
+      
+      .expertise-section {
+        margin-top: 50px;
+        background-color: #f8f8f5;
+        padding: 60px 0;
+      }
+      
+      .expertise-header {
+        text-align: center;
+        margin-bottom: 50px;
+      }
+      
+      .expertise-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 32px;
+        color: #5E2900;
+        margin-bottom: 15px;
+      }
+      
+      .expertise-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+      }
+      
+      .expertise-item {
+        background: #fff;
+        padding: 40px 30px;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s ease;
+      }
+      
+      .expertise-item:hover {
+        transform: translateY(-10px);
+      }
+      
+      .expertise-icon {
+        font-size: 40px;
+        color: #B08F4C;
+        margin-bottom: 20px;
+      }
+      
+      .expertise-name {
+        font-family: 'Playfair Display', serif;
+        font-size: 22px;
+        color: #5E2900;
+        margin-bottom: 15px;
+      }
+      
+      .expertise-description {
+        font-family: 'Lato', sans-serif;
+        font-size: 15px;
+        line-height: 1.6;
+        color: #666;
+      }
+      
+      @media (max-width: 991px) {
+        .founder-section {
+          flex-direction: column;
+          text-align: center;
+          gap: 40px;
+        }
+        
+        .founder-image {
+          max-width: 100%;
+          margin: 0 auto;
+        }
+        
+        .expertise-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      
+      @media (max-width: 768px) {
+        .about-section {
+          padding: 60px 0;
+        }
+        
+        .expertise-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- Header -->
+    <header class="header">
+        <!-- Promo Banner -->
+        <div class="promo-banner">
+            <button class="banner-arrow banner-prev">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <p>Save 21% on exclusive selections - <a href="#">Shop Now</a></p>
+            <button class="banner-arrow banner-next">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        
+        <!-- New Responsive Navigation -->
+        <nav class="navbar">
+            <div class="nav-container">
+                <!-- Logo -->
+                <a href="index.html" class="brand">Auric</a>
+                
+                <!-- Mobile Toggle Button -->
+                <div class="hamburger" id="navToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                
+                <!-- Navigation Links -->
+                <div class="nav-menu" id="navMenu">
+                    <!-- Close button for mobile menu in the top right corner -->
+                    <button class="close-menu" id="closeMenu">×</button>
+                    
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="new-arrivals.html" class="nav-link">New Arrivals</a></li>
+                        <li class="nav-item"><a href="shop.html" class="nav-link">Shop</a></li>
+                        <li class="nav-item"><a href="about.html" class="nav-link active">About</a></li>
+                        <li class="nav-item"><a href="#" class="nav-link">Testimonials</a></li>
+                        <li class="nav-item"><a href="#" class="nav-link">Order Track</a></li>
+                        <li class="nav-item"><a href="#" class="nav-link">Contact</a></li>
+                    </ul>
+                    
+                    <!-- Mobile account links in separate div after Contact -->
+                    <div class="mobile-account-links mobile-special">
+                        <a href="login.html" class="mobile-account-link">
+                            <i class="fas fa-user"></i> Account
+                        </a>
+                        <a href="#" class="mobile-account-link wishlist-toggle">
+                            <i class="fas fa-heart"></i> Wishlist (<span class="mobile-wishlist-count">0</span>)
+                        </a>
+                        <a href="#" class="mobile-account-link mobile-cart-toggle">
+                            <i class="fas fa-shopping-bag"></i> Shopping Bag (<span class="mobile-cart-count">0</span>)
+                        </a>
+                    
+                    </div>
+                </div>
+                
+                <!-- Navigation Icons - Matching the image -->
+                <div class="nav-icons">
+                    <a href="#" class="icon-link"><i class="fa-solid fa-magnifying-glass"></i></a>
+                    <a href="login.html" class="icon-link" id="user-icon"><i class="fa-solid fa-user"></i></a>
+                    <a href="#" class="icon-link wishlist-icon-container">
+                        <i class="fa-solid fa-heart"></i>
+                        <div class="wishlist-count">0</div>
+                    </a>
+                    <a href="#" class="icon-link cart-icon-container cart-toggle" id="cartToggleButton">
+                        <i class="fa-solid fa-bag-shopping"></i>
+                        <div class="cart-count">0</div>
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Overlay for menu background -->
+    <div class="menu-overlay" id="menuOverlay"></div>
+
+    <!-- About Content Section -->
+    <section class="about-section container">
+        <div class="about-header">
+            <h1 class="about-title">Our Story</h1>
+            <p class="about-subtitle">Welcome to Auric, where traditional craftsmanship meets contemporary design to create timeless pieces of luxury jewelry.</p>
+        </div>
+        
+        <div class="founder-section">
+            <div class="founder-image">
+                <img src="images/about/founder.jpg" alt="Founder of Auric Jewelry">
+            </div>
+            <div class="founder-content">
+                <h2 class="founder-name">Priya Malhotra</h2>
+                <span class="founder-title">Founder & Lead Designer</span>
+                <p class="founder-bio">With over 15 years of experience in the jewelry industry, Priya Malhotra founded Auric with a vision to create exquisite pieces that celebrate India's rich heritage of jewelry craftsmanship while embracing modern aesthetics.</p>
+                <p class="founder-bio">Her passion for traditional techniques and dedication to sourcing the finest materials has established Auric as a premier destination for luxury jewelry that tells a story and creates lasting impressions.</p>
+                <p class="founder-bio">Every Auric piece begins with Priya's hand-drawn designs, inspired by India's architectural marvels, cultural motifs, and natural beauty, transformed by skilled artisans into wearable art.</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Expertise Section -->
+    <section class="expertise-section">
+        <div class="container">
+            <div class="expertise-header">
+                <h2 class="expertise-title">Our Expertise</h2>
+            </div>
+            
+            <div class="expertise-grid">
+                <div class="expertise-item">
+                    <div class="expertise-icon">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <h3 class="expertise-name">Designer Gold</h3>
+                    <p class="expertise-description">Our gold jewelry combines traditional craftsmanship with contemporary design sensibilities. Each piece undergoes meticulous crafting using 22K and 18K gold, ensuring exceptional quality and lasting beauty.</p>
+                </div>
+                
+                <div class="expertise-item">
+                    <div class="expertise-icon">
+                        <i class="fas fa-gem"></i>
+                    </div>
+                    <h3 class="expertise-name">Diamond Jewelry</h3>
+                    <p class="expertise-description">We source only the finest diamonds for our collections, each stone meeting strict criteria for cut, clarity, color, and carat. Our diamond pieces are designed to capture light and attention with unparalleled brilliance.</p>
+                </div>
+                
+                <div class="expertise-item">
+                    <div class="expertise-icon">
+                        <i class="fas fa-bahai"></i>
+                    </div>
+                    <h3 class="expertise-name">Polki Creations</h3>
+                    <p class="expertise-description">Our polki pieces celebrate the ancient art of uncut diamond setting, a traditional Indian technique. These unique creations highlight the natural beauty of uncut diamonds in contemporary designs.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Section -->
+    <footer class="footer-modern">
+        <div class="footer-top">
+            <div class="container">
+                <div class="footer-logo">
+                    <a href="index.html">Auric</a>
+                </div>
+                
+                <div class="footer-newsletter-container">
+                    <h3>Subscribe to our newsletter</h3>
+                    <p>Get the latest updates on new products and special offers</p>
+                    <form class="footer-newsletter">
+                        <input type="email" placeholder="Your email address" required>
+                        <button type="submit">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-main">
+            <div class="container">
+                <div class="footer-widgets">
+                    <div class="footer-widget contact-widget">
+                        <h4>Contact Us</h4>
+                        <ul>
+                            <li>
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>123 Fashion Street, Mumbai, MH 400001, India</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-phone-alt"></i>
+                                <span>+91 98765 43210</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-envelope"></i>
+                                <span>info@auricjewelry.com</span>
+                            </li>
+                        </ul>
+                    </div>
+                  
+                  <div class="footer-widget">
+                        <h4>Information</h4>
+                        <ul>
+                            <li><a href="about.html">About Us</a></li>
+                            <li><a href="#">Delivery Information</a></li>
+                            <li><a href="#">Privacy Policy</a></li>
+                            <li><a href="#">Terms & Conditions</a></li>
+                        </ul>
+                    </div>
+                  
+                  <div class="footer-widget">
+                        <h4>Customer Service</h4>
+                        <ul>
+                            <li><a href="#">Contact Us</a></li>
+                            <li><a href="#">Returns</a></li>
+                            <li><a href="#">Site Map</a></li>
+                        </ul>
+                    </div>
+                  
+                  <div class="footer-widget">
+                        <h4>Follow Us</h4>
+                        <div class="social-icons">
+                            <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-pinterest-p"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+      
+      <div class="footer-bottom">
+            <div class="container">
+                <div class="footer-info">
+                    <p>© 2025 Auric Jewelry. All Rights Reserved.</p>
+                    <p>Designed with <i class="fas fa-heart"></i> by ReplicaStudio</p>
+                </div>
+                
+                <div class="footer-links">
+                    <img src="https://via.placeholder.com/40x25" alt="Visa">
+                    <img src="https://via.placeholder.com/40x25" alt="Mastercard">
+                    <img src="https://via.placeholder.com/40x25" alt="American Express">
+                    <img src="https://via.placeholder.com/40x25" alt="PayPal">
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Cart Panel (Hidden by default) -->
+    <div class="cart-panel">
+        <div class="cart-header">
+            <h3>Shopping Cart</h3>
+            <button class="close-cart"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="cart-items">
+            <!-- Cart items will be dynamically added here -->
+            <div class="empty-cart-message">Your cart is empty</div>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total:</span>
+                <span class="total-amount">₹0.00</span>
+            </div>
+            <div class="cart-buttons">
+                <a href="#" class="view-cart-btn">View Cart</a>
+                <a href="checkout.html" class="checkout-btn">Checkout</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Wishlist Panel (Hidden by default) -->
+    <div class="wishlist-panel">
+        <div class="wishlist-header">
+            <h3>Wishlist</h3>
+            <button class="close-wishlist"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="wishlist-items">
+            <!-- Wishlist items will be dynamically added here -->
+            <div class="empty-wishlist-message">Your wishlist is empty</div>
+        </div>
+    </div>
+    
+    <!-- Overlay for Cart -->
+    <div class="cart-overlay"></div>
+    
+    <!-- Overlay for Wishlist -->
+    <div class="wishlist-overlay"></div>
+
+    <!-- Scripts -->
+    <script src="js/navigation.js?v=1.0.4"></script>
+    <script src="js/banner-rotator.js?v=1.0.1"></script>
+    <script src="js/error-handler.js"></script>
+    <script src="js/firebase/firebase-auth.js"></script>
+    <script src="js/cart-local-storage.js?v=1.0.0"></script>
+    <script src="js/firebase/firebase-cart-manager.js?v=1.0.0"></script>
+    <script src="js/cart-manager.js?v=1.0.1"></script>
+    <script src="js/wishlist-local-storage.js?v=1.0.0"></script>
+    <script src="js/firebase/firebase-wishlist-manager.js?v=1.0.0"></script>
+    <script src="js/wishlist-manager.js?v=1.0.0"></script>
+    <script src="js/main.js"></script>
+    
+    <!-- Firebase Auth State Change -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // Get reference to the user icon
+        const userIcon = document.getElementById('user-icon');
+        
+        // Listen for auth state changes
+        firebase.auth().onAuthStateChanged(function(user) {
+          if (user) {
+            // User is signed in
+            console.log("Auth state: User is signed in", user.email);
+            
+            // Store user info in session storage
+            FirebaseAuth.saveSession({
+              uid: user.uid,
+              email: user.email,
+              displayName: user.displayName || 'User',
+              photoURL: user.photoURL,
+              loggedIn: true
+            });
+            
+            userIcon.href = "profile.html";
+            userIcon.classList.add('logged-in');
+          } else {
+            // User is not signed in, keep login link
+            console.log("Auth state: User is signed out");
+            FirebaseAuth.clearSession();
+            userIcon.href = "login.html";
+            userIcon.classList.remove('logged-in');
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
