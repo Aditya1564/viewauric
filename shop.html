@@ -260,46 +260,48 @@
 
     <!-- Filter Modal (Hidden Initially) -->
     <div class="filter-modal">
-        <div class="filter-modal-header">
-            <h2>Filter Products</h2>
-            <button class="close-filter-modal" id="closeFilterModal">×</button>
-        </div>
-        <div class="filter-modal-body">
-            <div class="filter-section">
-                <h3>Category</h3>
-                <div class="filter-options">
-                    <label class="filter-option-label">
-                        <input type="radio" name="category" value="all" checked> All Necklaces
-                    </label>
-                    <label class="filter-option-label">
-                        <input type="radio" name="category" value="gold"> Gold
-                    </label>
-                    <label class="filter-option-label">
-                        <input type="radio" name="category" value="diamond"> Diamond
-                    </label>
-                    <label class="filter-option-label">
-                        <input type="radio" name="category" value="polki"> Polki
-                    </label>
-                    <label class="filter-option-label">
-                        <input type="radio" name="category" value="pearl"> Pearl
-                    </label>
+        <div class="filter-modal-content">
+            <div class="filter-modal-header">
+                <h2>Filter Products</h2>
+                <button class="close-filter-modal" id="closeFilterModal">×</button>
+            </div>
+            <div class="filter-modal-body">
+                <div class="filter-section">
+                    <h3>Category</h3>
+                    <div class="filter-options">
+                        <label class="filter-option-label">
+                            <input type="radio" name="category" value="all" checked> All Necklaces
+                        </label>
+                        <label class="filter-option-label">
+                            <input type="radio" name="category" value="gold"> Gold
+                        </label>
+                        <label class="filter-option-label">
+                            <input type="radio" name="category" value="diamond"> Diamond
+                        </label>
+                        <label class="filter-option-label">
+                            <input type="radio" name="category" value="polki"> Polki
+                        </label>
+                        <label class="filter-option-label">
+                            <input type="radio" name="category" value="pearl"> Pearl
+                        </label>
+                    </div>
+                </div>
+                <div class="filter-section">
+                    <h3>Availability</h3>
+                    <div class="filter-options">
+                        <label class="filter-option-label">
+                            <input type="checkbox" name="availability" value="ready-to-ship"> Ready to Ship
+                        </label>
+                        <label class="filter-option-label">
+                            <input type="checkbox" name="availability" value="made-to-order"> Made to Order
+                        </label>
+                    </div>
                 </div>
             </div>
-            <div class="filter-section">
-                <h3>Availability</h3>
-                <div class="filter-options">
-                    <label class="filter-option-label">
-                        <input type="checkbox" name="availability" value="ready-to-ship"> Ready to Ship
-                    </label>
-                    <label class="filter-option-label">
-                        <input type="checkbox" name="availability" value="made-to-order"> Made to Order
-                    </label>
-                </div>
+            <div class="filter-modal-footer">
+                <button class="apply-filter-btn" id="applyFilterBtn">Apply Filters</button>
+                <button class="clear-filter-btn" id="clearFilterBtn">Clear All</button>
             </div>
-        </div>
-        <div class="filter-modal-footer">
-            <button class="apply-filter-btn" id="applyFilterBtn">Apply Filters</button>
-            <button class="clear-filter-btn" id="clearFilterBtn">Clear All</button>
         </div>
     </div>
 

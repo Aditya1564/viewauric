@@ -9,119 +9,131 @@
  * 5. Dropdown sort UI
  */
 
+// Wait for DOM to fully load before initializing
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize shop functionality when DOM is loaded
+    // Initialize shop functionality
     initShop();
 });
 
+/**
+ * Initialize shop page functionality
+ */
 function initShop() {
-    const productsGrid = document.getElementById('products-grid');
-    const filterOption = document.querySelector('.filter-option');
-    const sortOption = document.querySelector('.sort-option');
-    const sortDropdown = document.querySelector('.sort-dropdown');
-    const sortDropdownOptions = document.querySelectorAll('.sort-dropdown-option');
-    const filterModal = document.querySelector('.filter-modal');
-    // Use IDs when available, fallback to class selectors
-    const closeFilterModalBtn = document.getElementById('closeFilterModal') || document.querySelector('.close-filter-modal');
-    const applyFilterBtn = document.getElementById('applyFilterBtn') || document.querySelector('.apply-filter-btn');
-    const clearFilterBtn = document.getElementById('clearFilterBtn') || document.querySelector('.clear-filter-btn');
-    
+    // Get DOM elements
+    const elements = {
+        productsGrid: document.getElementById('products-grid'),
+        filterOption: document.querySelector('.filter-option'),
+        sortOption: document.querySelector('.sort-option'),
+        sortDropdown: document.querySelector('.sort-dropdown'),
+        sortDropdownOptions: document.querySelectorAll('.sort-dropdown-option'),
+        filterModal: document.querySelector('.filter-modal'),
+        closeFilterModalBtn: document.getElementById('closeFilterModal') || document.querySelector('.close-filter-modal'),
+        applyFilterBtn: document.getElementById('applyFilterBtn') || document.querySelector('.apply-filter-btn'),
+        clearFilterBtn: document.getElementById('clearFilterBtn') || document.querySelector('.clear-filter-btn')
+    };
+
     // Check if we're on the shop page
-    if (!productsGrid) {
-        return; // Not on shop page, exit
+    if (!elements.productsGrid) {
+        console.log('Not on shop page, exiting shop.js initialization');
+        return;
     }
-    
+
     console.log('Shop page detected, initializing shop functionality');
-    
-    // Get all product items
-    const allProducts = [...document.querySelectorAll('.product-item')];
-    console.log('Found product items:', allProducts.length);
-    
+
+    // Store original product elements
+    const originalProducts = Array.from(document.querySelectorAll('.product-item'));
+    console.log('Found product items:', originalProducts.length);
+
     // Current filter and sort settings
-    let currentSettings = {
+    const settings = {
         category: 'all',
         availability: [],
         sortBy: 'featured'
     };
-    
-    // Debug UI elements
-    console.log('Filter option element:', filterOption);
-    console.log('Sort option element:', sortOption);
-    console.log('Sort dropdown element:', sortDropdown);
-    console.log('Filter modal element:', filterModal);
-    console.log('Close filter modal button:', closeFilterModalBtn);
-    console.log('Apply filter button:', applyFilterBtn);
-    console.log('Clear filter button:', clearFilterBtn);
-    
-    // Set up event listeners for filtering and sorting
-    
-    // Filter button opens the filter modal
-    if (filterOption) {
-        filterOption.addEventListener('click', () => {
-            if (filterModal) {
-                filterModal.classList.add('active');
+
+    // Setup filter button - Opens the filter modal when clicked
+    if (elements.filterOption && elements.filterModal) {
+        elements.filterOption.addEventListener('click', function() {
+            console.log('Filter option clicked');
+            elements.filterModal.classList.add('active');
+        });
+    }
+
+    // Setup close filter modal button
+    if (elements.closeFilterModalBtn && elements.filterModal) {
+        elements.closeFilterModalBtn.addEventListener('click', function() {
+            console.log('Close filter modal button clicked');
+            elements.filterModal.classList.remove('active');
+        });
+    }
+
+    // Setup sort dropdown toggle
+    if (elements.sortOption && elements.sortDropdown) {
+        // Toggle dropdown when clicking sort option
+        elements.sortOption.addEventListener('click', function(e) {
+            e.stopPropagation();
+            console.log('Sort option clicked');
+            elements.sortOption.classList.toggle('active');
+            elements.sortDropdown.classList.toggle('active');
+            
+            // Position the dropdown more precisely if needed
+            if (elements.sortDropdown.classList.contains('active')) {
+                const sortRect = elements.sortOption.getBoundingClientRect();
+                elements.sortDropdown.style.top = (sortRect.bottom + window.scrollY) + 'px';
+                elements.sortDropdown.style.right = '20px';
             }
         });
-    }
-    
-    // Close filter modal
-    if (closeFilterModalBtn && filterModal) {
-        closeFilterModalBtn.addEventListener('click', () => {
-            filterModal.classList.remove('active');
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function() {
+            if (elements.sortDropdown.classList.contains('active')) {
+                elements.sortOption.classList.remove('active');
+                elements.sortDropdown.classList.remove('active');
+            }
         });
-    }
-    
-    // Sort dropdown toggle
-    if (sortOption && sortDropdown) {
-        sortOption.addEventListener('click', (e) => {
-            e.stopPropagation();
-            sortOption.classList.toggle('active');
-            sortDropdown.classList.toggle('active');
-        });
-        
-        // Close sort dropdown when clicking outside
-        document.addEventListener('click', () => {
-            sortOption.classList.remove('active');
-            sortDropdown.classList.remove('active');
-        });
-        
-        // Prevent dropdown from closing when clicking inside it
-        sortDropdown.addEventListener('click', (e) => {
+
+        // Prevent dropdown from closing when clicking inside
+        elements.sortDropdown.addEventListener('click', function(e) {
             e.stopPropagation();
         });
     }
-    
-    // Sort dropdown options
-    if (sortDropdownOptions) {
-        sortDropdownOptions.forEach(option => {
-            option.addEventListener('click', () => {
-                const sortValue = option.getAttribute('data-sort');
-                currentSettings.sortBy = sortValue;
+
+    // Setup sort dropdown options
+    if (elements.sortDropdownOptions && elements.sortDropdownOptions.length > 0) {
+        elements.sortDropdownOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                const sortValue = this.getAttribute('data-sort');
+                console.log('Sort option selected:', sortValue);
+                
+                // Update settings
+                settings.sortBy = sortValue;
                 
                 // Update active class
-                sortDropdownOptions.forEach(opt => opt.classList.remove('active'));
-                option.classList.add('active');
+                elements.sortDropdownOptions.forEach(opt => opt.classList.remove('active'));
+                this.classList.add('active');
                 
                 // Update sort option text
-                const sortText = option.textContent;
-                const sortSpan = sortOption.querySelector('span');
+                const sortText = this.textContent;
+                const sortSpan = elements.sortOption.querySelector('span');
                 if (sortSpan) {
                     sortSpan.textContent = sortText;
                 }
                 
                 // Close dropdown
-                sortDropdown.classList.remove('active');
-                sortOption.classList.remove('active');
+                elements.sortDropdown.classList.remove('active');
+                elements.sortOption.classList.remove('active');
                 
                 // Apply filters and sort
                 applyFiltersAndSort();
             });
         });
     }
-    
-    // Apply filter button
-    if (applyFilterBtn && filterModal) {
-        applyFilterBtn.addEventListener('click', () => {
+
+    // Setup apply filter button
+    if (elements.applyFilterBtn && elements.filterModal) {
+        elements.applyFilterBtn.addEventListener('click', function() {
+            console.log('Apply filter button clicked');
+            
             // Get selected category
             const categoryRadios = document.querySelectorAll('input[name="category"]');
             let selectedCategory = 'all';
@@ -142,21 +154,25 @@ function initShop() {
                 }
             });
             
-            // Update current settings
-            currentSettings.category = selectedCategory;
-            currentSettings.availability = selectedAvailability;
+            // Update settings
+            settings.category = selectedCategory;
+            settings.availability = selectedAvailability;
+            
+            console.log('Updated filter settings:', settings);
             
             // Close filter modal
-            filterModal.classList.remove('active');
+            elements.filterModal.classList.remove('active');
             
             // Apply filters and sort
             applyFiltersAndSort();
         });
     }
-    
-    // Clear filter button
-    if (clearFilterBtn) {
-        clearFilterBtn.addEventListener('click', () => {
+
+    // Setup clear filter button
+    if (elements.clearFilterBtn) {
+        elements.clearFilterBtn.addEventListener('click', function() {
+            console.log('Clear filter button clicked');
+            
             // Reset all filter inputs
             const categoryRadios = document.querySelectorAll('input[name="category"]');
             const availabilityCheckboxes = document.querySelectorAll('input[name="availability"]');
@@ -171,45 +187,50 @@ function initShop() {
                 checkbox.checked = false;
             });
             
-            // Update current settings
-            currentSettings.category = 'all';
-            currentSettings.availability = [];
+            // Update settings
+            settings.category = 'all';
+            settings.availability = [];
+            
+            console.log('Filter settings cleared:', settings);
+            
+            // No need to close the modal, user will do that manually
+            // by clicking Apply or the X button
         });
     }
-    
-    // Initialize with default view
-    applyFiltersAndSort();
-    
+
+    // Initialize shop with default view
+    setTimeout(() => {
+        console.log('Initializing default shop view');
+        applyFiltersAndSort();
+    }, 100);
+
     /**
-     * Apply selected filters and sorting
+     * Apply current filters and sorting to products
      */
     function applyFiltersAndSort() {
-        console.log('Applying filters and sort with settings:', JSON.stringify(currentSettings));
+        console.log('Applying filters and sort with settings:', settings);
         
         // Filter products
-        let filteredProducts = filterProducts(allProducts, currentSettings.category, currentSettings.availability);
+        let filteredProducts = filterProducts(originalProducts, settings.category, settings.availability);
         console.log('Filtered products count:', filteredProducts.length);
         
         // Sort filtered products
-        const sortedProducts = sortProducts(filteredProducts, currentSettings.sortBy);
+        const sortedProducts = sortProducts(filteredProducts, settings.sortBy);
         console.log('Sorted products count:', sortedProducts.length);
         
         // Display products
         displayProducts(sortedProducts);
     }
-    
+
     /**
      * Filter products by category and availability
-     * @param {Array} products - Array of product elements
-     * @param {String} category - Category to filter by
-     * @param {Array} availability - Array of availability options
-     * @returns {Array} - Filtered products
      */
     function filterProducts(products, category, availability) {
         // First filter by category
         let filteredByCategory = products;
         
         if (category !== 'all') {
+            console.log('Filtering by category:', category);
             filteredByCategory = products.filter(product => {
                 return product.dataset.category === category;
             });
@@ -217,6 +238,7 @@ function initShop() {
         
         // Then filter by availability if any are selected
         if (availability && availability.length > 0) {
+            console.log('Filtering by availability:', availability);
             return filteredByCategory.filter(product => {
                 const badge = product.querySelector('.product-badge');
                 if (!badge) return false;
@@ -236,14 +258,13 @@ function initShop() {
         
         return filteredByCategory;
     }
-    
+
     /**
      * Sort products by selected criteria
-     * @param {Array} products - Array of product elements to sort
-     * @param {String} sortBy - Sorting criteria
-     * @returns {Array} - Sorted products
      */
     function sortProducts(products, sortBy) {
+        console.log('Sorting products by:', sortBy);
+        
         const productsCopy = [...products]; // Create a copy to avoid modifying original
         
         switch (sortBy) {
@@ -274,21 +295,22 @@ function initShop() {
                 return productsCopy;
         }
     }
-    
+
     /**
      * Display products in the grid
-     * @param {Array} products - Array of product elements to display
      */
     function displayProducts(products) {
+        console.log('Displaying products in grid');
+        
         // Clear grid first
-        productsGrid.innerHTML = '';
+        elements.productsGrid.innerHTML = '';
         
         if (products.length === 0) {
             // Show no results message
             const noResults = document.createElement('div');
             noResults.className = 'no-results';
             noResults.innerHTML = '<p>No products match your filters. Please try different criteria.</p>';
-            productsGrid.appendChild(noResults);
+            elements.productsGrid.appendChild(noResults);
             return;
         }
         
@@ -312,7 +334,7 @@ function initShop() {
                 });
             }
             
-            productsGrid.appendChild(productClone);
+            elements.productsGrid.appendChild(productClone);
         });
         
         // Re-initialize wishlist buttons for newly added elements
@@ -322,4 +344,9 @@ function initShop() {
             }, 100);
         }
     }
+
+    // Add click detection to document for debugging
+    document.addEventListener('click', function(e) {
+        console.log('Click detected:', e.target);
+    });
 }
