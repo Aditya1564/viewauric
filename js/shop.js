@@ -113,12 +113,19 @@ function initShop() {
                 // Set position relative to the shop filter header
                 const shopFilterHeader = document.querySelector('.shop-filter-header');
                 if (shopFilterHeader) {
+                    // First reset any existing styles
+                    elements.sortDropdown.style.cssText = '';
+                    
+                    // Apply correct positioning and styling
                     elements.sortDropdown.style.position = 'absolute';
-                    elements.sortDropdown.style.top = sortRect.height + 'px';
-                    elements.sortDropdown.style.right = '0';
-                    console.log('Dropdown now visible at position:', 
-                        elements.sortDropdown.style.top, 
-                        elements.sortDropdown.style.right);
+                    elements.sortDropdown.style.top = '100%';
+                    elements.sortDropdown.style.right = '25px';
+                    elements.sortDropdown.style.zIndex = '1000';
+                    elements.sortDropdown.style.width = '200px';
+                    elements.sortDropdown.style.marginTop = '5px';
+                    elements.sortDropdown.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                    
+                    console.log('Dropdown positioned correctly');
                 }
             }
         }
