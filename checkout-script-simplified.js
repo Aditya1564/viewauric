@@ -655,14 +655,9 @@ document.addEventListener('DOMContentLoaded', function() {
         submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
         
         try {
-            // Check if Razorpay payment method is selected
-            if (paymentMethod === 'Razorpay') {
-                // Handle Razorpay payment flow
-                await processRazorpayPayment(orderData);
-                return; // Exit early as the payment flow will continue in the Razorpay callback
-            }
+            // Note: Razorpay test popups removed as requested
+            // For all payment methods, including Razorpay, continue with the standard flow
             
-            // For non-Razorpay payments (e.g. Cash on Delivery), continue with normal flow
             // Save order to Firebase if the module is loaded and user is logged in
             if (firebaseOrdersModule) {
                 console.log('Saving order to Firebase...');
