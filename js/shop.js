@@ -39,6 +39,29 @@ function initShop() {
     }
 
     console.log('Shop page detected, initializing shop functionality');
+    
+    // Check if the dropdown exists, create it if it doesn't
+    if (!elements.sortDropdown) {
+        console.log('Sort dropdown not found, creating one');
+        elements.sortDropdown = document.createElement('div');
+        elements.sortDropdown.className = 'sort-dropdown';
+        elements.sortDropdown.id = 'sortDropdown';
+        
+        // Add options to the dropdown
+        elements.sortDropdown.innerHTML = `
+            <div class="sort-dropdown-option" data-sort="featured">Featured</div>
+            <div class="sort-dropdown-option" data-sort="price-low-high">Price: Low to High</div>
+            <div class="sort-dropdown-option" data-sort="price-high-low">Price: High to Low</div>
+            <div class="sort-dropdown-option" data-sort="newest">Newest</div>
+        `;
+        
+        // Append to the shop filter header
+        const shopFilterHeader = document.querySelector('.shop-filter-header');
+        if (shopFilterHeader) {
+            shopFilterHeader.appendChild(elements.sortDropdown);
+            console.log('Sort dropdown created and appended to shop filter header');
+        }
+    }
 
     // Store original product elements
     const originalProducts = Array.from(document.querySelectorAll('.product-item'));
@@ -86,12 +109,17 @@ function initShop() {
             if (elements.sortDropdown.classList.contains('active')) {
                 const sortRect = elements.sortOption.getBoundingClientRect();
                 console.log('Sort option position:', sortRect);
-                elements.sortDropdown.style.position = 'fixed';
-                elements.sortDropdown.style.top = (sortRect.bottom + window.scrollY) + 'px';
-                elements.sortDropdown.style.right = '20px';
-                console.log('Dropdown now visible at position:', 
-                    elements.sortDropdown.style.top, 
-                    elements.sortDropdown.style.right);
+                
+                // Set position relative to the shop filter header
+                const shopFilterHeader = document.querySelector('.shop-filter-header');
+                if (shopFilterHeader) {
+                    elements.sortDropdown.style.position = 'absolute';
+                    elements.sortDropdown.style.top = sortRect.height + 'px';
+                    elements.sortDropdown.style.right = '0';
+                    console.log('Dropdown now visible at position:', 
+                        elements.sortDropdown.style.top, 
+                        elements.sortDropdown.style.right);
+                }
             }
         }
         
@@ -113,9 +141,21 @@ function initShop() {
     }
 
     // Setup sort dropdown options
+    // Re-query for dropdowns as we might have added them dynamically
+    elements.sortDropdownOptions = document.querySelectorAll('.sort-dropdown-option');
+    
     if (elements.sortDropdownOptions && elements.sortDropdownOptions.length > 0) {
+        console.log('Setting up sort dropdown options:', elements.sortDropdownOptions.length);
+        
         elements.sortDropdownOptions.forEach(option => {
-            option.addEventListener('click', function() {
+            // Remove any existing click listeners first to avoid duplicates
+            const oldOption = option.cloneNode(true);
+            option.parentNode.replaceChild(oldOption, option);
+            
+            // Add click listener to the fresh option element
+            oldOption.addEventListener('click', function(e) {
+                e.stopPropagation(); // Prevent event bubbling
+                
                 const sortValue = this.getAttribute('data-sort');
                 console.log('Sort option selected:', sortValue);
                 
@@ -123,7 +163,7 @@ function initShop() {
                 settings.sortBy = sortValue;
                 
                 // Update active class
-                elements.sortDropdownOptions.forEach(opt => opt.classList.remove('active'));
+                document.querySelectorAll('.sort-dropdown-option').forEach(opt => opt.classList.remove('active'));
                 this.classList.add('active');
                 
                 // Update sort option text
@@ -141,6 +181,8 @@ function initShop() {
                 applyFiltersAndSort();
             });
         });
+    } else {
+        console.warn('No sort dropdown options found!');
     }
 
     // Setup apply filter button
