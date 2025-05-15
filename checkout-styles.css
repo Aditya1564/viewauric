@@ -84,8 +84,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .step-icon.completed {
-    background-color: #7dcb81;
-    border-color: #7dcb81;
+    background-color: #25ab00;
+    border-color: #25ab00;
     color: white;
 }
 
@@ -290,7 +290,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .continue-shopping-btn:hover {
-    background-color: #9c7c38;
+    background-color: #7a4012;
     color: white;
 }
 
