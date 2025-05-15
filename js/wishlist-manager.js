@@ -690,7 +690,27 @@ const WishlistManager = (function() {
                     const productId = detailContainer.dataset.productId;
                     const productName = detailContainer.querySelector('.product-title').textContent;
                     const priceElement = detailContainer.querySelector('.price-value');
-                    const productPrice = parseFloat(priceElement ? priceElement.textContent.replace(/[^0-9.]/g, '') : 0);
+                    
+                    // Improved price extraction to handle different formats (₹32,500 or Rs. 15,550.00 or ₹15500.00)
+                    let productPrice = 0;
+                    if (priceElement) {
+                        // First try to get from data attribute if available
+                        if (priceElement.dataset.price) {
+                            productPrice = parseFloat(priceElement.dataset.price);
+                        } else {
+                            // Otherwise extract from text content
+                            // First remove currency symbols and spaces
+                            let priceText = priceElement.textContent.trim();
+                            console.log('Raw price text (detail container):', priceText);
+                            
+                            // Remove all non-numeric characters except for decimals and commas
+                            // Then replace commas with empty string to handle thousand separators
+                            priceText = priceText.replace(/[^0-9.,]/g, '').replace(/,/g, '');
+                            console.log('Cleaned price text (detail container):', priceText);
+                            
+                            productPrice = parseFloat(priceText);
+                        }
+                    }
                     // Fix for image selector - the image is directly on the element with class main-product-image
                     const productImageEl = document.querySelector('.main-image-container img');
                     const productImage = productImageEl ? productImageEl.src : '';
