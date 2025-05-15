@@ -18,6 +18,32 @@
     <script src="https://www.gstatic.com/firebasejs/9.19.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.19.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.19.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Initialization -->
+    <script>
+        // Initialize Firebase
+        try {
+            const firebaseConfig = {
+                apiKey: "AIzaSyAXX7xj0bVk1MQF65CmEyaR3ZfQ_9-yGsA",
+                authDomain: "auric-jewelry.firebaseapp.com",
+                projectId: "auric-jewelry",
+                storageBucket: "auric-jewelry.appspot.com",
+                messagingSenderId: "512628288919",
+                appId: "1:512628288919:web:10f4ac5b52462cd3a54c01"
+            };
+            
+            // Initialize Firebase
+            firebase.initializeApp(firebaseConfig);
+            console.log("Initializing Firebase...");
+            console.log("Firebase initialized successfully");
+            
+            // Enable cart persistence
+            window.FIREBASE_INITIALIZED = true;
+            console.log("Cart persistence enabled: Cart will not be cleared on page reload");
+        } catch (error) {
+            console.error("Error initializing Firebase:", error);
+        }
+    </script>
   </head>
   <body>
 
