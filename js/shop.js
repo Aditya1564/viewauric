@@ -21,9 +21,10 @@ function initShop() {
     const sortDropdown = document.querySelector('.sort-dropdown');
     const sortDropdownOptions = document.querySelectorAll('.sort-dropdown-option');
     const filterModal = document.querySelector('.filter-modal');
-    const closeFilterModalBtn = document.querySelector('.close-filter-modal');
-    const applyFilterBtn = document.querySelector('.apply-filter-btn');
-    const clearFilterBtn = document.querySelector('.clear-filter-btn');
+    // Use IDs when available, fallback to class selectors
+    const closeFilterModalBtn = document.getElementById('closeFilterModal') || document.querySelector('.close-filter-modal');
+    const applyFilterBtn = document.getElementById('applyFilterBtn') || document.querySelector('.apply-filter-btn');
+    const clearFilterBtn = document.getElementById('clearFilterBtn') || document.querySelector('.clear-filter-btn');
     
     // Check if we're on the shop page
     if (!productsGrid) {
@@ -34,6 +35,7 @@ function initShop() {
     
     // Get all product items
     const allProducts = [...document.querySelectorAll('.product-item')];
+    console.log('Found product items:', allProducts.length);
     
     // Current filter and sort settings
     let currentSettings = {
@@ -41,6 +43,15 @@ function initShop() {
         availability: [],
         sortBy: 'featured'
     };
+    
+    // Debug UI elements
+    console.log('Filter option element:', filterOption);
+    console.log('Sort option element:', sortOption);
+    console.log('Sort dropdown element:', sortDropdown);
+    console.log('Filter modal element:', filterModal);
+    console.log('Close filter modal button:', closeFilterModalBtn);
+    console.log('Apply filter button:', applyFilterBtn);
+    console.log('Clear filter button:', clearFilterBtn);
     
     // Set up event listeners for filtering and sorting
     
@@ -173,11 +184,15 @@ function initShop() {
      * Apply selected filters and sorting
      */
     function applyFiltersAndSort() {
+        console.log('Applying filters and sort with settings:', JSON.stringify(currentSettings));
+        
         // Filter products
         let filteredProducts = filterProducts(allProducts, currentSettings.category, currentSettings.availability);
+        console.log('Filtered products count:', filteredProducts.length);
         
         // Sort filtered products
         const sortedProducts = sortProducts(filteredProducts, currentSettings.sortBy);
+        console.log('Sorted products count:', sortedProducts.length);
         
         // Display products
         displayProducts(sortedProducts);
