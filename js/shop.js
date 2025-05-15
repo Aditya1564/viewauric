@@ -1,5 +1,5 @@
 /**
- * Auric Shop Page - New Design
+ * Auric Shop Page 
  * 
  * This script handles the shop page functionality:
  * 1. Product filtering by category and availability
@@ -30,10 +30,10 @@ function initShop() {
         return; // Not on shop page, exit
     }
     
-    console.log('Shop page detected, initializing new shop functionality');
+    console.log('Shop page detected, initializing shop functionality');
     
     // Get all product items
-    const allProducts = [...document.querySelectorAll('.product-card')];
+    const allProducts = [...document.querySelectorAll('.product-item')];
     
     // Current filter and sort settings
     let currentSettings = {
@@ -166,38 +166,6 @@ function initShop() {
         });
     }
     
-    // Add to cart buttons
-    const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
-    if (addToCartButtons) {
-        addToCartButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                e.preventDefault();
-                const productCard = button.closest('.product-card');
-                const productId = productCard.dataset.productId;
-                
-                console.log(`Adding product ${productId} to cart`);
-                
-                // If CartManager exists, add product to cart
-                if (typeof CartManager !== 'undefined' && CartManager.addToCart) {
-                    // Get product details
-                    const productTitle = productCard.querySelector('.product-title').textContent;
-                    const productPrice = parseInt(productCard.dataset.price);
-                    const productImage = productCard.querySelector('.product-image img').src;
-                    
-                    const product = {
-                        id: productId,
-                        name: productTitle,
-                        price: productPrice,
-                        image: productImage,
-                        quantity: 1
-                    };
-                    
-                    CartManager.addToCart(product);
-                }
-            });
-        });
-    }
-    
     // Initialize with default view
     applyFiltersAndSort();
     
@@ -313,36 +281,30 @@ function initShop() {
         products.forEach(product => {
             // Clone the node to remove any existing animation classes
             const productClone = product.cloneNode(true);
+            productClone.classList.add('visible');
             
-            // Re-attach event listener to add to cart button
-            const addToCartBtn = productClone.querySelector('.add-to-cart-btn');
-            if (addToCartBtn) {
-                addToCartBtn.addEventListener('click', (e) => {
+            // Re-attach event listener to wishlist button
+            const wishlistBtn = productClone.querySelector('.add-to-wishlist');
+            if (wishlistBtn) {
+                wishlistBtn.addEventListener('click', (e) => {
                     e.preventDefault();
-                    const productId = productClone.dataset.productId;
-                    console.log(`Adding product ${productId} to cart`);
+                    e.stopPropagation();
                     
-                    // If CartManager exists, add product to cart
-                    if (typeof CartManager !== 'undefined' && CartManager.addToCart) {
-                        // Get product details
-                        const productTitle = productClone.querySelector('.product-title').textContent;
-                        const productPrice = parseInt(productClone.dataset.price);
-                        const productImage = productClone.querySelector('.product-image img').src;
-                        
-                        const product = {
-                            id: productId,
-                            name: productTitle,
-                            price: productPrice,
-                            image: productImage,
-                            quantity: 1
-                        };
-                        
-                        CartManager.addToCart(product);
+                    // If WishlistManager exists, toggle product in wishlist
+                    if (typeof WishlistManager !== 'undefined' && WishlistManager.toggleWishlistItem) {
+                        WishlistManager.toggleWishlistItem(productClone.dataset.productId);
                     }
                 });
             }
             
             productsGrid.appendChild(productClone);
         });
+        
+        // Re-initialize wishlist buttons for newly added elements
+        if (typeof WishlistManager !== 'undefined' && WishlistManager.updateWishlistUI) {
+            setTimeout(() => {
+                WishlistManager.updateWishlistUI();
+            }, 100);
+        }
     }
 }
