@@ -988,7 +988,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <div id="orderDetails"></div>
                             </div>
                             <div class="modal-footer">
-                                <a href="index.html" class="btn btn-primary">Continue Shopping</a>
+                                <a href="index.html" class="btn btn-primary" style="background-color: #603000; border-color: #603000;">Continue Shopping</a>
                             </div>
                         </div>
                     </div>
