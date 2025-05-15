@@ -261,10 +261,11 @@ function initShop() {
         });
     }
 
-    // Initialize shop with default view
+    // Initialize shop with default view showing all products
     setTimeout(() => {
-        console.log('Initializing default shop view');
-        applyFiltersAndSort();
+        console.log('Initializing default shop view - showing all products');
+        // Initially just display all products without filtering/sorting
+        displayAllProducts(originalProducts);
     }, 100);
 
     /**
@@ -360,10 +361,61 @@ function initShop() {
     }
 
     /**
-     * Display products in the grid
+     * Display all products in the grid without filtering
+     * Used for initial page load
+     */
+    function displayAllProducts(products) {
+        console.log('Displaying all products in grid without filtering');
+        
+        // Clear grid first
+        elements.productsGrid.innerHTML = '';
+        
+        if (products.length === 0) {
+            // Show no products message
+            const noProducts = document.createElement('div');
+            noProducts.className = 'no-results';
+            noProducts.innerHTML = '<p>No products available in shop.</p>';
+            elements.productsGrid.appendChild(noProducts);
+            return;
+        }
+        
+        // Add all products with animation
+        products.forEach(product => {
+            // Clone the node to remove any existing animation classes
+            const productClone = product.cloneNode(true);
+            productClone.classList.add('visible');
+            
+            // Re-attach event listener to wishlist button
+            const wishlistBtn = productClone.querySelector('.add-to-wishlist');
+            if (wishlistBtn) {
+                wishlistBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // If WishlistManager exists, toggle product in wishlist
+                    if (typeof WishlistManager !== 'undefined' && WishlistManager.toggleWishlistItem) {
+                        WishlistManager.toggleWishlistItem(productClone.dataset.productId);
+                    }
+                });
+            }
+            
+            elements.productsGrid.appendChild(productClone);
+        });
+        
+        // Re-initialize wishlist buttons for newly added elements
+        if (typeof WishlistManager !== 'undefined' && WishlistManager.updateWishlistUI) {
+            setTimeout(() => {
+                WishlistManager.updateWishlistUI();
+            }, 100);
+        }
+    }
+
+    /**
+     * Display filtered/sorted products in the grid
+     * Used when filters or sorting are applied
      */
     function displayProducts(products) {
-        console.log('Displaying products in grid');
+        console.log('Displaying filtered/sorted products in grid');
         
         // Clear grid first
         elements.productsGrid.innerHTML = '';
@@ -377,7 +429,72 @@ function initShop() {
             return;
         }
         
+        // Only display a subset of products (limited to first 4 items)
+        const limitedProducts = products.slice(0, 4);
+        console.log(`Showing ${limitedProducts.length} products out of ${products.length} total matches`);
+        
         // Add products with animation
+        limitedProducts.forEach(product => {
+            // Clone the node to remove any existing animation classes
+            const productClone = product.cloneNode(true);
+            productClone.classList.add('visible');
+            
+            // Re-attach event listener to wishlist button
+            const wishlistBtn = productClone.querySelector('.add-to-wishlist');
+            if (wishlistBtn) {
+                wishlistBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // If WishlistManager exists, toggle product in wishlist
+                    if (typeof WishlistManager !== 'undefined' && WishlistManager.toggleWishlistItem) {
+                        WishlistManager.toggleWishlistItem(productClone.dataset.productId);
+                    }
+                });
+            }
+            
+            elements.productsGrid.appendChild(productClone);
+        });
+        
+        // If there are more products than shown, add a message
+        if (products.length > limitedProducts.length) {
+            const moreProductsMessage = document.createElement('div');
+            moreProductsMessage.className = 'more-products-message';
+            moreProductsMessage.innerHTML = `
+                <p>Showing ${limitedProducts.length} out of ${products.length} matching products</p>
+                <button id="showAllProductsBtn" class="show-all-btn">Show All Matching Products</button>
+            `;
+            elements.productsGrid.appendChild(moreProductsMessage);
+            
+            // Add event listener to show all button
+            const showAllBtn = document.getElementById('showAllProductsBtn');
+            if (showAllBtn) {
+                showAllBtn.addEventListener('click', () => {
+                    // Display all matching products when button is clicked
+                    displayAllMatchingProducts(products);
+                });
+            }
+        }
+        
+        // Re-initialize wishlist buttons for newly added elements
+        if (typeof WishlistManager !== 'undefined' && WishlistManager.updateWishlistUI) {
+            setTimeout(() => {
+                WishlistManager.updateWishlistUI();
+            }, 100);
+        }
+    }
+    
+    /**
+     * Display all matching products without limitation
+     * Used when user clicks "Show All" button
+     */
+    function displayAllMatchingProducts(products) {
+        console.log('Displaying all matching products without limitation');
+        
+        // Clear grid first
+        elements.productsGrid.innerHTML = '';
+        
+        // Add all matching products with animation
         products.forEach(product => {
             // Clone the node to remove any existing animation classes
             const productClone = product.cloneNode(true);
