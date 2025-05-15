@@ -67,7 +67,7 @@
 }
 
 .btn-track {
-    background-color: #d4af37;
+    background-color: #603000;
     color: #fff;
     border: none;
     border-radius: 5px;
@@ -81,7 +81,7 @@
 }
 
 .btn-track:hover {
-    background-color: #c19b2f;
+    background-color:#603000;
 }
 
 .order-info {
