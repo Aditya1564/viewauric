@@ -368,6 +368,21 @@ h1, h2, h3, h4, h5, h6 {
     border-radius: 0.25rem;
 }
 
+/* Footer styling */
+footer {
+    background-color: #f9f6f0 !important;
+}
+
+footer a {
+    color: #9c7c38;
+    font-weight: 500;
+}
+
+footer a:hover {
+    color: #85682e;
+    text-decoration: underline !important;
+}
+
 /* Responsive adjustments */
 @media (max-width: 576px) {
     .container {

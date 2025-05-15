@@ -23,9 +23,7 @@
     <!-- Netlify Functions Helper -->
     <script src="js/netlify-helpers.js"></script>
     
-    <!-- Deployment Debugging Tools -->
-    <script src="razorpay-debug.js"></script>
-    <script src="netlify-deploy-checklist.js"></script>
+    <!-- Note: Debug scripts removed as requested -->
     
     <!-- Firebase Config -->
     <script>
@@ -67,51 +65,7 @@
         function updateAuthUI(user) {
             // Add login status indicator to the header
             const header = document.querySelector('.simple-header .container');
-            
-            if (!document.getElementById('authStatus')) {
-                const authStatus = document.createElement('div');
-                authStatus.id = 'authStatus';
-                authStatus.classList.add('auth-status');
-                authStatus.style.marginLeft = 'auto';
-                authStatus.style.marginRight = '15px';
-                
-                header.insertBefore(authStatus, header.lastElementChild);
-            }
-            
-            const authStatusElement = document.getElementById('authStatus');
-            
-            if (user) {
-                // User is signed in
-                authStatusElement.innerHTML = `
-                    <div class="d-flex align-items-center">
-                        <span class="badge bg-success me-2">Logged In</span>
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                ${user.email}
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="userDropdown">
-                                <li><a class="dropdown-item" href="profile.html">Profile</a></li>
-                                <li><a class="dropdown-item" href="#" id="logoutButton">Log Out</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                `;
-                
-                // Add event listener to logout button
-                document.getElementById('logoutButton').addEventListener('click', function(e) {
-                    e.preventDefault();
-                    firebase.auth().signOut();
-                });
-            } else {
-                // No user is signed in
-                authStatusElement.innerHTML = `
-                    <div class="d-flex align-items-center">
-                        <span class="badge bg-secondary me-2">Not Logged In</span>
-                        <a href="login.html" class="btn btn-sm btn-outline-primary me-2">Login</a>
-                        <a href="signup.html" class="btn btn-sm btn-primary">Sign Up</a>
-                    </div>
-                `;
-            }
+            // Auth status is not shown in the checkout page as per new design
         }
     </script>
 </head>
@@ -184,6 +138,12 @@
                                 <div class="d-flex justify-content-between">
                                     <h5>Total:</h5>
                                     <h5 id="orderTotal">₹0.00</h5>
+                                </div>
+                                
+                                <div class="text-center mt-4">
+                                    <a href="index.html" class="btn continue-shopping-btn">
+                                        <i class="fas fa-store me-1"></i> Continue Shopping
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -450,5 +410,17 @@
         console.log("Loading cart dependencies for improved cart system");
     </script>
     <script src="checkout-script-simplified.js"></script>
+
+    <!-- Footer with developer credit -->
+    <footer class="bg-light mt-5 py-4 border-top">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p class="mb-0">&copy; 2025 Auric Jewelry. All Rights Reserved.</p>
+                    <p class="mb-0 mt-1">Designed & Developed by <a href="https://savannaik.netlify.app/" target="_blank" class="text-decoration-none">Savan Naik</a></p>
+                </div>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>
