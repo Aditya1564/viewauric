@@ -26,21 +26,21 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-outline-secondary {
-    color: #603000;
-    border-color: #603000;
+    color: #7a4012;
+    border-color: #7a4012;
 }
 
 .btn-outline-secondary:hover {
-    background-color: #603000;
-    border-color: #603000;
+    background-color: #7a4012;
+    border-color: #7a4012;
     color: white;
 }
 
 /* Custom Button Styles */
 .custom-back-btn:hover,
 .custom-continue-btn:hover {
-    background-color: #603000;
-    border-color: #603000;
+    background-color: #7a4012;
+    border-color: #7a4012;
     color: white !important; /* This ensures the text color stays white on hover */
 }
 
@@ -78,8 +78,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .step-icon.active {
-    background-color: #603000;
-    border-color: #603000;
+    background-color: #7a4012;
+    border-color: #7a4012;
     color: white;
 }
 
@@ -116,7 +116,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .progress-bar {
-    background-color: #603000;
+    background-color: #7a4012;
     transition: width 0.6s ease;
 }
 
@@ -125,7 +125,7 @@ h1, h2, h3, h4, h5, h6 {
     margin-top: 20px;
     background-color: #f9f6f0;
     padding: 15px;
-    border-left: 3px solid #603000;
+    border-left: 3px solid #7a4012;
 }
 
 #address-confirmation {
@@ -147,7 +147,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .simple-header .logo a {
-    color: #603000;
+    color: #7a4012;
     font-family: 'Playfair Display', serif;
     text-decoration: none;
 }
@@ -270,7 +270,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .form-control:focus {
     box-shadow: none;
-    border-color: #603000;
+    border-color: #7a4012;
 }
 
 .form-label {
@@ -382,12 +382,12 @@ footer {
 }
 
 footer a {
-    color: #603000;
+    color: #7a4012;
     font-weight: 500;
 }
 
 footer a:hover {
-    color: #4e2700;
+    color: #603000;
     text-decoration: underline !important;
 }
 
