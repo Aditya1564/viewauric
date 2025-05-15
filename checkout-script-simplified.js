@@ -1051,6 +1051,16 @@ document.addEventListener('DOMContentLoaded', function() {
         const confirmationModalElement = document.getElementById('confirmationModal');
         const confirmationModal = new bootstrap.Modal(confirmationModalElement);
         
+        // Make sure clicking the "Continue Shopping" button works by adding a direct event handler
+        const continueShoppingBtn = confirmationModalElement.querySelector('.modal-footer a');
+        if (continueShoppingBtn) {
+            continueShoppingBtn.onclick = function() {
+                console.log('Continue Shopping button clicked');
+                window.location.href = 'index.html';
+                return false;
+            };
+        }
+        
         // Add an event listener for when the modal is fully shown
         confirmationModalElement.addEventListener('shown.bs.modal', function() {
             console.log('Order confirmation modal shown, ensuring cart is cleared');
