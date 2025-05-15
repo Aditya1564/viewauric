@@ -13,9 +13,7 @@
     <link rel="stylesheet" href="css/navbar.css?v=1.1.1">
    <!-- <link rel="stylesheet" href="css/mobile-menu.css?v=1.0.0">-->
     <link rel="stylesheet" href="css/cart.css?v=1.0.2">
-    
-
-    
+    <link rel="stylesheet" href="css/testimonials.css?v=1.0.0">
   </head>
   <body>
 
@@ -492,6 +490,58 @@
         </div>
     </section>
     
+    <!-- Testimonials Section -->
+    <section class="testimonials-section">
+        <h2 class="testimonials-title">Customer Testimonials</h2>
+        <div class="testimonials-container">
+            <div class="testimonials-scroll">
+                <!-- Testimonial 1 -->
+                <div class="testimonial-item">
+                    <video class="testimonial-video" poster="images/slider/slider-image1.jpg" controls>
+                        <source src="1024X768.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <div class="testimonial-content">
+                        <h3 class="testimonial-name">Priya Sharma</h3>
+                        <p class="testimonial-location">Mumbai</p>
+                        <p class="testimonial-text">The gold necklace I purchased from Auric is absolutely stunning. The craftsmanship is exceptional and it has become my favorite piece of jewelry.</p>
+                    </div>
+                </div>
+                
+                <!-- Testimonial 2 -->
+                <div class="testimonial-item">
+                    <video class="testimonial-video" poster="images/slider/slider-image2.jpg" controls>
+                        <source src="1024X768(2).mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <div class="testimonial-content">
+                        <h3 class="testimonial-name">Anjali Reddy</h3>
+                        <p class="testimonial-location">Bangalore</p>
+                        <p class="testimonial-text">I ordered a pair of diamond earrings for my wedding, and they arrived beautifully packaged. The quality exceeded my expectations!</p>
+                    </div>
+                </div>
+                
+                <!-- Testimonial 3 -->
+                <div class="testimonial-item">
+                    <video class="testimonial-video" poster="images/category/Screenshot_20250504_130638.jpg" controls>
+                        <source src="1024X768(3).mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <div class="testimonial-content">
+                        <h3 class="testimonial-name">Neha Patel</h3>
+                        <p class="testimonial-location">Delhi</p>
+                        <p class="testimonial-text">The customer service at Auric is outstanding. They helped me select the perfect bracelet for my anniversary. Highly recommend!</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="testimonial-controls">
+                <button id="scrollLeft" class="testimonial-btn">Previous</button>
+                <button id="scrollRight" class="testimonial-btn">Next</button>
+            </div>
+        </div>
+    </section>
+    
     <!-- Made to Order Section -->
     <section class="made-to-order">
         <div class="made-to-order-content">
@@ -792,5 +842,8 @@
         }
       };
     </script>
+    
+    <!-- Testimonial Script -->
+    <script src="js/testimonial-scroller.js"></script>
   </body>
 </html>
