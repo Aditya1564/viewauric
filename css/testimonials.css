@@ -25,10 +25,27 @@
 
 .testimonials-scroll {
     display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
+    overflow-x: auto;
+    scroll-behavior: smooth;
     gap: 30px;
-    padding: 0 15px;
+    padding: 0 15px 20px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #d4af37 #f5f5f5;
+}
+
+.testimonials-scroll::-webkit-scrollbar {
+    height: 8px;
+}
+
+.testimonials-scroll::-webkit-scrollbar-track {
+    background: #f5f5f5;
+    border-radius: 10px;
+}
+
+.testimonials-scroll::-webkit-scrollbar-thumb {
+    background-color: #d4af37;
+    border-radius: 10px;
 }
 
 .testimonial-item {
@@ -38,7 +55,6 @@
     border-radius: 10px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     overflow: hidden;
-    margin-bottom: 10px;
 }
 
 .testimonial-video {
