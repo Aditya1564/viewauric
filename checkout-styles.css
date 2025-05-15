@@ -16,8 +16,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-primary {
-    background-color: #603000;
-    border-color: #603000;
+    background-color: #7a4012;
+    border-color: #7a4012;
 }
 
 .btn-primary:hover, .btn-primary:focus {
@@ -34,6 +34,14 @@ h1, h2, h3, h4, h5, h6 {
     background-color: #603000;
     border-color: #603000;
     color: white;
+}
+
+/* Custom Button Styles */
+.custom-back-btn:hover,
+.custom-continue-btn:hover {
+    background-color: #603000;
+    border-color: #603000;
+    color: white !important; /* This ensures the text color stays white on hover */
 }
 
 .card {
