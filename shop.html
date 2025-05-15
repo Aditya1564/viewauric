@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="css/responsive.css?v=1.0.4">
     <link rel="stylesheet" href="css/navbar.css?v=1.1.1">
     <link rel="stylesheet" href="css/cart.css?v=1.0.2">
-    <link rel="stylesheet" href="css/shop.css?v=1.0.0">
+    <link rel="stylesheet" href="css/shop.css?v=1.0.1">
   </head>
   <body>
 
@@ -91,268 +91,185 @@
     <!-- Overlay for menu background -->
     <div class="menu-overlay" id="menuOverlay"></div>
 
-    <!-- Shop Banner Section -->
-    <section class="shop-banner">
-        <div class="shop-banner-content">
-            <h1>Premium Necklace Collection</h1>
-            <p>Discover our exquisite selection of gold, diamond, polki and pearl necklaces</p>
+    <!-- Shop Filter Header -->
+    <div class="shop-filter-header">
+        <div class="filter-option">FILTER</div>
+        <div class="sort-option">
+            <span>SORT BY</span>
+            <i class="fas fa-chevron-down"></i>
         </div>
-    </section>
-
-    <!-- Shop Filtering Section -->
-    <section class="shop-filter container">
-        <div class="filter-container">
-            <div class="filter-row">
-                <div class="filter-group">
-                    <label for="sort-by">Sort By:</label>
-                    <select id="sort-by" class="filter-select">
-                        <option value="featured">Featured</option>
-                        <option value="price-low-high">Price: Low to High</option>
-                        <option value="price-high-low">Price: High to Low</option>
-                        <option value="newest">Newest</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="filter-category">Category:</label>
-                    <select id="filter-category" class="filter-select">
-                        <option value="all">All Necklaces</option>
-                        <option value="gold">Gold</option>
-                        <option value="diamond">Diamond</option>
-                        <option value="polki">Polki</option>
-                        <option value="pearl">Pearl</option>
-                    </select>
-                </div>
-                <div class="results-count">
-                    <span id="product-count">12</span> Products
-                </div>
-            </div>
-        </div>
-    </section>
+    </div>
 
     <!-- Product Grid Section -->
     <section class="shop-products container">
-        <div class="products-grid" id="products-grid">
+        <div class="products-grid-new" id="products-grid">
             <!-- Gold Necklaces -->
-            <div class="product-item" data-product-id="GN-01" data-category="gold" data-price="87500" data-date="2025-03-15">
-                <a href="product-detail.html" style="text-decoration: none; color: inherit;">
-                    <div class="product-image">
-                        <img src="images/product-category/IMG_20250504_150241.jpg" alt="Royal Gold Necklace">
-                        <div class="product-badge">SAVE 15%</div>
-                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
-                    </div>
-                    <div class="product-details">
-                        <h3 class="product-name">Royal Gold Necklace</h3>
-                        <div class="product-pricing">
-                            <span class="current-price">₹87,500</span>
-                            <span class="original-price">₹102,950</span>
-                            <span class="discount-tag">-15%</span>
-                        </div>
-                    </div>
-                </a>
+            <div class="product-card" data-product-id="GN-01" data-category="gold" data-price="80155" data-date="2025-03-15">
+                <div class="product-image">
+                    <img src="images/product-category/IMG_20250504_150241.jpg" alt="Indrani Gutta Necklace">
+                    <div class="product-badge">Ready To Ship</div>
+                    <button class="add-to-cart-btn">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">Indrani Gutta Necklace</h3>
+                    <div class="product-price">Rs. 80,155.00</div>
+                </div>
             </div>
 
-            <div class="product-item" data-product-id="GN-02" data-category="gold" data-price="94200" data-date="2025-02-20">
-                <a href="product-detail.html" style="text-decoration: none; color: inherit;">
-                    <div class="product-image">
-                        <img src="images/product-category/IMG_20250504_150418.jpg" alt="Antique Gold Necklace">
-                        <div class="product-badge">SAVE 12%</div>
-                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
-                    </div>
-                    <div class="product-details">
-                        <h3 class="product-name">Antique Gold Necklace</h3>
-                        <div class="product-pricing">
-                            <span class="current-price">₹94,200</span>
-                            <span class="original-price">₹107,000</span>
-                            <span class="discount-tag">-12%</span>
-                        </div>
-                    </div>
-                </a>
+            <div class="product-card" data-product-id="GN-02" data-category="gold" data-price="37796" data-date="2025-02-20">
+                <div class="product-image">
+                    <img src="images/product-category/IMG_20250504_150418.jpg" alt="Chandrika Kundan Necklace">
+                    <div class="product-badge badge-made-to-order">Made To Order</div>
+                    <button class="add-to-cart-btn">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">Chandrika Kundan Necklace</h3>
+                    <div class="product-price">Rs. 37,796.00</div>
+                </div>
             </div>
 
-            <div class="product-item" data-product-id="GN-03" data-category="gold" data-price="75800" data-date="2025-04-10">
-                <a href="product-detail.html" style="text-decoration: none; color: inherit;">
-                    <div class="product-image">
-                        <img src="images/product-category/IMG_20250504_150523.jpg" alt="Classic Gold Necklace">
-                        <div class="product-badge">SAVE 20%</div>
-                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
-                    </div>
-                    <div class="product-details">
-                        <h3 class="product-name">Classic Gold Necklace</h3>
-                        <div class="product-pricing">
-                            <span class="current-price">₹75,800</span>
-                            <span class="original-price">₹94,750</span>
-                            <span class="discount-tag">-20%</span>
-                        </div>
-                    </div>
-                </a>
+            <div class="product-card" data-product-id="GN-03" data-category="gold" data-price="89680" data-date="2025-04-10">
+                <div class="product-image">
+                    <img src="images/product-category/IMG_20250504_150523.jpg" alt="Rajnavi Kundan Necklace">
+                    <div class="product-badge">Ready To Ship</div>
+                    <button class="add-to-cart-btn">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">Rajnavi Kundan Necklace</h3>
+                    <div class="product-price">Rs. 89,680.00</div>
+                </div>
             </div>
 
-            <!-- Diamond Necklaces -->
-            <div class="product-item" data-product-id="DN-01" data-category="diamond" data-price="142500" data-date="2025-04-05">
-                <a href="product-detail.html" style="text-decoration: none; color: inherit;">
-                    <div class="product-image">
-                        <img src="images/product-category/IMG_20250504_150655.jpg" alt="Platinum Diamond Necklace">
-                        <div class="product-badge">SAVE 10%</div>
-                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
-                    </div>
-                    <div class="product-details">
-                        <h3 class="product-name">Platinum Diamond Necklace</h3>
-                        <div class="product-pricing">
-                            <span class="current-price">₹142,500</span>
-                            <span class="original-price">₹158,330</span>
-                            <span class="discount-tag">-10%</span>
-                        </div>
-                    </div>
-                </a>
+            <div class="product-card" data-product-id="DN-01" data-category="diamond" data-price="12062" data-date="2025-04-05">
+                <div class="product-image">
+                    <img src="images/product-category/IMG_20250504_150655.jpg" alt="Peacock Devotion Antique Necklace">
+                    <div class="product-badge badge-made-to-order">Made To Order</div>
+                    <button class="add-to-cart-btn">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">Peacock Devotion Antique Necklace</h3>
+                    <div class="product-price">Rs. 12,062.00</div>
+                </div>
             </div>
 
-            <div class="product-item" data-product-id="DN-02" data-category="diamond" data-price="168300" data-date="2025-03-22">
-                <a href="product-detail.html" style="text-decoration: none; color: inherit;">
-                    <div class="product-image">
-                        <img src="images/product-category/IMG_20250504_145717.jpg" alt="Radiant Diamond Necklace">
-                        <div class="product-badge">SAVE 8%</div>
-                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
-                    </div>
-                    <div class="product-details">
-                        <h3 class="product-name">Radiant Diamond Necklace</h3>
-                        <div class="product-pricing">
-                            <span class="current-price">₹168,300</span>
-                            <span class="original-price">₹182,940</span>
-                            <span class="discount-tag">-8%</span>
-                        </div>
-                    </div>
-                </a>
+            <div class="product-card" data-product-id="DN-02" data-category="diamond" data-price="67520" data-date="2025-03-22">
+                <div class="product-image">
+                    <img src="images/product-category/IMG_20250504_145717.jpg" alt="Maha Lakshmi Temple Necklace">
+                    <div class="product-badge">Ready To Ship</div>
+                    <button class="add-to-cart-btn">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">Maha Lakshmi Temple Necklace</h3>
+                    <div class="product-price">Rs. 67,520.00</div>
+                </div>
             </div>
 
-            <div class="product-item" data-product-id="DN-03" data-category="diamond" data-price="125600" data-date="2025-01-15">
-                <a href="product-detail.html" style="text-decoration: none; color: inherit;">
-                    <div class="product-image">
-                        <img src="images/product-category/IMG_20250504_145745.jpg" alt="Elegant Diamond Necklace">
-                        <div class="product-badge">SAVE 18%</div>
-                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
-                    </div>
-                    <div class="product-details">
-                        <h3 class="product-name">Elegant Diamond Necklace</h3>
-                        <div class="product-pricing">
-                            <span class="current-price">₹125,600</span>
-                            <span class="original-price">₹153,170</span>
-                            <span class="discount-tag">-18%</span>
-                        </div>
-                    </div>
-                </a>
+            <div class="product-card" data-product-id="DN-03" data-category="diamond" data-price="45890" data-date="2025-01-15">
+                <div class="product-image">
+                    <img src="images/product-category/IMG_20250504_145745.jpg" alt="Devi Emerald Kundan Necklace">
+                    <div class="product-badge badge-made-to-order">Made To Order</div>
+                    <button class="add-to-cart-btn">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">Devi Emerald Kundan Necklace</h3>
+                    <div class="product-price">Rs. 45,890.00</div>
+                </div>
             </div>
 
-            <!-- Polki Necklaces -->
-            <div class="product-item" data-product-id="PN-01" data-category="polki" data-price="108500" data-date="2025-02-10">
-                <a href="product-detail.html" style="text-decoration: none; color: inherit;">
-                    <div class="product-image">
-                        <img src="images/product-category/IMG_20250504_150226.jpg" alt="Royal Polki Necklace">
-                        <div class="product-badge">SAVE 12%</div>
-                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
-                    </div>
-                    <div class="product-details">
-                        <h3 class="product-name">Royal Polki Necklace</h3>
-                        <div class="product-pricing">
-                            <span class="current-price">₹108,500</span>
-                            <span class="original-price">₹123,290</span>
-                            <span class="discount-tag">-12%</span>
-                        </div>
-                    </div>
-                </a>
+            <div class="product-card" data-product-id="PN-01" data-category="polki" data-price="72340" data-date="2025-02-10">
+                <div class="product-image">
+                    <img src="images/product-category/IMG_20250504_150226.jpg" alt="Pradhvi Polki Necklace">
+                    <div class="product-badge">Ready To Ship</div>
+                    <button class="add-to-cart-btn">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">Pradhvi Polki Necklace</h3>
+                    <div class="product-price">Rs. 72,340.00</div>
+                </div>
             </div>
 
-            <div class="product-item" data-product-id="PN-02" data-category="polki" data-price="132400" data-date="2025-03-05">
-                <a href="product-detail.html" style="text-decoration: none; color: inherit;">
-                    <div class="product-image">
-                        <img src="images/product-category/IMG_20250504_150254.jpg" alt="Traditional Polki Necklace">
-                        <div class="product-badge">SAVE 15%</div>
-                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
-                    </div>
-                    <div class="product-details">
-                        <h3 class="product-name">Traditional Polki Necklace</h3>
-                        <div class="product-pricing">
-                            <span class="current-price">₹132,400</span>
-                            <span class="original-price">₹155,760</span>
-                            <span class="discount-tag">-15%</span>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <div class="product-item" data-product-id="PN-03" data-category="polki" data-price="95700" data-date="2025-04-20">
-                <a href="product-detail.html" style="text-decoration: none; color: inherit;">
-                    <div class="product-image">
-                        <img src="images/category/IMG_20250504_145653.jpg" alt="Bridal Polki Necklace">
-                        <div class="product-badge">SAVE 22%</div>
-                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
-                    </div>
-                    <div class="product-details">
-                        <h3 class="product-name">Bridal Polki Necklace</h3>
-                        <div class="product-pricing">
-                            <span class="current-price">₹95,700</span>
-                            <span class="original-price">₹122,700</span>
-                            <span class="discount-tag">-22%</span>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <!-- Pearl Necklaces -->
-            <div class="product-item" data-product-id="PN-04" data-category="pearl" data-price="58400" data-date="2025-01-25">
-                <a href="product-detail.html" style="text-decoration: none; color: inherit;">
-                    <div class="product-image">
-                        <img src="images/category/Screenshot_20250504_130638.jpg" alt="South Sea Pearl Necklace">
-                        <div class="product-badge">SAVE 25%</div>
-                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
-                    </div>
-                    <div class="product-details">
-                        <h3 class="product-name">South Sea Pearl Necklace</h3>
-                        <div class="product-pricing">
-                            <span class="current-price">₹58,400</span>
-                            <span class="original-price">₹77,870</span>
-                            <span class="discount-tag">-25%</span>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <div class="product-item" data-product-id="PN-05" data-category="pearl" data-price="72600" data-date="2025-03-10">
-                <a href="product-detail.html" style="text-decoration: none; color: inherit;">
-                    <div class="product-image">
-                        <img src="images/category/Screenshot_20250504_130717.jpg" alt="Multi-Strand Pearl Necklace">
-                        <div class="product-badge">SAVE 18%</div>
-                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
-                    </div>
-                    <div class="product-details">
-                        <h3 class="product-name">Multi-Strand Pearl Necklace</h3>
-                        <div class="product-pricing">
-                            <span class="current-price">₹72,600</span>
-                            <span class="original-price">₹88,540</span>
-                            <span class="discount-tag">-18%</span>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <div class="product-item" data-product-id="PN-06" data-category="pearl" data-price="64300" data-date="2025-02-28">
-                <a href="product-detail.html" style="text-decoration: none; color: inherit;">
-                    <div class="product-image">
-                        <img src="images/category/Screenshot_20250504_130805.jpg" alt="Designer Pearl Necklace">
-                        <div class="product-badge">SAVE 20%</div>
-                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
-                    </div>
-                    <div class="product-details">
-                        <h3 class="product-name">Designer Pearl Necklace</h3>
-                        <div class="product-pricing">
-                            <span class="current-price">₹64,300</span>
-                            <span class="original-price">₹80,370</span>
-                            <span class="discount-tag">-20%</span>
-                        </div>
-                    </div>
-                </a>
+            <div class="product-card" data-product-id="PN-02" data-category="polki" data-price="58700" data-date="2025-03-05">
+                <div class="product-image">
+                    <img src="images/product-category/IMG_20250504_150254.jpg" alt="Vihana Antique Necklace">
+                    <div class="product-badge badge-made-to-order">Made To Order</div>
+                    <button class="add-to-cart-btn">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">Vihana Antique Necklace</h3>
+                    <div class="product-price">Rs. 58,700.00</div>
+                </div>
             </div>
         </div>
     </section>
+
+    <!-- Sort Options Dropdown (Hidden Initially) -->
+    <div class="sort-dropdown">
+        <div class="sort-dropdown-option" data-sort="featured">Featured</div>
+        <div class="sort-dropdown-option" data-sort="price-low-high">Price: Low to High</div>
+        <div class="sort-dropdown-option" data-sort="price-high-low">Price: High to Low</div>
+        <div class="sort-dropdown-option" data-sort="newest">Newest</div>
+    </div>
+
+    <!-- Filter Modal (Hidden Initially) -->
+    <div class="filter-modal">
+        <div class="filter-modal-header">
+            <h2>Filter Products</h2>
+            <button class="close-filter-modal">×</button>
+        </div>
+        <div class="filter-modal-body">
+            <div class="filter-section">
+                <h3>Category</h3>
+                <div class="filter-options">
+                    <label class="filter-option-label">
+                        <input type="radio" name="category" value="all" checked> All Necklaces
+                    </label>
+                    <label class="filter-option-label">
+                        <input type="radio" name="category" value="gold"> Gold
+                    </label>
+                    <label class="filter-option-label">
+                        <input type="radio" name="category" value="diamond"> Diamond
+                    </label>
+                    <label class="filter-option-label">
+                        <input type="radio" name="category" value="polki"> Polki
+                    </label>
+                    <label class="filter-option-label">
+                        <input type="radio" name="category" value="pearl"> Pearl
+                    </label>
+                </div>
+            </div>
+            <div class="filter-section">
+                <h3>Availability</h3>
+                <div class="filter-options">
+                    <label class="filter-option-label">
+                        <input type="checkbox" name="availability" value="ready-to-ship"> Ready to Ship
+                    </label>
+                    <label class="filter-option-label">
+                        <input type="checkbox" name="availability" value="made-to-order"> Made to Order
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="filter-modal-footer">
+            <button class="apply-filter-btn">Apply Filters</button>
+            <button class="clear-filter-btn">Clear All</button>
+        </div>
+    </div>
 
     <!-- Newsletter Section -->
     <section class="newsletter-section">
