@@ -655,8 +655,25 @@ document.addEventListener('DOMContentLoaded', function() {
         submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
         
         try {
-            // Note: Razorpay test popups removed as requested
-            // For all payment methods, including Razorpay, continue with the standard flow
+            // Process payment based on the selected payment method
+            if (paymentMethod === 'Razorpay') {
+                console.log('Razorpay payment method selected, opening payment gateway...');
+                
+                try {
+                    // Process payment with Razorpay (this will open the popup)
+                    await processRazorpayPayment(orderData);
+                    
+                    // If we get here, it means the popup didn't open or there was another issue
+                    // The actual success handling is in the handleRazorpaySuccess function
+                    return;
+                } catch (razorpayError) {
+                    console.error('Error processing Razorpay payment:', razorpayError);
+                    throw new Error('Payment processing failed: ' + razorpayError.message);
+                }
+            }
+            
+            // Only continue with the rest of the flow for non-Razorpay payment methods
+            // or if Razorpay processing fails
             
             // Save order to Firebase if the module is loaded and user is logged in
             if (firebaseOrdersModule) {
