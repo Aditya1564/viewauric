@@ -50,7 +50,8 @@
 
 .testimonial-item {
     flex: 0 0 auto;
-    width: 300px; /* Decreased width from 380px */
+    width: 80%; /* Changed to 80% width as requested */
+    max-width: 500px; /* Adding max-width to prevent too wide videos on large screens */
     background-color: #fff;
     border-radius: 10px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
@@ -101,7 +102,8 @@
 /* Responsive adjustments */
 @media (max-width: 1100px) {
     .testimonial-item {
-        width: 260px;
+        width: 80%;
+        max-width: 400px;
     }
     
     .testimonial-video {
@@ -111,8 +113,8 @@
 
 @media (max-width: 767px) {
     .testimonial-item {
-        width: 100%;
-        max-width: 280px;
+        width: 80%;
+        max-width: 320px;
     }
     
     .testimonial-video {
