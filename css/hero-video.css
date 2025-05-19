@@ -147,7 +147,7 @@
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 2rem;
+    gap: 4rem;
     max-width: 1000px;
     margin: 0 auto;
     padding: 0 20px;
@@ -155,10 +155,10 @@
 
 .product-image-container {
     position: relative;
-    width: 250px;
-    height: 350px;
+    width: 280px;
+    height: 380px;
     overflow: hidden;
-    border-radius: 5px;
+  /*  border-radius: 5px;*/
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
@@ -247,7 +247,7 @@
     }
     
     .brides-jewellery {
-        background: linear-gradient(135deg, white 65%, #f8e3c8 80%);
+        background: linear-gradient(135deg, white 65%, #f8e3c8 40%);
         padding: 1rem 0 3rem 0;
     }
     
@@ -262,8 +262,11 @@
 
     
     .product-image-container {
-        width: 150px;
-        height: 210px;
+     /*   width: 150px;
+        height: 210px;*/
+
+        width: 180px;
+        height: 240px;
     }
     
     .product-image-container:nth-child(1) {
