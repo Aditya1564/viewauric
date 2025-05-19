@@ -50,7 +50,7 @@
 
 .testimonial-item {
     flex: 0 0 auto;
-    width: 80%; /* Changed to 80% width as requested */
+    width: 60%; /* Changed to 80% width as requested */
     max-width: 500px; /* Adding max-width to prevent too wide videos on large screens */
     background-color: #fff;
     border-radius: 10px;
@@ -62,6 +62,8 @@
     position: relative;
     width: 100%;
     height: 100%;
+    overflow: hidden;
+    cursor: pointer;
 }
 
 .video-link-icon {
@@ -92,6 +94,55 @@
     font-size: 18px;
 }
 
+.play-button-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 5;
+}
+
+.play-button {
+    width: 80px;
+    height: 80px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+}
+
+.play-button i {
+    font-size: 30px;
+    color: #d4af37;
+    margin-left: 5px; /* Slight offset to visually center the play icon */
+}
+
+.play-button:hover {
+    transform: scale(1.1);
+    background-color: white;
+}
+
+.video-title {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+    color: white;
+    padding: 15px;
+    text-align: center;
+    font-weight: 500;
+    z-index: 6;
+}
+
 .testimonial-video {
     width: 100%;
     height: 500px; /* Increased height from 450px */
@@ -102,7 +153,7 @@
 /* Responsive adjustments */
 @media (max-width: 1100px) {
     .testimonial-item {
-        width: 80%;
+        width: 60%;
         max-width: 400px;
     }
     
@@ -113,7 +164,7 @@
 
 @media (max-width: 767px) {
     .testimonial-item {
-        width: 80%;
+        width: 60%;
         max-width: 320px;
     }
     
