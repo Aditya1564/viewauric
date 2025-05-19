@@ -116,7 +116,7 @@
     padding: 2rem 0 4rem 0;
     text-align: center;
     position: relative;
-    background: linear-gradient(135deg, white 65%, #f8e3c8 85%);
+    background: linear-gradient(135deg, white 65%, #f8e3c8 40%);
 }
 
 .vamangam-title {
@@ -200,7 +200,7 @@
     }
     
     .brides-jewellery {
-        background: linear-gradient(135deg, white 70%, #f8e3c8 85%);
+        background: linear-gradient(135deg, white 65%, #f8e3c8 40%);
         padding: 1.5rem 0 3rem 0;
     }
     
