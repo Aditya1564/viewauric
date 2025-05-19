@@ -147,7 +147,7 @@
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 3.5rem;
+    gap: 5rem;
     max-width: 1000px;
     margin: 0 auto;
     padding: 0 20px;
@@ -227,7 +227,7 @@
     }
     
     .numbered-products {
-        gap: 3rem;
+        gap: 4.5rem;
     }
     
     .product-image-container {
@@ -271,7 +271,7 @@
     }
     
     .numbered-products {
-        gap: 2.5rem;
+        gap: 4rem;
     }
     
     .product-image-container {
