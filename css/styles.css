@@ -386,7 +386,7 @@ a {
 .category-full-item {
     position: relative;
     width: 100%;
-    height: 350px; /* Increased height for all category images */
+    height: 450px; /* Further increased height for all category images */
     overflow: hidden;
     margin: 0; /* No margin between items */
     padding: 0;
