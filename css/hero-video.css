@@ -224,7 +224,8 @@
 
 @media (max-width: 576px) {
     .hero-bg-video {
-        height: 40vh;
+        
+        height: 60vh;
     }
     
     .hero-title {

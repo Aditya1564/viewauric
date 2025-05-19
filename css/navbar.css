@@ -15,12 +15,12 @@
     padding: 0 20px;
     max-width: 1200px;
     margin: 0 auto;
-    height: 70px;
+    height: 90px; /* Increased height from 70px to 90px */
 }
 
 /* Brand/Logo */
 .brand {
-    font-size: 42px; /* Increased font size further */
+    font-size: 48px; /* Increased font size to match taller header */
     font-weight: 700; /* Increased font weight */
     font-family: 'Playfair Display', serif;
     color: #333;
