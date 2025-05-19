@@ -147,7 +147,7 @@
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 2rem;
+    gap: 3.5rem;
     max-width: 1000px;
     margin: 0 auto;
     padding: 0 20px;
@@ -226,6 +226,10 @@
         padding: 0 20px;
     }
     
+    .numbered-products {
+        gap: 3rem;
+    }
+    
     .product-image-container {
         width: 200px;
         height: 280px;
@@ -264,6 +268,10 @@
     
     .bride-subtitle {
         font-size: 1.3rem;
+    }
+    
+    .numbered-products {
+        gap: 2.5rem;
     }
     
     .product-image-container {
