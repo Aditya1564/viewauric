@@ -185,7 +185,7 @@
 
 .icon-link {
     color: #000; /* Darker color to match image */
-    font-size: 20px; /* Adjusted size to match image */
+    font-size: 25px; /* Adjusted size to match image */
     margin-left: 22px; /* Increased spacing between icons */
     text-decoration: none;
     transition: color 0.3s ease;
@@ -242,7 +242,8 @@
     }
     
     .icon-link {
-        margin-left: 12px; /* Reduce margin between icons */
+        margin-left: 12px;
+        font-size: 24px; /* Reduce margin between icons */
     }
     
     .brand {
@@ -339,7 +340,7 @@
     
     .icon-link {
         margin-left: 12px; /* Spacing between icons */
-        font-size: 20px; /* Larger icons */
+        font-size: 22px; /* Larger icons */
     }
     
     .close-menu {
@@ -389,7 +390,7 @@
     .nav-link {
         padding: 18px 20px;
         width: 100%;
-        font-size: 15px; /* Slightly smaller to match image */
+        font-size: 20px; /* Slightly smaller to match image */
         text-transform: uppercase;
         font-weight: 500;
         letter-spacing: 0.5px;
@@ -505,7 +506,7 @@
     
     .icon-link {
         margin-left: 8px;
-        font-size: 15px;
+        font-size: 22px;
     }
 }
 
@@ -513,7 +514,7 @@
 @media (max-width: 576px) {
     .nav-container {
         padding: 0 15px;
-        height: 60px;
+        
     }
     
     .brand {
@@ -525,7 +526,7 @@
     
     .icon-link {
         margin-left: 8px;
-        font-size: 18px; /* Larger icons on mobile */
+        font-size: 20px; /* Larger icons on mobile */
     }
     
     .nav-menu {
