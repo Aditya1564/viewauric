@@ -237,7 +237,7 @@
     }
     
     .nav-link {
-        padding: 25px 3px; /* Reduce padding */
+        padding: 35px 3px; /* Increased padding to match taller header */
         font-size: 11px; /* Smaller font size */
     }
     
