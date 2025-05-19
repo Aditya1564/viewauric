@@ -107,22 +107,34 @@
 }
 
 .play-button {
-    width: 80px;
-    height: 80px;
-    background-color: rgba(255, 255, 255, 0.8);
+    width: 60px;
+    height: 60px;
+    background-color: rgba(255, 255, 255, 0.85);
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
     transition: all 0.3s ease;
-    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     cursor: pointer;
+    position: relative;
 }
 
-.play-button i {
-    font-size: 30px;
-    color: #d4af37;
-    margin-left: 5px; /* Slight offset to visually center the play icon */
+.play-button svg {
+    margin-left: 2px;
+    width: 28px;
+    height: 28px;
+}
+
+.play-button::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.7);
 }
 
 .play-button:hover {
