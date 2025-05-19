@@ -347,7 +347,8 @@ a {
 
 .categories-header {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 10px;
+    padding-top: 40px;
 }
 
 .section-title {
@@ -373,7 +374,7 @@ a {
 
 /* Specific overrides for categories section title if needed */
 .categories .section-title {
-    margin-bottom: 40px;
+    margin-bottom: 15px;
 }
 
 .category-full-width-container {
