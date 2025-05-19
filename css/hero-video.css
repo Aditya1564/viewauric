@@ -8,9 +8,8 @@
 
 .hero-bg-video {
     width: 100%;
-    height: auto;
-    max-height: 100%;
-    object-fit: contain;
+    height: 60vh;
+    object-fit: cover;
     display: block;
 }
 
@@ -193,7 +192,7 @@
 /* Responsive Styles */
 @media (max-width: 768px) {
     .hero-bg-video {
-        height: auto;
+        height: 50vh;
     }
     
     .hero-title {
@@ -225,7 +224,7 @@
 
 @media (max-width: 576px) {
     .hero-bg-video {
-        height: auto;
+        height: 40vh;
     }
     
     .hero-title {
