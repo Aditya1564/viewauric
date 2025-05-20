@@ -1822,6 +1822,7 @@ a {
 }
 
 .container {
+    
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 15px;
@@ -1914,12 +1915,15 @@ a {
 
 .footer-widgets {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 30px;
+    text-align: center;
+    margin: 0 auto;
+    max-width: 1000px;
 }
 
 .footer-widget h4 {
-    color: #5a3f2a; /* Testimonial background color for headings */
+    color: #5a3f2a); /* Testimonial background color for headings */
     font-size: 18px;
     margin-bottom: 20px;
     font-weight: 700;
@@ -1949,7 +1953,7 @@ a {
 }
 
 .footer-widget ul li a {
-    color: #ffffff; /* White text for better visibility on dark background */
+    color: #000000; /* White text for better visibility on dark background */
     text-decoration: none;
     font-size: 14px;
     transition: all 0.3s ease;
@@ -2013,7 +2017,7 @@ a {
 /* Footer Bottom Section */
 .footer-bottom {
     padding: 20px 0;
-    background-color: #C1B2A3; /* Original footer background color */
+    background-color: #dbdbdb; /* Original footer background color */
 }
 
 .footer-info {
