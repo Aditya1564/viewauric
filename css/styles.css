@@ -1909,7 +1909,7 @@ a {
 .footer-main {
     padding: 50px 0 30px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-    background-color: #5a3f2a; /* Match the testimonial background color */
+    background-color: #C1B2A3; /* Original footer background color */
 }
 
 .footer-widgets {
@@ -1922,7 +1922,7 @@ a {
     color: #5a3f2a; /* Testimonial background color for headings */
     font-size: 18px;
     margin-bottom: 20px;
-    font-weight: 600;
+    font-weight: 700;
     position: relative;
     padding-bottom: 10px;
     letter-spacing: 1px;
@@ -1935,7 +1935,7 @@ a {
     bottom: 0;
     width: 30px;
     height: 2px;
-    background-color: #B08F4C;
+    background-color: #5a3f2a; /* Testimonial background color */
 }
 
 .footer-widget ul {
@@ -2013,7 +2013,7 @@ a {
 /* Footer Bottom Section */
 .footer-bottom {
     padding: 20px 0;
-    background-color: #5a3f2a; /* Match the testimonial background color */
+    background-color: #C1B2A3; /* Original footer background color */
 }
 
 .footer-info {
@@ -2027,7 +2027,7 @@ a {
 .copyright p {
     margin: 0;
     font-size: 13px;
-    color: #ffffff; /* White color for better visibility */
+    color: #333; /* Restore dark text color */
 }
 
 .footer-bottom .footer-links {
@@ -2036,14 +2036,14 @@ a {
 }
 
 .footer-bottom .footer-links a {
-    color: #ffffff; /* White color for better visibility */
+    color: #333; /* Restore dark text color */
     font-size: 13px;
     text-decoration: none;
     transition: color 0.3s ease;
 }
 
 .footer-bottom .footer-links a:hover {
-    color: #d4af37; /* Gold color on hover */
+    color: #5a3f2a; /* Testimonial background color on hover */
 }
 
 .payment-methods {
