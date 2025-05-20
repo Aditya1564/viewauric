@@ -976,7 +976,7 @@ a {
     font-family: 'Lato', sans-serif;
     font-size: 20px;
     font-weight: 500;
-    color: #9c7c38;
+    color: #999;
     letter-spacing: 0;
 }
 
@@ -1463,11 +1463,11 @@ a {
     border-radius: 0;
     overflow: hidden;
     position: relative;
-    background-color: #f8f8f5;
+   /* background-color: #f8f8f5;*/
     flex: 0 0 auto;
     width: 260px;
-    border: 1px solid rgba(107, 52, 0, 0.2);
-    box-shadow: 0 3px 10px rgba(107, 52, 0, 0.1);
+   /* border: 1px solid rgba(107, 52, 0, 0.2);
+    box-shadow: 0 3px 10px rgba(107, 52, 0, 0.1);*/
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     margin-right: 15px;
 }
@@ -1586,7 +1586,9 @@ a {
 
 .product-pricing {
     display: flex;
-    align-items: center;
+    display: flex;
+    justify-content: center;
+    text-align: center!important;
     gap: 10px;
 }
 
@@ -1594,7 +1596,8 @@ a {
     font-family: 'Lato', sans-serif;
     font-size: 17px;
     font-weight: 600;
-    color: #B08F4C !important;
+   /* text-align:center;*/
+    color: #888 !important;
 }
 
 .original-price {
