@@ -261,7 +261,7 @@
 .customer-play-button {
     width: 70px;
     height: 70px;
-    background-color: rgba(212, 175, 55, 0.85); /* Gold color like the reference */
+    background-color: rgba(255, 255, 255, 0.85); /* White color */
     border-radius: 50%;
     display: flex;
     justify-content: center;
@@ -278,6 +278,10 @@
     height: 32px;
 }
 
+.customer-play-button svg path {
+    fill: #5a3f2a; /* Change the icon color to brown to contrast with white background */
+}
+
 .customer-play-button::before {
     content: '';
     position: absolute;
@@ -286,12 +290,12 @@
     right: -5px;
     bottom: -5px;
     border-radius: 50%;
-    border: 2px solid rgba(212, 175, 55, 0.7); /* Gold color for border */
+    border: 2px solid rgba(255, 255, 255, 0.7); /* White border */
 }
 
 .customer-play-button:hover {
     transform: scale(1.1);
-    background-color: rgba(212, 175, 55, 1); /* Solid gold on hover */
+    background-color: rgba(255, 255, 255, 1); /* Solid white on hover */
 }
 
 .video-title {

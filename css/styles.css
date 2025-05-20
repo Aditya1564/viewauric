@@ -559,7 +559,8 @@ a {
 
 .view-details {
     display: inline-block;
-    background: #5E2900;
+  /*  background: #5E2900;*/
+    background:#5a3f2a;
     color: white;
     font-weight: 500;
     padding: 10px 20px;
@@ -661,7 +662,7 @@ a {
 
 .view-all-button {
     display: inline-block;
-    background-color: #5E2900;
+    background-color: #5a3f2a;
     color: white;
     font-family: 'Lato', sans-serif;
     font-size: 16px;
@@ -719,7 +720,8 @@ a {
 }
 
 .tab.active {
-    border-bottom-color: #693208;
+   /* border-bottom-color: #693208;*/
+   border-bottom-color: #5a3f2a;
 }
 
 .tab-content {
@@ -1610,7 +1612,7 @@ a {
 }
 
 .view-all-btn {
-    background: #693208;
+    background: #5a3f2a;
     color: white;
     font-family: 'Lato', sans-serif;
     font-size: 14px;
@@ -1623,7 +1625,7 @@ a {
 }
 
 .view-all-btn:hover {
-    background: #663300;
+    background: #5a3f2a;
 }
 
 /* Made to Order Section */
