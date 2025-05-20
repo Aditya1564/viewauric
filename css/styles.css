@@ -12,6 +12,10 @@ body {
     background-color: #f8f8f5;
 }
 
+.text-center {
+    text-align: center;
+}
+
 .container {
     max-width: 1200px;
     margin: 0 auto;
