@@ -1543,25 +1543,38 @@ a {
     align-items: center;
     justify-content: center;
     font-size: 22px; /* Increased to 22px for better visibility */
-    color: #ffffff; /* White color */
+    color: #ffffff !important; /* White color with !important */
     cursor: pointer;
     z-index: 2;
     transition: color 0.3s ease, transform 0.2s ease;
     text-shadow: 0 1px 3px rgba(0,0,0,0.3); /* Add slight shadow for better visibility */
 }
 
+.add-to-wishlist i,
+.add-to-wishlist .fa-heart,
+.add-to-wishlist .far.fa-heart {
+    color: #ffffff !important; /* Force white color for all heart icons */
+}
+
 /* 
-   Removing wishlist color change styles to maintain consistent appearance
-   This ensures the wishlist button doesn't turn pink when active
+   Active state for wishlist button
 */
 .add-to-wishlist.active {
     background-color: transparent !important;
-    color: #ffffff !important;
     border: none !important;
 }
 
-.add-to-wishlist.active i {
+.add-to-wishlist.active i,
+.add-to-wishlist.active .fa-heart,
+.add-to-wishlist.active .far.fa-heart {
     color: #ff3e6c !important; /* Reddish-pink color for active heart */
+}
+
+/* For hover state */
+.add-to-wishlist:hover i,
+.add-to-wishlist:hover .fa-heart,
+.add-to-wishlist:hover .far.fa-heart {
+    transform: scale(1.1);
 }
 
 .add-to-wishlist:hover {
