@@ -2046,6 +2046,11 @@ a {
     color: #5a3f2a; /* Testimonial background color on hover */
 }
 
+/* Contact icons in footer */
+.footer-widget.contact-widget i {
+    color: #5a3f2a; /* Testimonial background color for all footer icons */
+}
+
 .payment-methods {
     display: flex;
     gap: 10px;
