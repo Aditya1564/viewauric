@@ -1989,9 +1989,9 @@ a {
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background-color: #f0f0f0;
-    color: #603000;
-    font-size: 16px;
+    background-color: transparent;
+    color: #d4af37; /* Gold color to match headings */
+    font-size: 18px;
     transition: all 0.3s ease;
     position: relative;
 }
@@ -2002,7 +2002,8 @@ a {
 }
 
 .social-icons a:hover {
-    background-color: #603000;
+    background-color: transparent;
+    transform: translateY(-3px);
 }
 
 /* Keep icons visible with stronger contrast */
@@ -2014,7 +2015,7 @@ a {
 /* Footer Bottom Section */
 .footer-bottom {
     padding: 20px 0;
-    background-color: #C1B2A3; /* Match the footer background color */
+    background-color: #5a3f2a; /* Match the testimonial background color */
 }
 
 .footer-info {
@@ -2028,7 +2029,7 @@ a {
 .copyright p {
     margin: 0;
     font-size: 13px;
-    color: #000000; /* Changed from #777 to black */
+    color: #ffffff; /* White color for better visibility */
 }
 
 .footer-bottom .footer-links {
@@ -2037,14 +2038,14 @@ a {
 }
 
 .footer-bottom .footer-links a {
-    color: #000000; /* Changed from #666 to black */
+    color: #ffffff; /* White color for better visibility */
     font-size: 13px;
     text-decoration: none;
     transition: color 0.3s ease;
 }
 
 .footer-bottom .footer-links a:hover {
-    color: #603000;
+    color: #d4af37; /* Gold color on hover */
 }
 
 .payment-methods {
