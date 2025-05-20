@@ -1919,7 +1919,7 @@ a {
 }
 
 .footer-widget h4 {
-    color: #d4af37; /* Gold color for headings */
+    color: #5a3f2a; /* Testimonial background color for headings */
     font-size: 18px;
     margin-bottom: 20px;
     font-weight: 600;
@@ -1988,9 +1988,8 @@ a {
     justify-content: center;
     width: 36px;
     height: 36px;
-    border-radius: 50%;
     background-color: transparent;
-    color: #d4af37; /* Gold color to match headings */
+    color: #5a3f2a; /* Testimonial background color */
     font-size: 18px;
     transition: all 0.3s ease;
     position: relative;
@@ -2003,12 +2002,11 @@ a {
 
 .social-icons a:hover {
     background-color: transparent;
-    transform: translateY(-3px);
 }
 
 /* Keep icons visible with stronger contrast */
 .social-icons a:hover i {
-    color: #ffffff;
+    color: #5a3f2a;
     font-weight: bold; /* Make icons bolder on hover for better visibility */
 }
 
