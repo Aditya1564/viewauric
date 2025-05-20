@@ -100,7 +100,7 @@ function initCustomerTestimonialVideos() {
         const firstItem = scrollContainer.querySelector('.customer-testimonial-item');
         if (firstItem) {
             // Scroll to the second item (first item's width)
-            scrollContainer.scrollLeft = firstItem.offsetWidth + 20; // Adding gap
+            scrollContainer.scrollLeft = firstItem.offsetWidth + 25; // Adding gap
         }
     }, 300); // Short delay to ensure elements are rendered
     

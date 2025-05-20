@@ -18,7 +18,7 @@
 /* New Testimonials Section */
 .customer-testimonials-section {
     padding: 60px 0;
-    background-color: #5a3f2a; /* Brown background color like in the reference */
+    background-color: #C1B2A3; /* Brown background color like in the reference */
     margin-top: 30px;
     margin-bottom: 0;
     color: white;
@@ -110,7 +110,7 @@
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
     scrollbar-color: #d4af37 #5a3f2a;
-    justify-content: center;
+    justify-content: flex-start;
     position: relative;
 }
 
