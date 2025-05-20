@@ -1923,19 +1923,21 @@ a {
 }
 
 .footer-widget h4 {
-    color: #5a3f2a); /* Testimonial background color for headings */
+    color: #5a3f2a; /* Testimonial background color for headings */
     font-size: 18px;
     margin-bottom: 20px;
     font-weight: 700;
     position: relative;
     padding-bottom: 10px;
     letter-spacing: 1px;
+    text-align: center;
 }
 
 .footer-widget h4:after {
     content: '';
     position: absolute;
-    left: 0;
+    left: 50%;
+    transform: translateX(-50%);
     bottom: 0;
     width: 30px;
     height: 2px;
@@ -1950,6 +1952,7 @@ a {
 
 .footer-widget ul li {
     margin-bottom: 10px;
+    text-align: center;
 }
 
 .footer-widget ul li a {
@@ -1984,6 +1987,7 @@ a {
     display: flex;
     gap: 15px;
     margin-top: 20px;
+    justify-content: center;
 }
 
 .social-icons a {
@@ -2022,10 +2026,11 @@ a {
 
 .footer-info {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     flex-wrap: wrap;
-    gap: 15px;
+    gap: 30px;
+    text-align: center;
 }
 
 .copyright p {
@@ -2053,6 +2058,12 @@ a {
 /* Contact icons in footer */
 .footer-widget.contact-widget i {
     color: #5a3f2a; /* Testimonial background color for all footer icons */
+}
+
+.footer-widget.contact-widget p {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .payment-methods {
