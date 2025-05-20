@@ -1,12 +1,29 @@
 /* Testimonials Section */
+/* Buy and Watch Section - Keeping original */
 .testimonials-section {
+    padding: 60px 0;
+    background-color: #f5f5f5;
+    margin-top: 30px;
+}
+
+.testimonials-title {
+    text-align: center;
+    margin-bottom: 40px;
+    font-size: 2.5rem;
+    font-weight: 500;
+    color: #333;
+    font-family: 'Playfair Display', serif;
+}
+
+/* New Testimonials Section */
+.customer-testimonials-section {
     padding: 60px 0;
     background-color: #5a3f2a; /* Brown background color like in the reference */
     margin-top: 30px;
     color: white;
 }
 
-.testimonials-title {
+.customer-testimonials-title {
     text-align: center;
     margin-bottom: 40px;
     font-size: 2.5rem;
@@ -19,7 +36,7 @@
     transform: translateX(-50%);
 }
 
-.testimonials-title::after {
+.customer-testimonials-title::after {
     content: '';
     display: block;
     width: 200px;
@@ -65,7 +82,53 @@
 
 .testimonial-item {
     flex: 0 0 auto;
-    width: 80%; /* Changed to 80% width to match reference */
+    width: 60%; /* Changed back to original width */
+    max-width: 500px; /* Original max-width */
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+/* Customer testimonials styling */
+.customer-testimonials-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.customer-testimonials-scroll {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    gap: 20px;
+    padding: 20px 15px 40px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #d4af37 #5a3f2a;
+    justify-content: center;
+}
+
+.customer-testimonials-scroll::-webkit-scrollbar {
+    height: 8px;
+}
+
+.customer-testimonials-scroll::-webkit-scrollbar-track {
+    background: #5a3f2a;
+    border-radius: 10px;
+}
+
+.customer-testimonials-scroll::-webkit-scrollbar-thumb {
+    background-color: #d4af37;
+    border-radius: 10px;
+}
+
+.customer-testimonial-item {
+    flex: 0 0 auto;
+    width: 80%; /* Width for customer testimonials */
     max-width: 600px; /* Increased max-width */
     background-color: transparent; /* Transparent background */
     border-radius: 0; /* No border radius */
@@ -156,6 +219,42 @@
 .play-button:hover {
     transform: scale(1.1);
     background-color: white;
+}
+
+.customer-play-button {
+    width: 60px;
+    height: 60px;
+    background-color: rgba(212, 175, 55, 0.85); /* Gold color like the reference */
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    position: relative;
+}
+
+.customer-play-button svg {
+    margin-left: 2px;
+    width: 28px;
+    height: 28px;
+}
+
+.customer-play-button::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    border-radius: 50%;
+    border: 2px solid rgba(212, 175, 55, 0.7); /* Gold color for border */
+}
+
+.customer-play-button:hover {
+    transform: scale(1.1);
+    background-color: rgba(212, 175, 55, 1); /* Solid gold on hover */
 }
 
 .video-title {
