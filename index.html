@@ -178,14 +178,22 @@
     <section class="about-section">
         <div class="about-container">
             <div class="about-image">
-                <img src="IMG_20250520_053359.png" alt="Auric Jewelry Craftsmanship">
+                <img src="images/about/IMG_20250520_045649.png" alt="Auric Jewelry Craftsmanship">
             </div>
             <div class="about-content">
                 <h2 class="about-title">About Auric by Subha</h2>
                 <p class="about-description">
                     At Auric by Subha, our mission goes beyond simply creating beautiful jewellery we are committed to crafting pieces that embody both authenticity and uncompromising quality. Every ornament, whether it's a bold statement piece or a delicate detail, is thoughtfully designed and meticulously handcrafted. We source our materials responsibly and work with skilled artisans to ensure that each creation reflects our dedication to timeless elegance and ethical craftsmanship. With every piece we deliver, we uphold our promise of integrity, precision, and a passion for excellence that shines through in every sparkle.
                 </p>
-                <a href="about.html" class="about-link">Learn More About Our Story</a>
+                <div class="additional-content" style="display: none;">
+                    <p class="about-description">
+                        Founded in 2018 by Subha Raghunathan, Auric has grown from a small home-based studio to an internationally recognized brand. Our collections are inspired by both traditional Indian heritage and contemporary global aesthetics, creating pieces that are timeless yet distinctive.
+                    </p>
+                    <p class="about-description">
+                        Every piece in our collection tells a story – of ancient traditions, of skilled craftsmanship, and of women who wear them with pride. We believe jewelry should be more than just an accessory; it should be an expression of your unique personality and an heirloom to be treasured for generations.
+                    </p>
+                </div>
+                <a href="#" class="about-link" id="learnMoreLink">Learn More About Our Story</a>
             </div>
         </div>
     </section>
@@ -907,5 +915,27 @@
     
     <!-- Testimonial Script -->
     <script src="js/testimonial-scroller.js"></script>
+    
+    <!-- About Section Learn More Script -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+          const learnMoreLink = document.getElementById('learnMoreLink');
+          const additionalContent = document.querySelector('.additional-content');
+          
+          if (learnMoreLink && additionalContent) {
+              learnMoreLink.addEventListener('click', function(e) {
+                  e.preventDefault();
+                  
+                  if (additionalContent.style.display === 'none') {
+                      additionalContent.style.display = 'block';
+                      learnMoreLink.textContent = 'Show Less';
+                  } else {
+                      additionalContent.style.display = 'none';
+                      learnMoreLink.textContent = 'Learn More About Our Story';
+                  }
+              });
+          }
+      });
+    </script>
   </body>
 </html>
