@@ -94,6 +94,16 @@ function initCustomerTestimonialVideos() {
     const prevButton = document.querySelector('.testimonial-prev');
     const nextButton = document.querySelector('.testimonial-next');
     
+    // Initial scroll position - center on the second video (index 1)
+    setTimeout(() => {
+        // Get width of first testimonial item plus margins/gaps
+        const firstItem = scrollContainer.querySelector('.customer-testimonial-item');
+        if (firstItem) {
+            // Scroll to the second item (first item's width)
+            scrollContainer.scrollLeft = firstItem.offsetWidth + 20; // Adding gap
+        }
+    }, 300); // Short delay to ensure elements are rendered
+    
     // Add navigation button functionality
     if (prevButton && nextButton) {
         // Scroll to previous testimonial
