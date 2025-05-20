@@ -90,6 +90,29 @@ function initCustomerTestimonialVideos() {
     const videoContainers = scrollContainer.querySelectorAll('.video-container');
     const videos = scrollContainer.querySelectorAll('.testimonial-video');
     
+    // Navigation buttons
+    const prevButton = document.querySelector('.testimonial-prev');
+    const nextButton = document.querySelector('.testimonial-next');
+    
+    // Add navigation button functionality
+    if (prevButton && nextButton) {
+        // Scroll to previous testimonial
+        prevButton.addEventListener('click', function() {
+            scrollContainer.scrollBy({
+                left: -scrollContainer.offsetWidth * 0.8,
+                behavior: 'smooth'
+            });
+        });
+        
+        // Scroll to next testimonial
+        nextButton.addEventListener('click', function() {
+            scrollContainer.scrollBy({
+                left: scrollContainer.offsetWidth * 0.8,
+                behavior: 'smooth'
+            });
+        });
+    }
+    
     // Set up play button functionality
     videoContainers.forEach((container, index) => {
         const video = container.querySelector('.testimonial-video');

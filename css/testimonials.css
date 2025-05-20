@@ -109,7 +109,8 @@
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
     scrollbar-color: #d4af37 #5a3f2a;
-    justify-content: center;
+    justify-content: flex-start;
+    position: relative;
 }
 
 .customer-testimonials-scroll::-webkit-scrollbar {
@@ -134,7 +135,40 @@
     border-radius: 0; /* No border radius */
     box-shadow: none; /* No shadow to match reference design */
     overflow: hidden;
-    margin: 0 auto; /* Center the item */
+    margin: 0 15px; /* Add margin to space out items */
+}
+
+/* Navigation arrows for testimonials */
+.testimonial-nav-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    background-color: rgba(212, 175, 55, 0.8);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s ease;
+}
+
+.testimonial-nav-button:hover {
+    background-color: rgba(212, 175, 55, 1);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.testimonial-prev {
+    left: 10px;
+}
+
+.testimonial-next {
+    right: 10px;
 }
 
 .video-container {
