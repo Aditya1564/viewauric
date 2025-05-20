@@ -110,7 +110,7 @@
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
     scrollbar-color: #d4af37 #5a3f2a;
-    justify-content: flex-start;
+    justify-content: center;
     position: relative;
 }
 
