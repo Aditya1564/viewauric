@@ -15,12 +15,12 @@
 }
 
 .about-image {
-    flex: 0 0 40%;
+    flex: 0 0 35%;
     position: relative;
 }
 
 .about-image img {
-    width: 90%;
+    width: 80%;
     border-radius: 5px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     display: block;
