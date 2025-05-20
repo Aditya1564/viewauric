@@ -1535,8 +1535,9 @@ a {
     right: 10px;
     width: 30px;
     height: 30px;
-    background-color: transparent;
-    border: none;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
     border-radius: 50%;
     display: flex;
     align-items: center;
